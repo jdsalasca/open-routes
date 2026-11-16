@@ -55,7 +55,7 @@ Pruebas y build:
 ```bash
 mvn -f api/pom.xml test
 cd web && npm run build
-node tools/planner-check.mjs
+node tools/planner-check.mjs  # requiere Node 24 (TypeScript nativo)
 ```
 
 ## API

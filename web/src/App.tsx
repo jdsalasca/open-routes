@@ -178,7 +178,7 @@ export default function App() {
       listHeadRef.current?.scrollIntoView({ block: "start", behavior: reduced ? "auto" : "smooth" });
     }, 80);
     return () => window.clearTimeout(timer);
-  }, [nearMode, nearby, tripMode, origin, destination]);
+  }, [nearMode, nearby, tripMode, origin, destination, selectedId, activeTrip]);
 
   const handleSelect = useCallback((id: string) => {
     setSelectedId(id);

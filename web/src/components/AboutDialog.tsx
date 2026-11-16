@@ -42,9 +42,9 @@ export function AboutDialog({ dialogRef, city }: Props) {
         línea del recorrido (no a una parada inventada).
       </p>
       <p>
-        El buscador de origen acepta barrios y sitios principales. Cuando un barrio no tiene un
-        punto oficial en el mapa, usamos el punto de despacho o retorno que el operador dibuja en
-        su recorrido; por eso buscamos rutas en un radio de 500 m.
+        Los buscadores de origen y destino aceptan barrios y sitios principales. Cuando un barrio
+        no tiene un punto oficial en el mapa, usamos el punto de despacho o retorno que el operador
+        dibuja en su recorrido; por eso buscamos rutas en un radio de 500 m.
       </p>
       <p>
         Con origen y destino, el planificador busca rutas directas y ordena las opciones por tiempo
