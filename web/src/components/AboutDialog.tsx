@@ -30,9 +30,9 @@ export function AboutDialog({ dialogRef, city }: Props) {
       </div>
 
       <p>
-        open-routes reúne los recorridos de {city.name} en un mapa claro: activa tu ubicación,
-        descubre qué rutas pasan cerca y consulta sus horarios, tarifas y trayectos completos. Sin
-        publicidad, sin cuentas y sin guardar tu ubicación.
+        open-routes reúne los recorridos de {city.name} en un mapa claro: elige origen y destino,
+        descubre qué rutas te sirven y consulta sus horarios, tarifas y trayectos completos. Sin
+        publicidad, sin cuentas y sin enviar tu ubicación a nuestro servidor.
       </p>
 
       <h3>Cómo leer el mapa</h3>
@@ -49,6 +49,14 @@ export function AboutDialog({ dialogRef, city }: Props) {
       <p>
         Con origen y destino, el planificador busca rutas directas y ordena las opciones por tiempo
         estimado: caminata, espera y tramo en bus. Por ahora no combina transbordos.
+      </p>
+
+      <h3>Privacidad</h3>
+      <p>
+        Tu ubicación y los lugares que eliges se procesan en tu navegador; la cercanía no se
+        consulta en la API ni se guarda. El mapa base pide teselas a OpenStreetMap, que recibe la
+        zona visible y tu IP. Cloudflare sirve el sitio y mide tráfico sin cookies. No hay cuentas
+        ni publicidad.
       </p>
 
       <h3>Datos y límites</h3>

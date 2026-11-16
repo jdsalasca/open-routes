@@ -90,7 +90,8 @@ El importador `tools/tunja-routes.mjs` documenta cómo se convirtieron los mapas
 - Los lugares buscables son 42 barrios y sitios principales. Cuando no hay un nodo oficial, el punto es el despacho/retorno del operador; por eso el radio de búsqueda es de 500 m.
 - El planificador combina los trazados para encontrar **rutas directas** (sin transbordos). Los tiempos son estimaciones sobre la geometría: incluyen caminata, espera y bus, pero no tráfico, semáforos ni paradas oficiales.
 - La geolocalización se calcula contra la línea del recorrido, no contra paradas oficiales (el operador no publica esas paradas).
-- Las coordenadas se envían al endpoint de cercanía para calcular distancias. No se guardan en la app ni en base de datos; la respuesta se marca `Cache-Control: no-store`.
+- Las coordenadas se procesan en el navegador: la web no envía tu ubicación a la API. La API sigue exponiendo `/near` para integraciones.
+- El mapa base consulta teselas de OpenStreetMap (recibe la zona visible y tu IP) y Cloudflare sirve el sitio con analítica sin cookies.
 
 ## Despliegue
 

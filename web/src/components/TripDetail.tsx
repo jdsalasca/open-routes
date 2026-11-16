@@ -109,8 +109,8 @@ export function TripDetail({
       </div>
 
       <p className="detail__note">
-        Estimación aproximada calculada sobre el trazado oficial. No incluye tráfico, semáforos ni
-        paradas oficiales; confirma con el conductor.
+        Distancias a pie aproximadas en línea recta; el tiempo añade un factor de desvío. No incluye
+        tráfico, semáforos ni paradas oficiales; confirma con el conductor.
       </p>
     </article>
   );

@@ -46,7 +46,7 @@ export function PlaceField({
   const lastSelected = useRef(selectedLabel ?? "");
   const [query, setQuery] = useState(selectedLabel ?? "");
   const [open, setOpen] = useState(false);
-  const [active, setActive] = useState(0);
+  const [active, setActive] = useState(-1);
 
   useEffect(() => {
     if (!open) return;
@@ -64,6 +64,7 @@ export function PlaceField({
       setQuery(selectedLabel);
       lastSelected.current = selectedLabel;
     } else if (!selectedLabel) {
+      setQuery("");
       lastSelected.current = "";
     }
   }, [selectedLabel]);
@@ -80,7 +81,11 @@ export function PlaceField({
         (a, b) => score(a, term) - score(b, term) || a.name.localeCompare(b.name, "es")
       )
       .slice(0, 7);
-  }, [places, query]);
+  }, [places, query, selectedLabel]);
+
+  useEffect(() => {
+    setActive((current) => (current >= results.length ? -1 : current));
+  }, [results.length]);
 
   const choose = (place: Place) => {
     lastSelected.current = place.name;
@@ -93,12 +98,16 @@ export function PlaceField({
     if (event.key === "ArrowDown") {
       event.preventDefault();
       setOpen(true);
-      setActive((index) => Math.min(index + 1, Math.max(results.length - 1, 0)));
+      setActive((index) =>
+        index < 0 ? 0 : Math.min(index + 1, Math.max(results.length - 1, 0))
+      );
     } else if (event.key === "ArrowUp") {
       event.preventDefault();
       setOpen(true);
-      setActive((index) => Math.max(index - 1, 0));
-    } else if (event.key === "Enter" && open && results[active]) {
+      setActive((index) =>
+        index < 0 ? Math.max(results.length - 1, 0) : Math.max(index - 1, 0)
+      );
+    } else if (event.key === "Enter" && open && active >= 0 && results[active]) {
       event.preventDefault();
       choose(results[active]);
     } else if (event.key === "Escape") {
@@ -121,25 +130,28 @@ export function PlaceField({
           role="combobox"
           aria-autocomplete="list"
           aria-expanded={open}
-          aria-controls={`${id}-listbox`}
+          aria-controls={open && results.length > 0 ? `${id}-listbox` : undefined}
           aria-activedescendant={
-            open && results[active] ? `${id}-option-${results[active].id}` : undefined
+            open && active >= 0 && results[active]
+              ? `${id}-option-${results[active].id}`
+              : undefined
           }
           placeholder={placeholder}
           value={query}
           onChange={(event) => {
-            const next = event.target.value;
-            setQuery(next);
+            setQuery(event.target.value);
             setOpen(true);
-            setActive(0);
-            if (selectedLabel && next !== selectedLabel) onClear();
+            setActive(-1);
           }}
           onFocus={(event) => {
             setOpen(true);
-            setActive(0);
+            setActive(-1);
             if (event.currentTarget.value === selectedLabel) event.currentTarget.select();
           }}
-          onBlur={() => setOpen(false)}
+          onBlur={() => {
+            setOpen(false);
+            setQuery(selectedLabel ?? "");
+          }}
           onKeyDown={handleKeyDown}
           autoComplete="off"
           spellCheck={false}
@@ -161,35 +173,40 @@ export function PlaceField({
           </button>
         )}
       </div>
-      {open && (
-        <ul
-          className="place-list"
-          id={`${id}-listbox`}
-          role="listbox"
-          aria-label={`Sugerencias de ${label.toLowerCase()}`}
-        >
-          {results.map((place, index) => (
-            <li
-              key={place.id}
-              id={`${id}-option-${place.id}`}
-              role="option"
-              aria-selected={index === active}
-              className={`place-option${index === active ? " place-option--active" : ""}`}
-              onPointerDown={(event) => event.preventDefault()}
-              onMouseEnter={() => setActive(index)}
-              onClick={() => choose(place)}
-            >
-              <span className="place-option__name">{place.name}</span>
-              <span className="place-option__type">{place.type}</span>
-              <ChevronRightIcon size={14} className="place-option__chevron" />
-            </li>
-          ))}
-          {results.length === 0 && (
-            <li className="place-empty">
-              No encontramos ese lugar. Prueba con un barrio o usa tu ubicación.
-            </li>
-          )}
-        </ul>
+      {open && results.length === 0 && (
+        <div className="place-list place-empty" role="status">
+          No encontramos ese lugar. Prueba con un barrio o usa tu ubicación.
+        </div>
+      )}
+      {open && results.length > 0 && (
+        <>
+          <span className="visually-hidden" role="status">
+            {results.length} sugerencias disponibles
+          </span>
+          <ul
+            className="place-list"
+            id={`${id}-listbox`}
+            role="listbox"
+            aria-label={`Sugerencias de ${label.toLowerCase()}`}
+          >
+            {results.map((place, index) => (
+              <li
+                key={place.id}
+                id={`${id}-option-${place.id}`}
+                role="option"
+                aria-selected={index === active}
+                className={`place-option${index === active ? " place-option--active" : ""}`}
+                onPointerDown={(event) => event.preventDefault()}
+                onMouseEnter={() => setActive(index)}
+                onClick={() => choose(place)}
+              >
+                <span className="place-option__name">{place.name}</span>
+                <span className="place-option__type">{place.type}</span>
+                <ChevronRightIcon size={14} className="place-option__chevron" />
+              </li>
+            ))}
+          </ul>
+        </>
       )}
     </div>
   );

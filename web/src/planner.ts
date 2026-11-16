@@ -1,4 +1,4 @@
-import type { Origin, Place, Route } from "./types";
+import type { NearbyRoute, Origin, Place, Route } from "./types";
 
 export interface TripOption {
   route: Route;
@@ -163,4 +163,40 @@ export function findDirectTrips(
         a.walkToMeters + a.walkFromMeters - (b.walkToMeters + b.walkFromMeters)
     )
     .slice(0, 4);
+}
+
+/**
+ * Equivalente cliente del endpoint /near: evita enviar coordenadas al servidor.
+ */
+export function findNearbyRoutes(
+  point: { lat: number; lng: number },
+  radiusMeters: number,
+  routes: Route[]
+): NearbyRoute[] {
+  return routes
+    .map((route) => {
+      let best = Number.POSITIVE_INFINITY;
+      let direction = "";
+      for (const item of route.directions) {
+        for (const path of item.paths) {
+          const hit = nearestOnPath(point.lat, point.lng, path);
+          if (hit && hit.distance < best) {
+            best = hit.distance;
+            direction = item.name;
+          }
+        }
+      }
+      if (!Number.isFinite(best) || best > radiusMeters) return null;
+      return {
+        id: route.id,
+        code: route.code,
+        name: route.name,
+        color: route.color,
+        type: route.type,
+        direction,
+        distanceMeters: Math.round(best)
+      } satisfies NearbyRoute;
+    })
+    .filter((hit): hit is NearbyRoute => hit !== null)
+    .sort((a, b) => a.distanceMeters - b.distanceMeters);
 }

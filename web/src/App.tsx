@@ -19,7 +19,7 @@ import { PlaceField } from "./components/PlaceField";
 import { RouteDetail } from "./components/RouteDetail";
 import { TripDetail } from "./components/TripDetail";
 import { useGeolocation } from "./hooks/useGeolocation";
-import { distanceMeters, findDirectTrips } from "./planner";
+import { distanceMeters, findDirectTrips, findNearbyRoutes } from "./planner";
 import type { TripOption } from "./planner";
 import type { City, CitySummary, NearbyRoute, Origin, Place, Route } from "./types";
 
@@ -44,8 +44,11 @@ export default function App() {
   const aboutRef = useRef<HTMLDialogElement>(null);
   const sidebarRef = useRef<HTMLElement>(null);
   const listHeadRef = useRef<HTMLDivElement>(null);
-  const nearbyAbort = useRef<AbortController | null>(null);
   const routeRefs = useRef(new Map<string, HTMLButtonElement>());
+  const tripRefs = useRef(new Map<string, HTMLButtonElement>());
+  const lastTripKey = useRef<string | null>(null);
+  const returnFocusToTrip = useRef(false);
+  const locateToken = useRef(0);
   const [cities, setCities] = useState<CitySummary[] | null>(null);
   const [slug, setSlug] = useState<string | null>(
     () => new URLSearchParams(window.location.search).get("city")
@@ -59,8 +62,6 @@ export default function App() {
   const [destination, setDestination] = useState<Place | null>(null);
   const [nearby, setNearby] = useState<NearbyRoute[] | null>(null);
   const [nearMode, setNearMode] = useState(false);
-  const [nearbyError, setNearbyError] = useState<string | null>(null);
-  const [nearbyLoading, setNearbyLoading] = useState(false);
   const [query, setQuery] = useState("");
   const { status, error: geoError, locate } = useGeolocation();
 
@@ -83,9 +84,7 @@ export default function App() {
 
   useEffect(() => {
     if (!slug) return;
-    nearbyAbort.current?.abort();
-    setNearbyError(null);
-    setNearbyLoading(false);
+    locateToken.current += 1;
     const controller = new AbortController();
     setBoot("loading");
     api
@@ -142,7 +141,7 @@ export default function App() {
   }, [city, nearMode, nearby, query]);
 
   const samePlace = Boolean(
-    origin && destination && distanceMeters(origin, destination) < 100
+    origin && destination && distanceMeters(origin, destination) < 30
   );
 
   const tripOptions = useMemo(() => {
@@ -162,11 +161,8 @@ export default function App() {
   const detailOpen = Boolean(selected || activeTrip);
 
   const clearNearby = useCallback(() => {
-    nearbyAbort.current?.abort();
     setNearby(null);
     setNearMode(false);
-    setNearbyError(null);
-    setNearbyLoading(false);
   }, []);
 
   useEffect(() => {
@@ -180,13 +176,25 @@ export default function App() {
     return () => window.clearTimeout(timer);
   }, [nearMode, nearby, tripMode, origin, destination, selectedId, activeTrip]);
 
-  const handleSelect = useCallback((id: string) => {
-    setSelectedId(id);
-    setActiveDirection(0);
-    setActiveTrip(null);
-  }, []);
+  const handleSelect = useCallback(
+    (id: string) => {
+      const matchingTrip = tripOptions.find((option) => option.route.id === id);
+      if (matchingTrip) {
+        lastTripKey.current = `${matchingTrip.route.id}-${matchingTrip.directionIndex}`;
+        returnFocusToTrip.current = true;
+      } else {
+        returnFocusToTrip.current = false;
+      }
+      setSelectedId(id);
+      setActiveDirection(0);
+      setActiveTrip(null);
+    },
+    [tripOptions]
+  );
 
   const showAll = useCallback(() => {
+    locateToken.current += 1;
+    returnFocusToTrip.current = false;
     clearNearby();
     setOrigin(null);
     setDestination(null);
@@ -197,35 +205,18 @@ export default function App() {
   }, [clearNearby]);
 
   const loadNearby = useCallback(
-    async (point: { lat: number; lng: number }, citySlug: string, radius: number) => {
-      nearbyAbort.current?.abort();
-      const controller = new AbortController();
-      nearbyAbort.current = controller;
-      setNearby(null);
-      setNearMode(false);
-      setNearbyLoading(true);
-      setNearbyError(null);
-      try {
-        const hits = await api.nearby(citySlug, point.lat, point.lng, radius, controller.signal);
-        if (controller.signal.aborted) return;
-        setNearby(hits);
-        setNearMode(true);
-        setQuery("");
-      } catch {
-        if (controller.signal.aborted) return;
-        setNearby(null);
-        setNearMode(false);
-        setNearbyError("No pudimos consultar las rutas cercanas. Revisa tu conexión e inténtalo otra vez.");
-      } finally {
-        if (!controller.signal.aborted) setNearbyLoading(false);
-      }
+    (point: { lat: number; lng: number }, radius: number) => {
+      if (!city) return;
+      setNearby(findNearbyRoutes(point, radius, city.routes));
+      setNearMode(true);
+      setQuery("");
     },
-    []
+    [city]
   );
 
   const selectOriginPlace = useCallback(
     (place: Place) => {
-      if (!city) return;
+      locateToken.current += 1;
       setOrigin({
         kind: "place",
         lat: place.lat,
@@ -239,14 +230,15 @@ export default function App() {
       if (destination) {
         clearNearby();
       } else {
-        void loadNearby({ lat: place.lat, lng: place.lng }, city.slug, PLACE_RADIUS);
+        loadNearby({ lat: place.lat, lng: place.lng }, PLACE_RADIUS);
       }
     },
-    [city, destination, clearNearby, loadNearby]
+    [destination, clearNearby, loadNearby]
   );
 
   const selectDestination = useCallback(
     (place: Place) => {
+      locateToken.current += 1;
       setDestination(place);
       setActiveTrip(null);
       setSelectedId(null);
@@ -257,27 +249,26 @@ export default function App() {
   );
 
   const clearOrigin = useCallback(() => {
+    locateToken.current += 1;
     setOrigin(null);
     setActiveTrip(null);
     clearNearby();
   }, [clearNearby]);
 
   const clearDestination = useCallback(() => {
+    locateToken.current += 1;
     setDestination(null);
     setActiveTrip(null);
-    if (origin && city) {
-      void loadNearby(
-        origin,
-        city.slug,
-        origin.kind === "place" ? PLACE_RADIUS : GPS_RADIUS
-      );
+    if (origin) {
+      loadNearby(origin, origin.kind === "place" ? PLACE_RADIUS : GPS_RADIUS);
     } else {
       clearNearby();
     }
-  }, [city, origin, clearNearby, loadNearby]);
+  }, [origin, clearNearby, loadNearby]);
 
   const swapEnds = useCallback(() => {
     if (!origin || origin.kind !== "place" || !destination) return;
+    locateToken.current += 1;
     const nextOrigin: Origin = {
       kind: "place",
       lat: destination.lat,
@@ -301,35 +292,41 @@ export default function App() {
 
   const handleLocate = useCallback(async () => {
     if (!city) return;
+    const token = ++locateToken.current;
     setSelectedId(null);
     const point = await locate();
+    if (token !== locateToken.current) return;
     if (!point) return;
     setOrigin({ kind: "gps", ...point, label: "Tu ubicación" });
     setActiveTrip(null);
     if (destination) {
       clearNearby();
     } else {
-      await loadNearby(point, city.slug, GPS_RADIUS);
+      loadNearby(point, GPS_RADIUS);
     }
   }, [city, destination, locate, clearNearby, loadNearby]);
 
-  const retryNearby = useCallback(() => {
-    if (!origin || !city) return;
-    void loadNearby(
-      origin,
-      city.slug,
-      origin.kind === "place" ? PLACE_RADIUS : GPS_RADIUS
-    );
-  }, [city, origin, loadNearby]);
-
-  const openTrip = useCallback((trip: TripOption) => {
+  const openTrip = useCallback((trip: TripOption, key: string) => {
+    lastTripKey.current = key;
+    returnFocusToTrip.current = false;
     setActiveTrip(trip);
     setSelectedId(null);
     setActiveDirection(trip.directionIndex);
   }, []);
 
+  const closeTrip = useCallback(() => {
+    const key = lastTripKey.current;
+    returnFocusToTrip.current = false;
+    setActiveTrip(null);
+    requestAnimationFrame(() => {
+      if (key) tripRefs.current.get(key)?.focus();
+    });
+  }, []);
+
   const openRouteFromTrip = useCallback(() => {
     if (!activeTrip) return;
+    returnFocusToTrip.current = true;
+    lastTripKey.current = `${activeTrip.route.id}-${activeTrip.directionIndex}`;
     setSelectedId(activeTrip.route.id);
     setActiveDirection(activeTrip.directionIndex);
     setActiveTrip(null);
@@ -337,10 +334,14 @@ export default function App() {
 
   const handleBack = useCallback(() => {
     const id = selectedId;
+    const key = lastTripKey.current;
+    const focusTrip = returnFocusToTrip.current;
+    returnFocusToTrip.current = false;
     setSelectedId(null);
     setActiveDirection(0);
     requestAnimationFrame(() => {
-      if (id) routeRefs.current.get(id)?.focus();
+      if (focusTrip && key) tripRefs.current.get(key)?.focus();
+      else if (id) routeRefs.current.get(id)?.focus();
     });
   }, [selectedId]);
 
@@ -399,11 +400,9 @@ export default function App() {
   const locateLabel =
     status === "locating"
       ? "Buscando tu ubicación…"
-      : nearbyLoading
-        ? "Buscando rutas…"
-        : origin?.kind === "gps"
-          ? "Actualizar mi ubicación"
-          : "Usar mi ubicación";
+      : origin?.kind === "gps"
+        ? "Actualizar mi ubicación"
+        : "Usar mi ubicación";
 
   return (
     <div className={`app${detailOpen ? " app--detail" : ""}`}>
@@ -485,7 +484,7 @@ export default function App() {
               trip={activeTrip}
               originLabel={origin?.label ?? "tu origen"}
               destinationLabel={destination?.name ?? "tu destino"}
-              onBack={() => setActiveTrip(null)}
+              onBack={closeTrip}
               onOpenRoute={openRouteFromTrip}
             />
           ) : selected ? (
@@ -515,7 +514,7 @@ export default function App() {
                     type="button"
                     className="primary-button"
                     onClick={handleLocate}
-                    disabled={status === "locating" || nearbyLoading}
+                    disabled={status === "locating"}
                   >
                     <LocateIcon />
                     {locateLabel}
@@ -566,7 +565,8 @@ export default function App() {
                 </div>
 
                 <p className="hero__privacy">
-                  Se envía a nuestro servidor solo para calcular distancias. No se almacena.
+                  La cercanía se calcula en tu navegador. Tu ubicación no se envía a nuestro
+                  servidor.
                 </p>
                 <div className="hero__meta">
                   <span className="meta-chip">
@@ -604,29 +604,10 @@ export default function App() {
                 </div>
               )}
 
-              {nearbyLoading && !tripMode && (
-                <div className="notice notice--info" role="status">
-                  <span className="notice__spinner" aria-hidden="true" />
-                  <span>Buscando rutas cerca de {origin?.label ?? "tu ubicación"}…</span>
-                </div>
-              )}
-
               {geoError && (
                 <div className="notice" role="status">
                   <InfoIcon />
                   <span>{geoError}</span>
-                </div>
-              )}
-
-              {nearbyError && !tripMode && (
-                <div className="notice" role="alert">
-                  <InfoIcon />
-                  <span>
-                    {nearbyError}{" "}
-                    <button type="button" className="notice__link" onClick={retryNearby}>
-                      Reintentar
-                    </button>
-                  </span>
                 </div>
               )}
 
@@ -669,35 +650,42 @@ export default function App() {
               {tripMode ? (
                 <div className="trip-list">
                   {!samePlace &&
-                    tripOptions.map((option) => (
-                      <button
-                        key={`${option.route.id}-${option.directionIndex}`}
-                        type="button"
-                        className="trip-card"
-                        style={{ "--route-color": option.route.color } as CSSProperties}
-                        onClick={() => openTrip(option)}
-                      >
-                        <span className="trip-card__code" aria-hidden="true">
-                          {option.route.code}
-                        </span>
-                        <span className="trip-card__body">
-                          <span className="trip-card__name">{option.route.name}</span>
-                          <span className="trip-card__meta">
-                            <strong>≈ {option.totalMinutes} min</strong>
-                            <span>
-                              {distanceLabel(option.walkToMeters + option.walkFromMeters)} a pie
+                    tripOptions.map((option) => {
+                      const key = `${option.route.id}-${option.directionIndex}`;
+                      return (
+                        <button
+                          key={key}
+                          ref={(element) => {
+                            if (element) tripRefs.current.set(key, element);
+                            else tripRefs.current.delete(key);
+                          }}
+                          type="button"
+                          className="trip-card"
+                          style={{ "--route-color": option.route.color } as CSSProperties}
+                          onClick={() => openTrip(option, key)}
+                        >
+                          <span className="trip-card__code" aria-hidden="true">
+                            {option.route.code}
+                          </span>
+                          <span className="trip-card__body">
+                            <span className="trip-card__name">{option.route.name}</span>
+                            <span className="trip-card__meta">
+                              <strong>≈ {option.totalMinutes} min</strong>
+                              <span>
+                                {distanceLabel(option.walkToMeters + option.walkFromMeters)} a pie
+                              </span>
+                              <span>{option.rideMinutes} min en bus</span>
                             </span>
-                            <span>{option.rideMinutes} min en bus</span>
+                            <span className="trip-card__hint">
+                              Sube cerca de {origin?.label} · baja cerca de {destination?.name}
+                            </span>
                           </span>
-                          <span className="trip-card__hint">
-                            Sube cerca de {origin?.label} · baja cerca de {destination?.name}
+                          <span className="trip-card__side">
+                            <ChevronRightIcon className="route-card__chevron" />
                           </span>
-                        </span>
-                        <span className="trip-card__side">
-                          <ChevronRightIcon className="route-card__chevron" />
-                        </span>
-                      </button>
-                    ))}
+                        </button>
+                      );
+                    })}
                 </div>
               ) : destinationOnly ? (
                 <p className="list-empty">
@@ -790,16 +778,13 @@ export default function App() {
         {status === "locating"
           ? "Buscando tu ubicación."
           : geoError ??
-            nearbyError ??
-            (nearbyLoading
-              ? `Buscando rutas cerca de ${origin?.label ?? "tu ubicación"}.`
-              : tripMode
-                ? samePlace
-                  ? "El origen y el destino son el mismo lugar."
-                  : `${tripOptions.length} rutas directas encontradas.`
-                : nearMode && nearby
-                  ? `${nearby.length} rutas cerca de ${origin?.label ?? "tu ubicación"}.`
-                  : "")}
+            (tripMode
+              ? samePlace
+                ? "El origen y el destino son el mismo lugar."
+                : `${tripOptions.length} rutas directas encontradas.`
+              : nearMode && nearby
+                ? `${nearby.length} rutas cerca de ${origin?.label ?? "tu ubicación"}.`
+                : "")}
       </p>
 
       <AboutDialog dialogRef={aboutRef} city={city} />
