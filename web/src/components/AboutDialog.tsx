@@ -60,8 +60,8 @@ export function AboutDialog({ dialogRef, city }: Props) {
 
       <h3>Tecnología</h3>
       <p>
-        React, Vite, SCSS, Leaflet y Spring Boot. El mapa base es de OpenStreetMap y las rutas se
-        dibujan con datos abiertos. El código está bajo licencia MIT.
+        React, Vite, SCSS, Leaflet y Spring Boot. El mapa base es de OpenStreetMap y las rutas
+        usan los trazados publicados por el operador. El código está bajo licencia MIT.
       </p>
 
       <div className="about__footer">

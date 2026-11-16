@@ -21,7 +21,8 @@ public final class Geo {
 
     /**
      * Distancia mínima de un punto a una polilínea. Proyecta localmente a metros:
-     * a escala de una ciudad el error es despreciable y evita trigonometría por segmento.
+     * a escala de una ciudad el error es despreciable. No usar para cruzar el
+     * antimeridiano ni para geometrías de cientos de kilómetros.
      */
     public static double distanceToPathMeters(double lat, double lng, List<double[]> path) {
         if (path == null || path.isEmpty()) {

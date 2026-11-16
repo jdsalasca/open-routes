@@ -13,7 +13,7 @@ COPY api/pom.xml ./
 RUN mvn -q -DskipTests dependency:go-offline
 COPY api/src ./src
 COPY --from=web /web/dist ./src/main/resources/static
-RUN mvn -q -Dmaven.test.skip=true package
+RUN mvn -q package
 
 FROM eclipse-temurin:21-jre-alpine
 RUN addgroup -S app && adduser -S app -G app

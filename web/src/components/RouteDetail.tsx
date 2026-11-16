@@ -30,7 +30,13 @@ export function RouteDetail({ route, activeDirection, onDirection, onBack, fare 
   return (
     <article className="detail" style={{ "--route-color": route.color } as CSSProperties}>
       <div className="detail__top">
-        <button type="button" className="detail__back" onClick={onBack} aria-label="Volver a la lista de rutas">
+        <button
+          type="button"
+          className="detail__back"
+          onClick={onBack}
+          aria-label="Volver a la lista de rutas"
+          autoFocus
+        >
           <ArrowLeftIcon />
         </button>
         <span className="detail__kicker">Ruta de bus</span>
@@ -76,20 +82,41 @@ export function RouteDetail({ route, activeDirection, onDirection, onBack, fare 
         </div>
       </div>
 
-      <div className="fare">
-        <span className="fare__icon">
-          <TicketIcon />
-        </span>
-        <div>
-          <div className="fare__label">Pasaje</div>
-          <div className="fare__price">{money(fare.day)}</div>
-        </div>
-        <div className="fare__note">
-          Nocturno y festivos
-          <strong>{money(fare.night)}</strong>
-        </div>
-      </div>
-      <p className="fare-hint">{fare.note}</p>
+      {route.type === "Intermunicipal" ? (
+        <>
+          <div className="fare">
+            <span className="fare__icon">
+              <TicketIcon />
+            </span>
+            <div>
+              <div className="fare__label">Tarifa</div>
+              <div className="fare__price">Por confirmar</div>
+            </div>
+            <div className="fare__note">Ruta intermunicipal</div>
+          </div>
+          <p className="fare-hint">
+            La tarifa urbana de {money(fare.day)} no aplica a este recorrido. Confirma el valor con
+            el operador.
+          </p>
+        </>
+      ) : (
+        <>
+          <div className="fare">
+            <span className="fare__icon">
+              <TicketIcon />
+            </span>
+            <div>
+              <div className="fare__label">Pasaje</div>
+              <div className="fare__price">{money(fare.day)}</div>
+            </div>
+            <div className="fare__note">
+              Nocturno, domingos y festivos
+              <strong>{money(fare.night)}</strong>
+            </div>
+          </div>
+          <p className="fare-hint">{fare.note}</p>
+        </>
+      )}
 
       <h3 className="detail__section-title">
         <PinIcon size={13} /> Trayectos

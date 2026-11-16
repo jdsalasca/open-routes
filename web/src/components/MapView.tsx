@@ -18,6 +18,7 @@ type Props = {
 };
 
 const isMobile = () => window.matchMedia("(max-width: 900px)").matches;
+const reducedMotion = () => window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
 export function MapView({ city, selected, activeDirection, nearby, nearMode, user, onSelect }: Props) {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -113,7 +114,7 @@ export function MapView({ city, selected, activeDirection, nearby, nearMode, use
           addPath(path, selected.color, active ? 6 : 3.2, active ? 1 : 0.35, selected);
         }
       }
-      for (const stop of selected.directions[0]?.stops ?? []) {
+      for (const stop of selected.directions[activeDirection]?.stops ?? selected.directions[0]?.stops ?? []) {
         L.circleMarker([stop.lat, stop.lng], {
           radius: 5,
           color: "#ffffff",
@@ -172,14 +173,19 @@ export function MapView({ city, selected, activeDirection, nearby, nearMode, use
     const map = mapRef.current;
     if (!map || selected) return;
     if (user && nearMode) {
-      map.flyTo([user.lat, user.lng], 15, { duration: 0.8 });
+      if (reducedMotion()) {
+        map.setView([user.lat, user.lng], 15);
+      } else {
+        map.flyTo([user.lat, user.lng], 15, { duration: 0.8 });
+      }
       return;
     }
-    map.flyTo(
-      [city.center.lat, city.center.lng],
-      isMobile() ? Math.max(city.zoom - 1, 10) : city.zoom,
-      { duration: 0.6 }
-    );
+    const zoom = isMobile() ? Math.max(city.zoom - 1, 10) : city.zoom;
+    if (reducedMotion()) {
+      map.setView([city.center.lat, city.center.lng], zoom);
+    } else {
+      map.flyTo([city.center.lat, city.center.lng], zoom, { duration: 0.6 });
+    }
   }, [city, user, nearMode, selected]);
 
   useEffect(() => {
@@ -194,7 +200,7 @@ export function MapView({ city, selected, activeDirection, nearby, nearMode, use
           paddingTopLeft: [24, 28],
           paddingBottomRight: [24, 28],
           maxZoom: 15,
-          animate: true
+          animate: !reducedMotion()
         });
       }
       return;

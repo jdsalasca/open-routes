@@ -14,7 +14,7 @@ Rutas de transporte público claras y cerca de ti. Empieza en **Tunja, Boyacá**
 - Dibuja las 26 rutas de la UT Mi Ruta sobre un mapa claro, cada una con su color.
 - Consulta trazados (ida y vuelta), vías por las que pasa, paradas de despacho, horarios y tarifas de 2026.
 - Busca por código, nombre, barrio o vía.
-- Responsive: sidebar en escritorio, panel deslizante en móvil.
+- Responsive: sidebar en escritorio, panel inferior fijo en móvil.
 - Sin cuentas, sin publicidad y sin guardar la ubicación.
 
 ## Stack
@@ -72,10 +72,12 @@ El importador `tools/tunja-routes.mjs` documenta cómo se convirtieron los mapas
 ## Datos y límites
 
 - Fuente de trazados y horarios: [UT Mi Ruta · Rutas y ramales](https://www.utmiruta.com/rutasyramalaesutmiruta) (2026).
-- Tarifa: $2.600 diurno y $2.700 nocturno, domingos y festivos (Decreto 0006 de 2026).
+- Los datos del operador se usan como referencia; el proyecto no reclama una licencia abierta sobre ellos. La licencia MIT cubre el código.
+- Tarifa: $2.600 de lunes a sábado entre 06:00 y 19:00; $2.700 en horario nocturno (19:01–05:59), domingos y festivos (Decreto 0006 de 2026). No aplica a la ruta intermunicipal R19.
 - Los recorridos, horarios y tarifas pueden cambiar. La información del operador manda; esta app es una ayuda para leer el sistema, no un aviso oficial.
 - Los trazados son los del mapa público del operador. Algunos ramales se dibujan como segmentos separados porque así están en el KML original.
 - La geolocalización se calcula contra la línea del recorrido, no contra paradas oficiales (el operador no publica esas paradas).
+- Las coordenadas se envían al endpoint de cercanía para calcular distancias. No se guardan en la app ni en base de datos; la respuesta se marca `Cache-Control: no-store`.
 
 ## Despliegue
 

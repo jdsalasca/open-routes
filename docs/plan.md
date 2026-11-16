@@ -15,7 +15,7 @@ Mapa web de transporte público para Tunja que responda en segundos: qué rutas 
 - [x] Dockerfile multi-stage + compose en `127.0.0.1:5179`.
 - [x] Pruebas de API, datos y geometría; build de producción.
 - [x] Validación visual desktop y móvil (Playwright).
-- [ ] Revisión externa (Codex) y correcciones.
+- [x] Revisión externa (Codex) y correcciones.
 - [ ] Despliegue en `open-routes.eridu.top` y verificación de sitios existentes.
 
 ### R2 · Datos y comunidad (después)

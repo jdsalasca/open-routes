@@ -16,6 +16,7 @@ import {
 import { MapView } from "./components/MapView";
 import { RouteDetail } from "./components/RouteDetail";
 import { useGeolocation } from "./hooks/useGeolocation";
+import type { GeoPoint } from "./hooks/useGeolocation";
 import type { City, CitySummary, NearbyRoute, Route } from "./types";
 
 const NEARBY_RADIUS = 1000;
@@ -37,6 +38,8 @@ const distanceLabel = (meters: number) =>
 export default function App() {
   const aboutRef = useRef<HTMLDialogElement>(null);
   const sidebarRef = useRef<HTMLElement>(null);
+  const nearbyAbort = useRef<AbortController | null>(null);
+  const routeRefs = useRef(new Map<string, HTMLButtonElement>());
   const [cities, setCities] = useState<CitySummary[] | null>(null);
   const [slug, setSlug] = useState<string | null>(
     () => new URLSearchParams(window.location.search).get("city")
@@ -47,6 +50,8 @@ export default function App() {
   const [activeDirection, setActiveDirection] = useState(0);
   const [nearby, setNearby] = useState<NearbyRoute[] | null>(null);
   const [nearMode, setNearMode] = useState(false);
+  const [nearbyError, setNearbyError] = useState<string | null>(null);
+  const [nearbyLoading, setNearbyLoading] = useState(false);
   const [query, setQuery] = useState("");
   const { position, status, error: geoError, locate } = useGeolocation();
 
@@ -69,6 +74,9 @@ export default function App() {
 
   useEffect(() => {
     if (!slug) return;
+    nearbyAbort.current?.abort();
+    setNearbyError(null);
+    setNearbyLoading(false);
     const controller = new AbortController();
     setBoot("loading");
     api
@@ -131,42 +139,71 @@ export default function App() {
     setQuery("");
   }, []);
 
+  const loadNearby = useCallback(async (point: GeoPoint, citySlug: string) => {
+    nearbyAbort.current?.abort();
+    const controller = new AbortController();
+    nearbyAbort.current = controller;
+    setNearbyLoading(true);
+    setNearbyError(null);
+    try {
+      const hits = await api.nearby(citySlug, point.lat, point.lng, NEARBY_RADIUS, controller.signal);
+      if (controller.signal.aborted) return;
+      setNearby(hits);
+      setNearMode(true);
+      setQuery("");
+    } catch {
+      if (controller.signal.aborted) return;
+      setNearby(null);
+      setNearMode(false);
+      setNearbyError("No pudimos consultar las rutas cercanas. Revisa tu conexión e inténtalo otra vez.");
+    } finally {
+      if (!controller.signal.aborted) setNearbyLoading(false);
+    }
+  }, []);
+
   const handleLocate = useCallback(async () => {
     if (!city) return;
     setSelectedId(null);
     setActiveDirection(0);
     const point = await locate();
     if (!point) return;
-    try {
-      const hits = await api.nearby(city.slug, point.lat, point.lng, NEARBY_RADIUS);
-      setNearby(hits);
-    } catch {
-      setNearby([]);
-    }
-    setNearMode(true);
-    setQuery("");
-  }, [city, locate]);
+    await loadNearby(point, city.slug);
+  }, [city, locate, loadNearby]);
+
+  const retryNearby = useCallback(() => {
+    if (position && city) void loadNearby(position, city.slug);
+  }, [city, position, loadNearby]);
+
+  const handleBack = useCallback(() => {
+    const id = selectedId;
+    setSelectedId(null);
+    setActiveDirection(0);
+    requestAnimationFrame(() => {
+      if (id) routeRefs.current.get(id)?.focus();
+    });
+  }, [selectedId]);
+
+  if (boot === "error") {
+    return (
+      <div className="loading">
+        <div className="loading__card">
+          <LogoMark size={38} />
+          <strong>No pudimos cargar las rutas.</strong>
+          <button type="button" className="primary-button" onClick={() => window.location.reload()}>
+            Reintentar
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   if (boot === "loading" || !city) {
-    if (boot === "error") {
-      return (
-        <div className="loading">
-          <div className="loading__card">
-            <LogoMark size={38} />
-            <strong>No pudimos cargar las rutas.</strong>
-            <button type="button" className="primary-button" onClick={() => window.location.reload()}>
-              Reintentar
-            </button>
-          </div>
-        </div>
-      );
-    }
     return (
       <div className="loading">
         <div className="loading__card">
           <LogoMark size={38} />
           <span className="loading__spinner" aria-hidden="true" />
-          <span>Cargando rutas de Tunja…</span>
+          <span>Cargando rutas…</span>
         </div>
       </div>
     );
@@ -259,10 +296,7 @@ export default function App() {
               route={selected}
               activeDirection={activeDirection}
               onDirection={setActiveDirection}
-              onBack={() => {
-                setSelectedId(null);
-                setActiveDirection(0);
-              }}
+              onBack={handleBack}
               fare={city.fare}
             />
           ) : (
@@ -284,14 +318,16 @@ export default function App() {
                     type="button"
                     className="primary-button"
                     onClick={handleLocate}
-                    disabled={status === "locating"}
+                    disabled={status === "locating" || nearbyLoading}
                   >
                     <LocateIcon />
                     {status === "locating"
                       ? "Buscando tu ubicación…"
-                      : position
-                        ? "Actualizar mi ubicación"
-                        : "Usar mi ubicación"}
+                      : nearbyLoading
+                        ? "Buscando rutas cerca de ti…"
+                        : position
+                          ? "Actualizar mi ubicación"
+                          : "Usar mi ubicación"}
                   </button>
                   {nearMode && (
                     <button type="button" className="link-button" onClick={showAll}>
@@ -299,7 +335,9 @@ export default function App() {
                     </button>
                   )}
                 </div>
-                <p className="hero__privacy">Solo se usa para calcular distancias. No se guarda.</p>
+                <p className="hero__privacy">
+                  Se envía a nuestro servidor solo para calcular distancias. No se almacena.
+                </p>
                 <div className="hero__meta">
                   <span className="meta-chip">
                     <BusIcon size={13} /> {city.routes.length} rutas
@@ -314,6 +352,18 @@ export default function App() {
                 <div className="notice" role="status">
                   <InfoIcon />
                   <span>{geoError}</span>
+                </div>
+              )}
+
+              {nearbyError && (
+                <div className="notice" role="alert">
+                  <InfoIcon />
+                  <span>
+                    {nearbyError}{" "}
+                    <button type="button" className="notice__link" onClick={retryNearby}>
+                      Reintentar
+                    </button>
+                  </span>
                 </div>
               )}
 
@@ -360,6 +410,10 @@ export default function App() {
                   return (
                     <button
                       key={route.id}
+                      ref={(element) => {
+                        if (element) routeRefs.current.set(route.id, element);
+                        else routeRefs.current.delete(route.id);
+                      }}
                       type="button"
                       className={`route-card${selectedId === route.id ? " route-card--selected" : ""}`}
                       style={{ "--route-color": route.color } as CSSProperties}

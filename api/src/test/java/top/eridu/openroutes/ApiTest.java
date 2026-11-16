@@ -42,7 +42,9 @@ class ApiTest {
                         .param("radius", "500"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.length()").value(org.hamcrest.Matchers.greaterThan(0)))
-                .andExpect(jsonPath("$[0].distanceMeters").value(org.hamcrest.Matchers.lessThanOrEqualTo(500)));
+                .andExpect(jsonPath("$[0].distanceMeters").value(org.hamcrest.Matchers.lessThanOrEqualTo(500)))
+                .andExpect(org.springframework.test.web.servlet.result.MockMvcResultMatchers
+                        .header().string("Cache-Control", "no-store"));
     }
 
     @Test
@@ -53,6 +55,16 @@ class ApiTest {
                         .header().string("X-Content-Type-Options", "nosniff"))
                 .andExpect(org.springframework.test.web.servlet.result.MockMvcResultMatchers
                         .header().exists("Content-Security-Policy"));
+    }
+
+    @Test
+    void cercaAmplioDevuelveTodasLasRutas() throws Exception {
+        mvc.perform(get("/api/cities/tunja/routes/near")
+                        .param("lat", "5.5325")
+                        .param("lng", "-73.3617")
+                        .param("radius", "5000"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.length()").value(26));
     }
 
     @Test

@@ -18,6 +18,7 @@ import top.eridu.openroutes.geo.Geo;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 @RestController
 @RequestMapping("/api")
@@ -49,8 +50,10 @@ public class ApiController {
             @PathVariable String slug,
             @RequestParam double lat,
             @RequestParam double lng,
-            @RequestParam(defaultValue = "800") int radius
+            @RequestParam(defaultValue = "800") int radius,
+            jakarta.servlet.http.HttpServletResponse response
     ) {
+        response.setHeader("Cache-Control", "no-store");
         City city = cities.find(slug).orElseThrow(() -> notFound(slug));
         if (!Double.isFinite(lat) || !Double.isFinite(lng)
                 || lat < -90 || lat > 90 || lng < -180 || lng > 180) {
@@ -59,9 +62,9 @@ public class ApiController {
         int maxDistance = Math.clamp(radius, 50, 5000);
         return city.routes().stream()
                 .map(route -> nearest(route, lat, lng))
+                .filter(Objects::nonNull)
                 .filter(hit -> hit.distanceMeters() <= maxDistance)
                 .sorted(Comparator.comparingInt(NearbyRoute::distanceMeters))
-                .limit(25)
                 .toList();
     }
 
@@ -76,6 +79,9 @@ public class ApiController {
                     directionName = direction.name();
                 }
             }
+        }
+        if (!Double.isFinite(best)) {
+            return null;
         }
         return new NearbyRoute(route.id(), route.code(), route.name(), route.color(), route.type(),
                 directionName, (int) Math.round(best));

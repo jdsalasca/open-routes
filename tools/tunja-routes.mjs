@@ -100,7 +100,8 @@ function parseKml(xml) {
 }
 
 // Une segmentos sueltos en cadenas continuas por cercanía entre extremos.
-// El KML dibuja por calles, no en orden de recorrido.
+// El KML dibuja por calles, no en orden de recorrido. Tolerancia corta a
+// propósito: no queremos inventar conexiones entre ramales cercanos.
 function chainSegments(segments) {
   const unused = new Set(segments.keys());
   const chains = [];
@@ -108,7 +109,7 @@ function chainSegments(segments) {
     for (const other of unused) {
       if (other === index) continue;
       const pts = segments[other].pts;
-      if (meters(point, pts[0]) < 30 || meters(point, pts.at(-1)) < 30) return true;
+      if (meters(point, pts[0]) < 12 || meters(point, pts.at(-1)) < 12) return true;
     }
     return false;
   };
@@ -143,7 +144,7 @@ function chainSegments(segments) {
         if (toStart < bestDistance) { bestDistance = toStart; best = i; bestReverse = false; }
         if (toEnd < bestDistance) { bestDistance = toEnd; best = i; bestReverse = true; }
       }
-      if (best < 0 || bestDistance > 35) break;
+      if (best < 0 || bestDistance > 12) break;
       const next = bestReverse ? [...segments[best].pts].reverse() : segments[best].pts;
       for (const point of next) {
         if (meters(points.at(-1), point) > 2) points.push(point);
@@ -263,7 +264,7 @@ async function main() {
       day: 2600,
       night: 2700,
       currency: "COP",
-      note: "Tarifa 2026 (Decreto 0006 de 2026). Diurno 06:00–19:00; nocturno, domingos y festivos 19:01–05:59."
+      note: "Tarifa 2026 (Decreto 0006 de 2026). Lunes a sábado, 06:00–19:00: $2.600. Nocturno (19:01–05:59), domingos y festivos: $2.700."
     },
     routes
   };

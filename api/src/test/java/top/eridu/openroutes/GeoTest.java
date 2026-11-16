@@ -29,4 +29,14 @@ class GeoTest {
         double distance = Geo.distanceToPathMeters(5.0009, -73.0, path);
         assertThat(distance).isBetween(90.0, 110.0);
     }
+
+    @Test
+    void extremosYSegmentosDegeneradosNoRompen() {
+        List<double[]> path = List.of(new double[]{5.0, -73.0}, new double[]{5.0, -72.999});
+        assertThat(Geo.distanceToPathMeters(5.0, -72.999, path)).isLessThan(1);
+        assertThat(Geo.distanceToPathMeters(5.0, -72.998, path)).isBetween(100.0, 120.0);
+
+        List<double[]> duplicate = List.of(new double[]{5.0, -73.0}, new double[]{5.0, -73.0});
+        assertThat(Geo.distanceToPathMeters(5.001, -73.0, duplicate)).isBetween(100.0, 120.0);
+    }
 }

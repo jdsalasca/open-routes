@@ -26,6 +26,7 @@ public class CityRepository {
         for (Resource file : files) {
             try (InputStream in = file.getInputStream()) {
                 City city = mapper.readValue(in, City.class);
+                validate(city);
                 if (loaded.put(city.slug(), city) != null) {
                     throw new IllegalStateException("Ciudad duplicada: " + city.slug());
                 }
@@ -43,5 +44,38 @@ public class CityRepository {
 
     public Optional<City> find(String slug) {
         return Optional.ofNullable(cities.get(slug));
+    }
+
+    /**
+     * Falla al arrancar si una ciudad trae geometrías vacías: es preferible a
+     * servir distancias inventadas o negativas.
+     */
+    private static void validate(City city) {
+        if (city.routes() == null || city.routes().isEmpty()) {
+            throw new IllegalStateException("La ciudad " + city.slug() + " no tiene rutas");
+        }
+        for (var route : city.routes()) {
+            if (route.directions() == null || route.directions().isEmpty()) {
+                throw new IllegalStateException(route.code() + " no tiene sentidos");
+            }
+            for (var direction : route.directions()) {
+                if (direction.paths() == null || direction.paths().isEmpty()) {
+                    throw new IllegalStateException(route.code() + " tiene un sentido sin trazado");
+                }
+                for (var path : direction.paths()) {
+                    if (path == null || path.size() < 2) {
+                        throw new IllegalStateException(route.code() + " tiene un trazado vacío");
+                    }
+                    for (double[] point : path) {
+                        if (point == null || point.length < 2
+                                || !Double.isFinite(point[0]) || !Double.isFinite(point[1])
+                                || point[0] < -90 || point[0] > 90
+                                || point[1] < -180 || point[1] > 180) {
+                            throw new IllegalStateException(route.code() + " tiene un punto inválido");
+                        }
+                    }
+                }
+            }
+        }
     }
 }
