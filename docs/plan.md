@@ -16,7 +16,7 @@ Mapa web de transporte público para Tunja que responda en segundos: qué rutas 
 - [x] Pruebas de API, datos y geometría; build de producción.
 - [x] Validación visual desktop y móvil (Playwright).
 - [x] Revisión externa (Codex) y correcciones.
-- [ ] Despliegue en `open-routes.eridu.top` y verificación de sitios existentes.
+- [x] Despliegue en `open-routes.eridu.top` y verificación de sitios existentes.
 
 ### R2 · Datos y comunidad (después)
 
