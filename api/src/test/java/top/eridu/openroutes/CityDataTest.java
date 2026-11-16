@@ -71,6 +71,14 @@ class CityDataTest {
     }
 
     @Test
+    void rutasCircularesEstanMarcadas() {
+        assertThat(city.routes())
+                .filteredOn(route -> route.circular())
+                .extracting(Route::code)
+                .containsExactlyInAnyOrder("R10", "R22");
+    }
+
+    @Test
     void lugaresSonBuscablesYEscandinavoExiste() {
         assertThat(city.places()).hasSizeGreaterThan(20);
         assertThat(city.places()).extracting(place -> place.id()).doesNotHaveDuplicates();

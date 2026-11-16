@@ -13,6 +13,7 @@ public record Route(
         Schedule sunday,
         String operator,
         String sourceUrl,
+        boolean circular,
         List<Direction> directions
 ) {
 }

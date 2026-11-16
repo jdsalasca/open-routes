@@ -29,7 +29,7 @@ const ROUTES = [
   { code: "R7", mid: "1eRJ7qm9i5zXX1mwawixWllXkzTegx70", name: "Estancia del Roble ↔ Florida", weekday: ["05:30", "22:00", 9], sunday: ["05:50", "22:00", null] },
   { code: "R8", mid: "1oqcvw7AEcj7gYIlSX0yN9bBxqL6ygtg", name: "Cooservicios ↔ ESE Santiago de Tunja", weekday: ["05:30", "22:00", 6], sunday: ["05:50", "22:00", 13] },
   { code: "R9", mid: "1oHH34OQE8ohMcAu3vkwyOfE-4npAJLo", name: "Arboleda ↔ La Fuente", weekday: ["05:30", "22:00", 5], sunday: ["05:50", "22:00", 8] },
-  { code: "R10", mid: "1m86r9hybxEvg_xqwOnbN2IhrqCJ9aTY", name: "Muiscas ↔ El Triunfo", weekday: ["05:30", "22:00", 7], sunday: ["05:50", "22:00", 16] },
+  { code: "R10", mid: "1m86r9hybxEvg_xqwOnbN2IhrqCJ9aTY", name: "Muiscas ↔ El Triunfo", circular: true, weekday: ["05:30", "22:00", 7], sunday: ["05:50", "22:00", 16] },
   { code: "R11", mid: "1dtxI10iAsM0rVvCBknohCENcbEa2pgE", name: "Santa Marta ↔ Cooservicios", weekday: ["05:30", "22:00", 6], sunday: ["05:50", "22:00", 7] },
   { code: "R12", mid: "19SJdXxCQgGrukAWBOsqCwd3mnK0_2Ns", name: "Runta ↔ Uniboyacá", weekday: ["05:30", "22:00", 8], sunday: ["05:50", "22:00", null] },
   { code: "R13", mid: "1WOnjL-bUisZRIz1Q3762JFjjKs2DqpY", name: "El Lago ↔ El Triunfo", weekday: ["05:30", "22:00", 6], sunday: ["05:50", "22:00", 11] },
@@ -41,7 +41,7 @@ const ROUTES = [
   { code: "R19", mid: "1jtJMmh-HSa9MwyhkPUPXdgT6vEfYGmI", name: "Tunja ↔ Ventaquemada", type: "Intermunicipal", weekday: ["05:30", "22:00", 7], sunday: ["05:50", "22:00", 11] },
   { code: "R20", mid: "1CfhLbzjBVv4OWsrYcN1JqKFeyMzrziU", name: "Pirgua ↔ Terminal de Transporte", weekday: ["05:30", "22:00", 8], sunday: ["05:50", "22:00", 12] },
   { code: "R21", mid: "1ekzmAjoOPCopokongA49rMUlTnhOLfA", name: "Pirgua ↔ Retén Sur", weekday: ["05:30", "22:00", 8], sunday: ["05:50", "22:00", 17] },
-  { code: "R22", mid: "1offZUKeO1dtehA9mdaxpbsePh9yUdIY", name: "Asís ↔ La Fuente", weekday: ["05:30", "22:00", 7], sunday: ["05:50", "22:00", 13] },
+  { code: "R22", mid: "1offZUKeO1dtehA9mdaxpbsePh9yUdIY", name: "Asís ↔ La Fuente", circular: true, weekday: ["05:30", "22:00", 7], sunday: ["05:50", "22:00", 13] },
   { code: "R23", mid: "1U2an2O8xu1MClwkXPTNpcN4gTApTDnk", name: "Arboleda ↔ Uniboyacá", weekday: ["05:30", "22:00", 6], sunday: ["05:50", "22:00", 11] },
   { code: "R24", mid: "1W6rKWrwaU4PYHQPlqwFSpeKLEFmwMW4", name: "Runta ↔ La Fuente (Florencia)", weekday: ["05:30", "22:00", 9], sunday: ["05:50", "22:00", 20] },
   { code: "R25", mid: "1gtbzt4FPTgmbWeKOt119iICn3LS4Ggs", name: "Runta ↔ La Fuente", weekday: ["05:30", "22:00", 8], sunday: ["05:50", "22:00", null] },
@@ -292,6 +292,7 @@ async function main() {
       sunday: schedule(meta.sunday),
       operator: "UT Mi Ruta",
       sourceUrl: `https://www.google.com/maps/d/viewer?mid=${meta.mid}`,
+      circular: Boolean(meta.circular),
       directions
     });
   }

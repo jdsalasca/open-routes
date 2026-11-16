@@ -56,6 +56,7 @@ export function RouteDetail({ route, activeDirection, onDirection, onBack, fare 
           <BusIcon size={13} /> {route.type}
         </span>
         <span className="meta-chip">{route.operator}</span>
+        {route.circular && <span className="meta-chip">Circular</span>}
       </div>
 
       <h3 className="detail__section-title">

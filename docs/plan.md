@@ -14,7 +14,8 @@ Mapa web de transporte público para Tunja que responda en segundos: qué rutas 
 - [x] Web React+Vite+SCSS con mapa Leaflet, geolocalización, búsqueda y detalle de ruta.
 - [x] Buscador de origen por barrio o lugar (42 sitios de Tunja), con rutas a 500 m y distancias.
 - [x] Planificador origen → destino con rutas directas, tiempos estimados y guía de subida/bajada.
-- [x] Auditoría de calidad y correcciones P1 de bajo riesgo (campos, GPS, foco, cercanía en cliente).
+- [x] Proyecciones múltiples, circuitos explícitos (R10/R22), aviso de fragmentos y espera según el día.
+- [x] Auditoría de calidad y correcciones P1/P2 (campos, GPS, foco, cercanía en cliente, teclado, pruebas).
 - [x] Dockerfile multi-stage + compose en `127.0.0.1:5179`.
 - [x] Pruebas de API, datos y geometría; build de producción.
 - [x] Validación visual desktop y móvil (Playwright).
@@ -26,8 +27,8 @@ Mapa web de transporte público para Tunja que responda en segundos: qué rutas 
 - Paradas oficiales y tiempos de paso cuando el operador los publique.
 - Reportes ciudadanos de cambios (con moderación).
 - Más ciudades con el mismo esquema.
-- Planificador con transbordos, circuitos y tiempos por franja horaria.
-- Unificar fragmentos de un mismo sentido (R8, R13, R18) sin inventar conexiones.
+- Planificador con transbordos y tiempos por franja/festivos.
+- Unificar fragmentos de un mismo sentido (R8, R13, R18) con datos verificados, sin inventar conexiones.
 
 ## Criterios de aceptación
 

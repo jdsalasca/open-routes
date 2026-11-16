@@ -364,5 +364,5 @@ export function MapView({
     focusCity();
   }, [trip, selected, focusCity, origin, destination]);
 
-  return <div ref={containerRef} className="map" role="region" aria-label={`Mapa de rutas de ${city.name}`} />;
+  return <div ref={containerRef} className="map" role="region" aria-label={`Mapa de rutas de ${city.name}`} aria-describedby="map-instructions" />;
 }

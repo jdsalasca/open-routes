@@ -48,7 +48,14 @@ export function AboutDialog({ dialogRef, city }: Props) {
       </p>
       <p>
         Con origen y destino, el planificador busca rutas directas y ordena las opciones por tiempo
-        estimado: caminata, espera y tramo en bus. Por ahora no combina transbordos.
+        estimado: caminata, espera y tramo en bus. R10 y R22 están marcadas como circulares por el
+        operador; el planificador solo cierra la vuelta cuando el trazado termina cerca del inicio.
+        Por ahora no combina transbordos.
+      </p>
+      <p>
+        Algunos sentidos (R8, R13 y R18) están divididos en el mapa; el planificador los marca como
+        no verificados en lugar de inventar una conexión. La espera usa la frecuencia de hoy y no
+        comprueba festivos, disponibilidad ni tráfico.
       </p>
 
       <h3>Privacidad</h3>

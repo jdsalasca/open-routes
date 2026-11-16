@@ -69,7 +69,8 @@ export function TripDetail({
           <span className="trip-step__num">2</span>
           <div>
             <strong>
-              <BusIcon size={13} /> Toma la {trip.route.code} · {trip.rideMinutes} min a bordo
+              <BusIcon size={13} /> Toma la {trip.route.code} ·{" "}
+              {Math.round(trip.rideMinutes)} min a bordo
             </strong>
             <p className="trip-step__direction">{trip.route.directions[trip.directionIndex]?.name}</p>
           </div>
@@ -90,12 +91,15 @@ export function TripDetail({
       <div className="trip-total">
         <ClockIcon size={18} />
         <div>
-          <span>Tiempo estimado</span>
-          <strong>{trip.totalMinutes} min</strong>
+          <span>{trip.waitKnown ? "Tiempo estimado" : "Tiempo estimado sin espera"}</span>
+          <strong>{Math.round(trip.totalMinutes)} min</strong>
         </div>
         <p>
-          {trip.walkToMeters < 30 ? "Estás en la ruta" : `${meters(trip.walkToMeters)} a pie`} · ~
-          {trip.waitMinutes} min de espera · {meters(trip.rideMeters)} en bus
+          {trip.walkToMeters < 30 ? "Estás en la ruta" : `${meters(trip.walkToMeters)} a pie`} ·{" "}
+          {trip.waitKnown && trip.waitMinutes !== null
+            ? `~${Math.round(trip.waitMinutes)} min de espera`
+            : "espera sin dato"}{" "}
+          · {meters(trip.rideMeters)} en bus
         </p>
       </div>
 
@@ -109,8 +113,9 @@ export function TripDetail({
       </div>
 
       <p className="detail__note">
-        Distancias a pie aproximadas en línea recta; el tiempo añade un factor de desvío. No incluye
-        tráfico, semáforos ni paradas oficiales; confirma con el conductor.
+        Distancias a pie aproximadas en línea recta; el tiempo añade un factor de desvío. La espera
+        usa la frecuencia de hoy (domingo usa horario dominical) y no verifica disponibilidad,
+        festivos, tráfico ni paradas oficiales.
       </p>
     </article>
   );

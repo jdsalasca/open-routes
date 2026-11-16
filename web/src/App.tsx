@@ -19,7 +19,7 @@ import { PlaceField } from "./components/PlaceField";
 import { RouteDetail } from "./components/RouteDetail";
 import { TripDetail } from "./components/TripDetail";
 import { useGeolocation } from "./hooks/useGeolocation";
-import { distanceMeters, findDirectTrips, findNearbyRoutes } from "./planner";
+import { distanceMeters, findDirectTrips, findNearbyRoutes, findSplitRoutes } from "./planner";
 import type { TripOption } from "./planner";
 import type { City, CitySummary, NearbyRoute, Origin, Place, Route } from "./types";
 
@@ -153,6 +153,13 @@ export default function App() {
     () => tripOptions.map((option) => option.route.id),
     [tripOptions]
   );
+
+  const splitRoutes = useMemo(() => {
+    if (!city || !origin || !destination || samePlace) return [];
+    return findSplitRoutes(origin, destination, city.routes)
+      .filter((hit) => !tripOptions.some((option) => option.route.id === hit.route.id))
+      .slice(0, 3);
+  }, [city, origin, destination, samePlace, tripOptions]);
 
   const tripMode = Boolean(origin && destination);
   const destinationOnly = Boolean(!origin && destination);
@@ -589,7 +596,14 @@ export default function App() {
                 <div className="notice notice--info">
                   <InfoIcon />
                   <span>
-                    No encontramos una ruta directa entre {origin?.label} y {destination?.name}.{" "}
+                    No encontramos una ruta directa verificada entre {origin?.label} y{" "}
+                    {destination?.name}.{" "}
+                    {splitRoutes.length > 0 &&
+                      (splitRoutes.length === 1
+                        ? `La ruta ${splitRoutes[0].route.code} tiene el trazado dividido en el mapa; podría servir, pero no lo confirmamos. `
+                        : `Las rutas ${splitRoutes
+                            .map((hit) => hit.route.code)
+                            .join(", ")} tienen el trazado dividido en el mapa; podrían servir, pero no lo confirmamos. `)}
                     <button type="button" className="notice__link" onClick={clearDestination}>
                       Ver rutas cerca del origen
                     </button>
@@ -648,7 +662,8 @@ export default function App() {
               )}
 
               {tripMode ? (
-                <div className="trip-list">
+                <>
+                  <div className="trip-list">
                   {!samePlace &&
                     tripOptions.map((option) => {
                       const key = `${option.route.id}-${option.directionIndex}`;
@@ -670,11 +685,11 @@ export default function App() {
                           <span className="trip-card__body">
                             <span className="trip-card__name">{option.route.name}</span>
                             <span className="trip-card__meta">
-                              <strong>≈ {option.totalMinutes} min</strong>
+                              <strong>≈ {Math.round(option.totalMinutes)} min</strong>
                               <span>
-                                {distanceLabel(option.walkToMeters + option.walkFromMeters)} a pie
+                                ≈ {distanceLabel(option.walkToMeters + option.walkFromMeters)} a pie
                               </span>
-                              <span>{option.rideMinutes} min en bus</span>
+                              <span>{Math.round(option.rideMinutes)} min en bus</span>
                             </span>
                             <span className="trip-card__hint">
                               Sube cerca de {origin?.label} · baja cerca de {destination?.name}
@@ -686,7 +701,14 @@ export default function App() {
                         </button>
                       );
                     })}
-                </div>
+                  </div>
+                  {tripOptions.length > 0 && splitRoutes.length > 0 && (
+                    <p className="list-footnote">
+                      No evaluamos {splitRoutes.map((hit) => hit.route.code).join(", ")}: su trazado
+                      está dividido en el mapa y no permite confirmar una ruta directa.
+                    </p>
+                  )}
+                </>
               ) : destinationOnly ? (
                 <p className="list-empty">
                   Destino: {destination?.name}. Elige un origen o usa tu ubicación para ver las
@@ -758,6 +780,11 @@ export default function App() {
         </aside>
 
         <div className="map-wrap">
+          <p id="map-instructions" className="visually-hidden">
+            El mapa es una ayuda visual. Usa la lista de rutas y las opciones de viaje para
+            seleccionar recorridos con el teclado; los pasos se describen en texto al abrir una
+            opción.
+          </p>
           <MapView
             city={city}
             selected={selected}

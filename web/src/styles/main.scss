@@ -824,6 +824,16 @@ summary:focus-visible {
   text-align: center;
 }
 
+.list-footnote {
+  margin: 0 16px 16px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  background: $canvas;
+  color: $muted;
+  font-size: 10.5px;
+  line-height: 1.45;
+}
+
 .trip-list {
   display: flex;
   flex-direction: column;

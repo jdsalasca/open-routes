@@ -488,6 +488,7 @@
    },
    "operator": "UT Mi Ruta",
    "sourceUrl": "https://www.google.com/maps/d/viewer?mid=10vBKVmZezs-g8MMp8_Lpwv58Gu-PrZ8",
+   "circular": false,
    "directions": [
     {
      "name": "ARBOLEDA - AVENIDA NORTE - TERMINAL DE TRANSPORTE",
@@ -1367,6 +1368,7 @@
    },
    "operator": "UT Mi Ruta",
    "sourceUrl": "https://www.google.com/maps/d/viewer?mid=1bed3U2Cj8p7Xkwr4jhR72JpsSpqqLJ8",
+   "circular": false,
    "directions": [
     {
      "name": "PINOS DE ORIENTE - SAN FRANCISCO VIADUCTO - TERMINAL DE TRANSPORTE - ARBOLEDA.",
@@ -2194,6 +2196,7 @@
    },
    "operator": "UT Mi Ruta",
    "sourceUrl": "https://www.google.com/maps/d/viewer?mid=1ZhWpAzr1G35lzNaQnV_Hf7Ie1UkKfVE",
+   "circular": false,
    "directions": [
     {
      "name": "ARBOLEDA - SANTA INÉS - ESCANDINAVO",
@@ -2859,6 +2862,7 @@
    },
    "operator": "UT Mi Ruta",
    "sourceUrl": "https://www.google.com/maps/d/viewer?mid=1J8f6kKxksaNQXKCFI3lwCQ-ryD6Voho",
+   "circular": false,
    "directions": [
     {
      "name": "PINOS DE ORIENTE - SAN FRANCISCO - MUISCAS - ARBOLEDA",
@@ -3761,6 +3765,7 @@
    },
    "operator": "UT Mi Ruta",
    "sourceUrl": "https://www.google.com/maps/d/viewer?mid=12MHFeo6TomE7TOY1hIznu1yVd9IIMIg",
+   "circular": false,
    "directions": [
     {
      "name": "Arboleda - Muiscas -- Reten sur.",
@@ -4380,6 +4385,7 @@
    },
    "operator": "UT Mi Ruta",
    "sourceUrl": "https://www.google.com/maps/d/viewer?mid=17U6jmQtSPhVnYQV8cSMSs7wAxAo81MA",
+   "circular": false,
    "directions": [
     {
      "name": "ESTANCIA DEL ROBLE - AVENIDA NORTE - RETEN SUR.",
@@ -5408,6 +5414,7 @@
    },
    "operator": "UT Mi Ruta",
    "sourceUrl": "https://www.google.com/maps/d/viewer?mid=1eRJ7qm9i5zXX1mwawixWllXkzTegx70",
+   "circular": false,
    "directions": [
     {
      "name": "FLORIDA - JUAN DE CASTELLANOS - AVENIDA NORTE - ESTANCIA DEL ROBLE.",
@@ -6018,6 +6025,7 @@
    },
    "operator": "UT Mi Ruta",
    "sourceUrl": "https://www.google.com/maps/d/viewer?mid=1oqcvw7AEcj7gYIlSX0yN9bBxqL6ygtg",
+   "circular": false,
    "directions": [
     {
      "name": "Cooservicios - La Fuente.",
@@ -6779,6 +6787,7 @@
    },
    "operator": "UT Mi Ruta",
    "sourceUrl": "https://www.google.com/maps/d/viewer?mid=1oHH34OQE8ohMcAu3vkwyOfE-4npAJLo",
+   "circular": false,
    "directions": [
     {
      "name": "ARBOLEDA - AVENIDA NORTE - LA FUENTE",
@@ -7420,6 +7429,7 @@
    },
    "operator": "UT Mi Ruta",
    "sourceUrl": "https://www.google.com/maps/d/viewer?mid=1m86r9hybxEvg_xqwOnbN2IhrqCJ9aTY",
+   "circular": true,
    "directions": [
     {
      "name": "MUISCAS - AVENIDA NORTE - TRIUNFO",
@@ -8090,6 +8100,7 @@
    },
    "operator": "UT Mi Ruta",
    "sourceUrl": "https://www.google.com/maps/d/viewer?mid=1dtxI10iAsM0rVvCBknohCENcbEa2pgE",
+   "circular": false,
    "directions": [
     {
      "name": "BR. SANTA MARTA - COOSERVICIOS - VIADUCTO - MUISCAS",
@@ -8780,6 +8791,7 @@
    },
    "operator": "UT Mi Ruta",
    "sourceUrl": "https://www.google.com/maps/d/viewer?mid=19SJdXxCQgGrukAWBOsqCwd3mnK0_2Ns",
+   "circular": false,
    "directions": [
     {
      "name": "RUNTA - RETÉN SUR - AVENIDA NORTE - MUISCAS",
@@ -9490,6 +9502,7 @@
    },
    "operator": "UT Mi Ruta",
    "sourceUrl": "https://www.google.com/maps/d/viewer?mid=1WOnjL-bUisZRIz1Q3762JFjjKs2DqpY",
+   "circular": false,
    "directions": [
     {
      "name": "LIMITE PERIMETRO TUNJA -ESTADIO - TRIUNFO.",
@@ -10428,6 +10441,7 @@
    },
    "operator": "UT Mi Ruta",
    "sourceUrl": "https://www.google.com/maps/d/viewer?mid=17Wd36tkYxESAtzpPdQgsljXzgNJBEKk",
+   "circular": false,
    "directions": [
     {
      "name": "ESTANCIA DEL ROBLE - VIADUCTO - PARAÍSO",
@@ -11063,6 +11077,7 @@
    },
    "operator": "UT Mi Ruta",
    "sourceUrl": "https://www.google.com/maps/d/viewer?mid=1DapnoAnXKZZd25gJ2sIiUXJwmRf7ZVM",
+   "circular": false,
    "directions": [
     {
      "name": "COOSERVICIOS - AVENIDA NORTE - MUISCAS",
@@ -11674,6 +11689,7 @@
    },
    "operator": "UT Mi Ruta",
    "sourceUrl": "https://www.google.com/maps/d/viewer?mid=1vJ_qfc3q9C8LWHMml48kMGiaNq0jSEM",
+   "circular": false,
    "directions": [
     {
      "name": "ASÍS - AVENIDA NORTE - FLORIDA",
@@ -12366,6 +12382,7 @@
    },
    "operator": "UT Mi Ruta",
    "sourceUrl": "https://www.google.com/maps/d/viewer?mid=1RPG3jI5fClpB00o2Ufgp8E5GQkv_ArI",
+   "circular": false,
    "directions": [
     {
      "name": "ASÍS - AVENIDA NORTE - ALTAMIRA.",
@@ -12970,6 +12987,7 @@
    },
    "operator": "UT Mi Ruta",
    "sourceUrl": "https://www.google.com/maps/d/viewer?mid=1HUeIRiF7ilCRl6YFFffTa-KhZzoslic",
+   "circular": false,
    "directions": [
     {
      "name": "LIMITE PERIMETRO TUNJA (Sector El Lago - Resolución 2292 de 1999) - AVENIDA NORTE - PRADOS DE SAN LUIS.",
@@ -13810,6 +13828,7 @@
    },
    "operator": "UT Mi Ruta",
    "sourceUrl": "https://www.google.com/maps/d/viewer?mid=1jtJMmh-HSa9MwyhkPUPXdgT6vEfYGmI",
+   "circular": false,
    "directions": [
     {
      "name": "ARBOLEDA - LIMITE PERIMETRO TUNJA - (RETORNO BTS, Vda. Barón Gallero - Sector San Antonio).",
@@ -15420,6 +15439,7 @@
    },
    "operator": "UT Mi Ruta",
    "sourceUrl": "https://www.google.com/maps/d/viewer?mid=1CfhLbzjBVv4OWsrYcN1JqKFeyMzrziU",
+   "circular": false,
    "directions": [
     {
      "name": "PIRGUA - TERMINAL - AVENIDA NORTE - ARBOLEDA",
@@ -16336,6 +16356,7 @@
    },
    "operator": "UT Mi Ruta",
    "sourceUrl": "https://www.google.com/maps/d/viewer?mid=1ekzmAjoOPCopokongA49rMUlTnhOLfA",
+   "circular": false,
    "directions": [
     {
      "name": "PIRGUA - TERMINAL - ESTADIO - RUNTA",
@@ -17387,6 +17408,7 @@
    },
    "operator": "UT Mi Ruta",
    "sourceUrl": "https://www.google.com/maps/d/viewer?mid=1offZUKeO1dtehA9mdaxpbsePh9yUdIY",
+   "circular": true,
    "directions": [
     {
      "name": "BARRIO ASIS - BARRIO MUISCAS - AVENIDA UNIVERSITARIA - C.C. VIVA - TERMINAL - BARRIO LA FUENTE (Circular).",
@@ -18535,6 +18557,7 @@
    },
    "operator": "UT Mi Ruta",
    "sourceUrl": "https://www.google.com/maps/d/viewer?mid=1U2an2O8xu1MClwkXPTNpcN4gTApTDnk",
+   "circular": false,
    "directions": [
     {
      "name": "ARBOLEDA - UNIBOYACÁ - RAMAL FLORIDA - SAN FRANCISCO.",
@@ -19307,6 +19330,7 @@
    },
    "operator": "UT Mi Ruta",
    "sourceUrl": "https://www.google.com/maps/d/viewer?mid=1W6rKWrwaU4PYHQPlqwFSpeKLEFmwMW4",
+   "circular": false,
    "directions": [
     {
      "name": "RUNTA - RAMAL FLORENCIA - LA FUENTE.",
@@ -20459,6 +20483,7 @@
    },
    "operator": "UT Mi Ruta",
    "sourceUrl": "https://www.google.com/maps/d/viewer?mid=1gtbzt4FPTgmbWeKOt119iICn3LS4Ggs",
+   "circular": false,
    "directions": [
     {
      "name": "RUNTA - LA FUENTE",
@@ -21150,6 +21175,7 @@
    },
    "operator": "UT Mi Ruta",
    "sourceUrl": "https://www.google.com/maps/d/viewer?mid=18IVMIdC3LDAQs6yHZ8-06GlPAc3zV2s",
+   "circular": false,
    "directions": [
     {
      "name": "MUISCAS - AVENIDA NORTE - ANTONIA SANTOS - RAMAL SOL DE ORIENTE.",

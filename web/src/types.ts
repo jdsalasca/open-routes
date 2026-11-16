@@ -58,6 +58,7 @@ export interface Route {
   sunday: Schedule;
   operator: string;
   sourceUrl: string;
+  circular: boolean;
   directions: Direction[];
 }
 
