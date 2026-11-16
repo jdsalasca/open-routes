@@ -88,6 +88,8 @@ curl -s http://127.0.0.1:5179/api/health
 
 En el servidor se publica solo en loopback (`127.0.0.1:5179`) y Cloudflare Tunnel lo expone en `open-routes.eridu.top`.
 
+Runbook: `~/sitios/open-routes` en el servidor, rama `develop`, puerto local `5179`; el túnel y el DNS están documentados en `server/README.md`.
+
 ## Licencia
 
 MIT © 2026 jdsalasca.

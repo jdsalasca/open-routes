@@ -20,8 +20,9 @@ public class SecurityHeadersFilter extends OncePerRequestFilter {
             "default-src 'self'",
             "img-src 'self' data: https://tile.openstreetmap.org",
             "style-src 'self' 'unsafe-inline'",
-            "script-src 'self'",
-            "connect-src 'self'",
+            // Cloudflare inyecta su analítica sin cookies en el borde.
+            "script-src 'self' https://static.cloudflareinsights.com",
+            "connect-src 'self' https://cloudflareinsights.com",
             "font-src 'self'",
             "base-uri 'none'",
             "form-action 'self'",
