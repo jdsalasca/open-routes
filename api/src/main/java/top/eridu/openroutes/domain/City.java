@@ -16,6 +16,7 @@ public record City(
         String description,
         List<Source> sources,
         Fare fare,
+        List<Place> places,
         List<Route> routes
 ) {
 }

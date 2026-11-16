@@ -1,7 +1,6 @@
 import L from "leaflet";
 import { useCallback, useEffect, useRef } from "react";
-import type { GeoPoint } from "../hooks/useGeolocation";
-import type { City, NearbyRoute, Route } from "../types";
+import type { City, NearbyRoute, Origin, Route } from "../types";
 
 const TILE_URL = "https://tile.openstreetmap.org/{z}/{x}/{y}.png";
 const ATTRIBUTION =
@@ -13,14 +12,24 @@ type Props = {
   activeDirection: number;
   nearby: NearbyRoute[] | null;
   nearMode: boolean;
-  user: GeoPoint | null;
+  origin: Origin | null;
+  originRadius: number;
   onSelect: (id: string) => void;
 };
 
 const isMobile = () => window.matchMedia("(max-width: 900px)").matches;
 const reducedMotion = () => window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
-export function MapView({ city, selected, activeDirection, nearby, nearMode, user, onSelect }: Props) {
+export function MapView({
+  city,
+  selected,
+  activeDirection,
+  nearby,
+  nearMode,
+  origin,
+  originRadius,
+  onSelect
+}: Props) {
   const containerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<L.Map | null>(null);
   const routesLayerRef = useRef<L.LayerGroup | null>(null);
@@ -138,28 +147,41 @@ export function MapView({ city, selected, activeDirection, nearby, nearMode, use
     if (!map) return;
 
     if (userLayerRef.current) userLayerRef.current.remove();
-    if (!user) return;
+    if (!origin) return;
 
+    const isGps = origin.kind === "gps";
     const layer = L.layerGroup().addTo(map);
-    L.circle([user.lat, user.lng], {
-      radius: Math.min(user.accuracy, 300),
-      color: "#0e6e4e",
+    L.circle([origin.lat, origin.lng], {
+      radius: isGps ? Math.min(origin.accuracy, 300) : originRadius,
+      color: isGps ? "#0e6e4e" : "#b45309",
       weight: 1,
-      opacity: 0.3,
-      fillColor: "#0e6e4e",
-      fillOpacity: 0.08
+      opacity: isGps ? 0.3 : 0.55,
+      fillColor: isGps ? "#0e6e4e" : "#b45309",
+      fillOpacity: isGps ? 0.08 : 0.04,
+      dashArray: isGps ? undefined : "4 7"
     }).addTo(layer);
 
-    L.marker([user.lat, user.lng], {
-      interactive: false,
+    const marker = L.marker([origin.lat, origin.lng], {
+      interactive: !isGps,
       keyboard: false,
       icon: L.divIcon({
         className: "",
-        html: '<div class="location-pin"><span class="location-pin__pulse"></span><span class="location-pin__dot"></span></div>',
+        html: isGps
+          ? '<div class="location-pin"><span class="location-pin__pulse"></span><span class="location-pin__dot"></span></div>'
+          : '<div class="origin-pin"><span class="origin-pin__dot"></span></div>',
         iconSize: [18, 18],
         iconAnchor: [9, 9]
       })
     }).addTo(layer);
+
+    if (!isGps) {
+      marker.bindTooltip(origin.label, {
+        permanent: true,
+        direction: "top",
+        className: "origin-tip",
+        offset: [0, -8]
+      });
+    }
 
     userLayerRef.current = layer;
 
@@ -167,16 +189,16 @@ export function MapView({ city, selected, activeDirection, nearby, nearMode, use
       layer.remove();
       userLayerRef.current = null;
     };
-  }, [user]);
+  }, [origin, originRadius]);
 
   const focusCity = useCallback(() => {
     const map = mapRef.current;
     if (!map || selected) return;
-    if (user && nearMode) {
+    if (origin) {
       if (reducedMotion()) {
-        map.setView([user.lat, user.lng], 15);
+        map.setView([origin.lat, origin.lng], 15);
       } else {
-        map.flyTo([user.lat, user.lng], 15, { duration: 0.8 });
+        map.flyTo([origin.lat, origin.lng], 15, { duration: 0.8 });
       }
       return;
     }
@@ -186,7 +208,7 @@ export function MapView({ city, selected, activeDirection, nearby, nearMode, use
     } else {
       map.flyTo([city.center.lat, city.center.lng], zoom, { duration: 0.6 });
     }
-  }, [city, user, nearMode, selected]);
+  }, [city, origin, selected]);
 
   useEffect(() => {
     const map = mapRef.current;

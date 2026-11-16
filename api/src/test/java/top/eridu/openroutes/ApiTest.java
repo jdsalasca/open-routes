@@ -31,6 +31,7 @@ class ApiTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.name").value("Tunja"))
                 .andExpect(jsonPath("$.routes.length()").value(26))
+                .andExpect(jsonPath("$.places.length()").value(org.hamcrest.Matchers.greaterThan(20)))
                 .andExpect(jsonPath("$.routes[0].directions[0].paths[0].length()").isNumber());
     }
 

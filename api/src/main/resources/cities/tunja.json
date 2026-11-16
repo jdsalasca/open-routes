@@ -21,6 +21,453 @@
   "currency": "COP",
   "note": "Tarifa 2026 (Decreto 0006 de 2026). Lunes a sábado, 06:00–19:00: $2.600. Nocturno (19:01–05:59), domingos y festivos: $2.700."
  },
+ "places": [
+  {
+   "id": "plaza-bolivar",
+   "name": "Plaza de Bolívar",
+   "type": "Centro histórico",
+   "lat": 5.5323217,
+   "lng": -73.3616267,
+   "aliases": [
+    "plaza",
+    "centro",
+    "centro historico",
+    "bolivar"
+   ]
+  },
+  {
+   "id": "terminal",
+   "name": "Terminal de Transportes",
+   "type": "Terminal",
+   "lat": 5.530811,
+   "lng": -73.344941,
+   "aliases": [
+    "terminal",
+    "terminal de tunja",
+    "juana velasco"
+   ]
+  },
+  {
+   "id": "escandinavo",
+   "name": "Escandinavo",
+   "type": "Barrio",
+   "lat": 5.523731,
+   "lng": -73.373165,
+   "aliases": [
+    "escandinavo",
+    "calle 7a"
+   ]
+  },
+  {
+   "id": "uptc",
+   "name": "UPTC",
+   "type": "Universidad",
+   "lat": 5.5521632,
+   "lng": -73.3567425,
+   "aliases": [
+    "uptc",
+    "universidad pedagogica",
+    "pedagogica"
+   ]
+  },
+  {
+   "id": "muiscas",
+   "name": "Los Muiscas",
+   "type": "Barrio",
+   "lat": 5.5696253,
+   "lng": -73.3403376,
+   "aliases": [
+    "muiscas",
+    "parque los muiscas"
+   ]
+  },
+  {
+   "id": "santa-ines",
+   "name": "Santa Inés",
+   "type": "Barrio",
+   "lat": 5.5493892,
+   "lng": -73.3510038,
+   "aliases": [
+    "santa ines"
+   ]
+  },
+  {
+   "id": "viva",
+   "name": "Centro Comercial Viva",
+   "type": "Centro comercial",
+   "lat": 5.5570086,
+   "lng": -73.3463232,
+   "aliases": [
+    "viva",
+    "centro comercial"
+   ]
+  },
+  {
+   "id": "hospital",
+   "name": "Hospital San Rafael",
+   "type": "Hospital",
+   "lat": 5.5404943,
+   "lng": -73.3612242,
+   "aliases": [
+    "hospital",
+    "san rafael"
+   ]
+  },
+  {
+   "id": "estadio",
+   "name": "Estadio La Independencia",
+   "type": "Estadio",
+   "lat": 5.5421527,
+   "lng": -73.3533589,
+   "aliases": [
+    "estadio",
+    "la independencia"
+   ]
+  },
+  {
+   "id": "usta",
+   "name": "Universidad Santo Tomás",
+   "type": "Universidad",
+   "lat": 5.5485316,
+   "lng": -73.3442035,
+   "aliases": [
+    "usta",
+    "santo tomas"
+   ]
+  },
+  {
+   "id": "uniboyaca",
+   "name": "Uniboyacá",
+   "type": "Universidad",
+   "lat": 5.5672993,
+   "lng": -73.3382574,
+   "aliases": [
+    "uniboyaca",
+    "universidad de boyaca"
+   ]
+  },
+  {
+   "id": "aeropuerto",
+   "name": "Aeropuerto Gustavo Rojas Pinilla",
+   "type": "Aeropuerto",
+   "lat": 5.5436927,
+   "lng": -73.3433651,
+   "aliases": [
+    "aeropuerto",
+    "rojas pinilla"
+   ]
+  },
+  {
+   "id": "catedral",
+   "name": "Catedral Basílica",
+   "type": "Sitio",
+   "lat": 5.5319181,
+   "lng": -73.3608458,
+   "aliases": [
+    "catedral",
+    "iglesia"
+   ]
+  },
+  {
+   "id": "parque-santander",
+   "name": "Parque Santander",
+   "type": "Parque",
+   "lat": 5.5361875,
+   "lng": -73.3627682,
+   "aliases": [
+    "parque santander",
+    "santander"
+   ]
+  },
+  {
+   "id": "las-nieves",
+   "name": "Las Nieves",
+   "type": "Barrio",
+   "lat": 5.5384229,
+   "lng": -73.3592951,
+   "aliases": [
+    "las nieves",
+    "nieves"
+   ]
+  },
+  {
+   "id": "villa-universitaria",
+   "name": "Villa Universitaria",
+   "type": "Barrio",
+   "lat": 5.5483549,
+   "lng": -73.3565625,
+   "aliases": [
+    "villa universitaria"
+   ]
+  },
+  {
+   "id": "asis",
+   "name": "Barrio Asís",
+   "type": "Barrio",
+   "lat": 5.5691078,
+   "lng": -73.34547,
+   "aliases": [
+    "asis"
+   ]
+  },
+  {
+   "id": "la-granja",
+   "name": "Barrio La Granja",
+   "type": "Barrio",
+   "lat": 5.5613023,
+   "lng": -73.3498304,
+   "aliases": [
+    "la granja"
+   ]
+  },
+  {
+   "id": "arboleda",
+   "name": "Arboleda",
+   "type": "Barrio",
+   "lat": 5.575059,
+   "lng": -73.33157,
+   "aliases": [
+    "arboleda",
+    "arboledas"
+   ]
+  },
+  {
+   "id": "pinos-oriente",
+   "name": "Pinos de Oriente",
+   "type": "Barrio",
+   "lat": 5.504264,
+   "lng": -73.36242,
+   "aliases": [
+    "pinos de oriente"
+   ]
+  },
+  {
+   "id": "ciudad-jardin",
+   "name": "Ciudad Jardín",
+   "type": "Barrio",
+   "lat": 5.504176,
+   "lng": -73.362494,
+   "aliases": [
+    "ciudad jardin"
+   ]
+  },
+  {
+   "id": "pirgua",
+   "name": "Pirgua",
+   "type": "Sector",
+   "lat": 5.529523,
+   "lng": -73.32944,
+   "aliases": [
+    "pirgua"
+   ]
+  },
+  {
+   "id": "runta",
+   "name": "Runta",
+   "type": "Sector",
+   "lat": 5.491614,
+   "lng": -73.383473,
+   "aliases": [
+    "runta"
+   ]
+  },
+  {
+   "id": "santa-marta",
+   "name": "Santa Marta",
+   "type": "Barrio",
+   "lat": 5.51589,
+   "lng": -73.353859,
+   "aliases": [
+    "santa marta"
+   ]
+  },
+  {
+   "id": "cooservicios",
+   "name": "Cooservicios",
+   "type": "Barrio",
+   "lat": 5.5150467,
+   "lng": -73.3589478,
+   "aliases": [
+    "cooservicios"
+   ]
+  },
+  {
+   "id": "prados-san-luis",
+   "name": "Prados de San Luis",
+   "type": "Barrio",
+   "lat": 5.5307468,
+   "lng": -73.3452062,
+   "aliases": [
+    "prados de san luis"
+   ]
+  },
+  {
+   "id": "el-triunfo",
+   "name": "El Triunfo",
+   "type": "Barrio",
+   "lat": 5.512662,
+   "lng": -73.374315,
+   "aliases": [
+    "el triunfo",
+    "triunfo"
+   ]
+  },
+  {
+   "id": "la-fuente",
+   "name": "La Fuente",
+   "type": "Barrio",
+   "lat": 5.549311,
+   "lng": -73.366168,
+   "aliases": [
+    "la fuente"
+   ]
+  },
+  {
+   "id": "estancia-roble",
+   "name": "Estancia del Roble",
+   "type": "Barrio",
+   "lat": 5.560294,
+   "lng": -73.354734,
+   "aliases": [
+    "estancia del roble",
+    "estancia"
+   ]
+  },
+  {
+   "id": "altamira",
+   "name": "Altamira",
+   "type": "Barrio",
+   "lat": 5.543974,
+   "lng": -73.369389,
+   "aliases": [
+    "altamira"
+   ]
+  },
+  {
+   "id": "paraiso",
+   "name": "Paraíso",
+   "type": "Barrio",
+   "lat": 5.524124,
+   "lng": -73.370093,
+   "aliases": [
+    "paraiso",
+    "el paraiso"
+   ]
+  },
+  {
+   "id": "florida",
+   "name": "Florida",
+   "type": "Barrio",
+   "lat": 5.515222,
+   "lng": -73.366125,
+   "aliases": [
+    "florida"
+   ]
+  },
+  {
+   "id": "reten-sur",
+   "name": "Retén Sur",
+   "type": "Sector",
+   "lat": 5.508524,
+   "lng": -73.373813,
+   "aliases": [
+    "reten sur"
+   ]
+  },
+  {
+   "id": "antonia-santos",
+   "name": "Antonia Santos",
+   "type": "Barrio",
+   "lat": 5.518208,
+   "lng": -73.361853,
+   "aliases": [
+    "antonia santos"
+   ]
+  },
+  {
+   "id": "san-francisco",
+   "name": "San Francisco",
+   "type": "Barrio",
+   "lat": 5.5083315,
+   "lng": -73.3671922,
+   "aliases": [
+    "san francisco"
+   ]
+  },
+  {
+   "id": "san-lazaro",
+   "name": "San Lázaro",
+   "type": "Barrio",
+   "lat": 5.544094,
+   "lng": -73.372708,
+   "aliases": [
+    "san lazaro"
+   ]
+  },
+  {
+   "id": "mercado-sur",
+   "name": "Plaza de Mercado del Sur",
+   "type": "Mercado",
+   "lat": 5.5082896,
+   "lng": -73.3718224,
+   "aliases": [
+    "mercado",
+    "plaza de mercado"
+   ]
+  },
+  {
+   "id": "ventaquemada",
+   "name": "Ventaquemada",
+   "type": "Municipio",
+   "lat": 5.3666155,
+   "lng": -73.5216361,
+   "aliases": [
+    "ventaquemada"
+   ]
+  },
+  {
+   "id": "puente-boyaca",
+   "name": "Puente de Boyacá",
+   "type": "Sitio",
+   "lat": 5.446297,
+   "lng": -73.433792,
+   "aliases": [
+    "puente de boyaca",
+    "puente"
+   ]
+  },
+  {
+   "id": "green-hills",
+   "name": "Green Hills",
+   "type": "Sector",
+   "lat": 5.569316,
+   "lng": -73.33255,
+   "aliases": [
+    "green hills"
+   ]
+  },
+  {
+   "id": "azul-blanco",
+   "name": "Azul y Blanco",
+   "type": "Sector",
+   "lat": 5.569092,
+   "lng": -73.350613,
+   "aliases": [
+    "azul y blanco"
+   ]
+  },
+  {
+   "id": "cda",
+   "name": "CDA",
+   "type": "Sector",
+   "lat": 5.599811,
+   "lng": -73.32612,
+   "aliases": [
+    "cda",
+    "limite norte"
+   ]
+  }
+ ],
  "routes": [
   {
    "id": "r1",

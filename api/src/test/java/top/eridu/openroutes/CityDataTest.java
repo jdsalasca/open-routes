@@ -69,4 +69,20 @@ class CityDataTest {
             assertThat(route.weekday().frequencyMin()).isPositive();
         });
     }
+
+    @Test
+    void lugaresSonBuscablesYEscandinavoExiste() {
+        assertThat(city.places()).hasSizeGreaterThan(20);
+        assertThat(city.places()).extracting(place -> place.id()).doesNotHaveDuplicates();
+        assertThat(city.places()).anySatisfy(place -> {
+            assertThat(place.name()).isEqualTo("Escandinavo");
+            assertThat(place.lat()).isBetween(5.3, 5.65);
+            assertThat(place.lng()).isBetween(-73.55, -73.25);
+        });
+        assertThat(city.places()).allSatisfy(place -> {
+            assertThat(place.name()).isNotBlank();
+            assertThat(place.type()).isNotBlank();
+            assertThat(place.aliases()).isNotEmpty();
+        });
+    }
 }

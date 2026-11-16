@@ -8,6 +8,19 @@ export interface Source {
   url: string;
 }
 
+export interface Place {
+  id: string;
+  name: string;
+  type: string;
+  lat: number;
+  lng: number;
+  aliases: string[];
+}
+
+export type Origin =
+  | { kind: "gps"; lat: number; lng: number; label: string; accuracy: number }
+  | { kind: "place"; lat: number; lng: number; label: string; type: string };
+
 export interface Fare {
   day: number;
   night: number;
@@ -62,6 +75,7 @@ export interface CitySummary {
 }
 
 export interface City extends Omit<CitySummary, "routeCount"> {
+  places: Place[];
   routes: Route[];
 }
 

@@ -1,10 +1,11 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import type { CSSProperties } from "react";
+import type { CSSProperties, KeyboardEvent } from "react";
 import { api } from "./api";
 import { AboutDialog } from "./components/AboutDialog";
 import {
   BusIcon,
   ChevronRightIcon,
+  CloseIcon,
   GithubIcon,
   InfoIcon,
   LocateIcon,
@@ -16,10 +17,10 @@ import {
 import { MapView } from "./components/MapView";
 import { RouteDetail } from "./components/RouteDetail";
 import { useGeolocation } from "./hooks/useGeolocation";
-import type { GeoPoint } from "./hooks/useGeolocation";
-import type { City, CitySummary, NearbyRoute, Route } from "./types";
+import type { City, CitySummary, NearbyRoute, Origin, Place, Route } from "./types";
 
-const NEARBY_RADIUS = 1000;
+const GPS_RADIUS = 1000;
+const PLACE_RADIUS = 500;
 
 const normalize = (value: string) =>
   value
@@ -35,9 +36,17 @@ const frequency = (value: number | null) => (value ? `Cada ${value} min` : "Frec
 const distanceLabel = (meters: number) =>
   meters < 1000 ? `${meters} m` : `${(meters / 1000).toFixed(1).replace(".", ",")} km`;
 
+const placeScore = (place: Place, term: string) => {
+  const name = normalize(place.name);
+  if (name.startsWith(term)) return 0;
+  if (name.split(/\s+/).some((word) => word.startsWith(term))) return 1;
+  return 2;
+};
+
 export default function App() {
   const aboutRef = useRef<HTMLDialogElement>(null);
   const sidebarRef = useRef<HTMLElement>(null);
+  const listHeadRef = useRef<HTMLDivElement>(null);
   const nearbyAbort = useRef<AbortController | null>(null);
   const routeRefs = useRef(new Map<string, HTMLButtonElement>());
   const [cities, setCities] = useState<CitySummary[] | null>(null);
@@ -52,8 +61,12 @@ export default function App() {
   const [nearMode, setNearMode] = useState(false);
   const [nearbyError, setNearbyError] = useState<string | null>(null);
   const [nearbyLoading, setNearbyLoading] = useState(false);
+  const [origin, setOrigin] = useState<Origin | null>(null);
+  const [placeQuery, setPlaceQuery] = useState("");
+  const [placeOpen, setPlaceOpen] = useState(false);
+  const [activePlace, setActivePlace] = useState(0);
   const [query, setQuery] = useState("");
-  const { position, status, error: geoError, locate } = useGeolocation();
+  const { status, error: geoError, locate } = useGeolocation();
 
   useEffect(() => {
     const controller = new AbortController();
@@ -88,6 +101,9 @@ export default function App() {
         setActiveDirection(0);
         setNearby(null);
         setNearMode(false);
+        setOrigin(null);
+        setPlaceQuery("");
+        setPlaceOpen(false);
         setQuery("");
         document.title = `open-routes · Rutas de ${data.name}`;
       })
@@ -106,10 +122,37 @@ export default function App() {
     sidebarRef.current?.scrollTo({ top: 0 });
   }, [selectedId]);
 
+  useEffect(() => {
+    if (!nearMode || !nearby) return;
+    if (!window.matchMedia("(max-width: 900px)").matches) return;
+    const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const timer = window.setTimeout(() => {
+      listHeadRef.current?.scrollIntoView({ block: "start", behavior: reduced ? "auto" : "smooth" });
+    }, 80);
+    return () => window.clearTimeout(timer);
+  }, [nearMode, nearby]);
+
   const nearbyById = useMemo(
     () => new Map((nearby ?? []).map((hit) => [hit.id, hit])),
     [nearby]
   );
+
+  const placeResults = useMemo(() => {
+    if (!city) return [];
+    const allPlaces = city.places ?? [];
+    const term = normalize(placeQuery.trim());
+    if (!term) return allPlaces.slice(0, 7);
+    return allPlaces
+      .filter((place) =>
+        normalize([place.name, place.type, ...place.aliases].join(" ")).includes(term)
+      )
+      .sort(
+        (a, b) =>
+          placeScore(a, term) - placeScore(b, term) ||
+          a.name.localeCompare(b.name, "es")
+      )
+      .slice(0, 7);
+  }, [city, placeQuery]);
 
   const visibleRoutes = useMemo(() => {
     if (!city) return [];
@@ -134,45 +177,98 @@ export default function App() {
   }, []);
 
   const showAll = useCallback(() => {
+    nearbyAbort.current?.abort();
     setNearMode(false);
+    setNearby(null);
+    setNearbyError(null);
+    setNearbyLoading(false);
+    setOrigin(null);
     setSelectedId(null);
     setQuery("");
+    setPlaceQuery("");
+    setPlaceOpen(false);
   }, []);
 
-  const loadNearby = useCallback(async (point: GeoPoint, citySlug: string) => {
-    nearbyAbort.current?.abort();
-    const controller = new AbortController();
-    nearbyAbort.current = controller;
-    setNearbyLoading(true);
-    setNearbyError(null);
-    try {
-      const hits = await api.nearby(citySlug, point.lat, point.lng, NEARBY_RADIUS, controller.signal);
-      if (controller.signal.aborted) return;
-      setNearby(hits);
-      setNearMode(true);
-      setQuery("");
-    } catch {
-      if (controller.signal.aborted) return;
+  const loadNearby = useCallback(
+    async (point: { lat: number; lng: number }, citySlug: string, radius: number) => {
+      nearbyAbort.current?.abort();
+      const controller = new AbortController();
+      nearbyAbort.current = controller;
       setNearby(null);
       setNearMode(false);
-      setNearbyError("No pudimos consultar las rutas cercanas. Revisa tu conexión e inténtalo otra vez.");
-    } finally {
-      if (!controller.signal.aborted) setNearbyLoading(false);
-    }
-  }, []);
+      setNearbyLoading(true);
+      setNearbyError(null);
+      try {
+        const hits = await api.nearby(citySlug, point.lat, point.lng, radius, controller.signal);
+        if (controller.signal.aborted) return;
+        setNearby(hits);
+        setNearMode(true);
+        setQuery("");
+      } catch {
+        if (controller.signal.aborted) return;
+        setNearby(null);
+        setNearMode(false);
+        setNearbyError("No pudimos consultar las rutas cercanas. Revisa tu conexión e inténtalo otra vez.");
+      } finally {
+        if (!controller.signal.aborted) setNearbyLoading(false);
+      }
+    },
+    []
+  );
 
   const handleLocate = useCallback(async () => {
     if (!city) return;
     setSelectedId(null);
     setActiveDirection(0);
+    setPlaceQuery("");
+    setPlaceOpen(false);
     const point = await locate();
     if (!point) return;
-    await loadNearby(point, city.slug);
+    setOrigin({ kind: "gps", ...point, label: "Tu ubicación" });
+    await loadNearby(point, city.slug, GPS_RADIUS);
   }, [city, locate, loadNearby]);
 
+  const selectPlace = useCallback(
+    (place: Place) => {
+      if (!city) return;
+      setOrigin({
+        kind: "place",
+        lat: place.lat,
+        lng: place.lng,
+        label: place.name,
+        type: place.type
+      });
+      setSelectedId(null);
+      setActiveDirection(0);
+      setPlaceQuery("");
+      setPlaceOpen(false);
+      setActivePlace(0);
+      void loadNearby({ lat: place.lat, lng: place.lng }, city.slug, PLACE_RADIUS);
+    },
+    [city, loadNearby]
+  );
+
   const retryNearby = useCallback(() => {
-    if (position && city) void loadNearby(position, city.slug);
-  }, [city, position, loadNearby]);
+    if (!origin || !city) return;
+    void loadNearby(origin, city.slug, origin.kind === "place" ? PLACE_RADIUS : GPS_RADIUS);
+  }, [city, origin, loadNearby]);
+
+  const handlePlaceKeyDown = (event: KeyboardEvent<HTMLInputElement>) => {
+    if (event.key === "ArrowDown") {
+      event.preventDefault();
+      setPlaceOpen(true);
+      setActivePlace((index) => Math.min(index + 1, Math.max(placeResults.length - 1, 0)));
+    } else if (event.key === "ArrowUp") {
+      event.preventDefault();
+      setPlaceOpen(true);
+      setActivePlace((index) => Math.max(index - 1, 0));
+    } else if (event.key === "Enter" && placeOpen && placeResults[activePlace]) {
+      event.preventDefault();
+      selectPlace(placeResults[activePlace]);
+    } else if (event.key === "Escape") {
+      setPlaceOpen(false);
+    }
+  };
 
   const handleBack = useCallback(() => {
     const id = selectedId;
@@ -210,10 +306,13 @@ export default function App() {
   }
 
   const nearbyEmpty = nearMode && nearby !== null && nearby.length === 0;
+  const originRadius = origin?.kind === "place" ? PLACE_RADIUS : GPS_RADIUS;
   const listNote = query.trim()
     ? `${visibleRoutes.length} resultados`
-    : nearMode
-      ? "radio de 1 km"
+    : origin
+      ? origin.kind === "place"
+        ? "a 500 m"
+        : "radio de 1 km"
       : `${city.routes.length} rutas`;
 
   return (
@@ -310,9 +409,84 @@ export default function App() {
                   ¿Qué <em>ruta</em> te lleva?
                 </h1>
                 <p>
-                  {city.routes.length} rutas de bus en un solo mapa. Activa tu ubicación y mira
-                  cuáles pasan cerca de ti, con su recorrido completo.
+                  Escribe un barrio o lugar para ver qué rutas pasan por ahí, o usa tu ubicación.
                 </p>
+
+                <div className="origin-search">
+                  <label className="origin-search__label" htmlFor="place-search">
+                    ¿Desde dónde sales?
+                  </label>
+                  <div className="origin-search__box">
+                    <PinIcon size={16} />
+                    <input
+                      id="place-search"
+                      type="text"
+                      role="combobox"
+                      aria-autocomplete="list"
+                      aria-expanded={placeOpen}
+                      aria-controls="place-listbox"
+                      aria-activedescendant={
+                        placeOpen && placeResults[activePlace]
+                          ? `place-option-${placeResults[activePlace].id}`
+                          : undefined
+                      }
+                      placeholder="Escandinavo, Plaza de Bolívar, UPTC…"
+                      value={placeQuery}
+                      onChange={(event) => {
+                        setPlaceQuery(event.target.value);
+                        setPlaceOpen(true);
+                        setActivePlace(0);
+                      }}
+                      onFocus={() => {
+                        setPlaceOpen(true);
+                        setActivePlace(0);
+                      }}
+                      onBlur={() => setPlaceOpen(false)}
+                      onKeyDown={handlePlaceKeyDown}
+                      autoComplete="off"
+                      spellCheck={false}
+                    />
+                    {placeQuery && (
+                      <button
+                        type="button"
+                        className="origin-search__clear"
+                        aria-label="Borrar búsqueda de lugar"
+                        onClick={() => {
+                          setPlaceQuery("");
+                          setActivePlace(0);
+                        }}
+                      >
+                        <CloseIcon size={14} />
+                      </button>
+                    )}
+                  </div>
+                  {placeOpen && (
+                    <ul className="place-list" id="place-listbox" role="listbox" aria-label="Lugares">
+                      {placeResults.map((place, index) => (
+                        <li
+                          key={place.id}
+                          id={`place-option-${place.id}`}
+                          role="option"
+                          aria-selected={index === activePlace}
+                          className={`place-option${index === activePlace ? " place-option--active" : ""}`}
+                          onPointerDown={(event) => event.preventDefault()}
+                          onMouseEnter={() => setActivePlace(index)}
+                          onClick={() => selectPlace(place)}
+                        >
+                          <span className="place-option__name">{place.name}</span>
+                          <span className="place-option__type">{place.type}</span>
+                          <ChevronRightIcon size={14} className="place-option__chevron" />
+                        </li>
+                      ))}
+                      {placeResults.length === 0 && (
+                        <li className="place-empty">
+                          No encontramos ese lugar. Prueba con un barrio o usa tu ubicación.
+                        </li>
+                      )}
+                    </ul>
+                  )}
+                </div>
+
                 <div className="hero__actions">
                   <button
                     type="button"
@@ -324,16 +498,11 @@ export default function App() {
                     {status === "locating"
                       ? "Buscando tu ubicación…"
                       : nearbyLoading
-                        ? "Buscando rutas cerca de ti…"
-                        : position
+                        ? "Buscando rutas…"
+                        : origin?.kind === "gps"
                           ? "Actualizar mi ubicación"
                           : "Usar mi ubicación"}
                   </button>
-                  {nearMode && (
-                    <button type="button" className="link-button" onClick={showAll}>
-                      Ver todas las rutas
-                    </button>
-                  )}
                 </div>
                 <p className="hero__privacy">
                   Se envía a nuestro servidor solo para calcular distancias. No se almacena.
@@ -347,6 +516,37 @@ export default function App() {
                   </span>
                 </div>
               </section>
+
+              {origin && (
+                <div className="origin-banner">
+                  <span className="origin-banner__icon">
+                    <PinIcon size={15} />
+                  </span>
+                  <div className="origin-banner__body">
+                    <span className="origin-banner__label">Origen</span>
+                    <strong>{origin.label}</strong>
+                    <span className="origin-banner__meta">
+                      {origin.kind === "gps" ? "Ubicación actual" : origin.type} ·{" "}
+                      {origin.kind === "place" ? "500 m" : "1 km"}
+                    </span>
+                  </div>
+                  <button
+                    type="button"
+                    className="origin-banner__clear"
+                    onClick={showAll}
+                    aria-label="Quitar el origen"
+                  >
+                    Quitar
+                  </button>
+                </div>
+              )}
+
+              {nearbyLoading && (
+                <div className="notice notice--info" role="status">
+                  <span className="notice__spinner" aria-hidden="true" />
+                  <span>Buscando rutas cerca de {origin?.label ?? "tu ubicación"}…</span>
+                </div>
+              )}
 
               {geoError && (
                 <div className="notice" role="status">
@@ -371,7 +571,9 @@ export default function App() {
                 <div className="notice notice--info">
                   <InfoIcon />
                   <span>
-                    No hay rutas a menos de 1 km.{" "}
+                    {origin?.kind === "place"
+                      ? `No hay rutas a menos de 500 m de ${origin.label}.`
+                      : "No hay rutas a menos de 1 km."}{" "}
                     <button type="button" className="notice__link" onClick={showAll}>
                       Ver todas
                     </button>
@@ -379,27 +581,28 @@ export default function App() {
                 </div>
               )}
 
-              <div className="list-head" id="rutas" tabIndex={-1}>
-                <h2>{nearMode ? "Cerca de ti" : "Todas las rutas"}</h2>
+              <div className="list-head" id="rutas" tabIndex={-1} ref={listHeadRef}>
+                <h2 title={origin?.label}>
+                  {origin
+                    ? origin.kind === "gps"
+                      ? "Rutas cerca de ti"
+                      : `Rutas cerca de ${origin.label}`
+                    : "Todas las rutas"}
+                </h2>
                 <span className="list-head__note">{listNote}</span>
-                {nearMode && (
-                  <button type="button" className="list-head__action" onClick={showAll}>
-                    Ver todas
-                  </button>
-                )}
               </div>
 
               <div className="search">
                 <SearchIcon size={15} />
                 <label className="visually-hidden" htmlFor="route-search">
-                  Buscar ruta, barrio o vía
+                  Filtrar rutas por código o vía
                 </label>
                 <input
                   id="route-search"
                   type="search"
                   value={query}
                   onChange={(event) => setQuery(event.target.value)}
-                  placeholder="Buscar ruta, barrio o vía…"
+                  placeholder="Filtrar por ruta o vía…"
                   autoComplete="off"
                 />
               </div>
@@ -441,8 +644,8 @@ export default function App() {
                 })}
                 {visibleRoutes.length === 0 && query.trim() && (
                   <p className="list-empty">
-                    No encontramos rutas para «{query.trim()}». Prueba con un barrio, una vía o el
-                    código de la ruta.
+                    No encontramos rutas para «{query.trim()}». Prueba con otra vía o con el código
+                    de la ruta.
                   </p>
                 )}
               </div>
@@ -472,7 +675,8 @@ export default function App() {
             activeDirection={activeDirection}
             nearby={nearMode ? nearby : null}
             nearMode={nearMode}
-            user={position}
+            origin={origin}
+            originRadius={originRadius}
             onSelect={handleSelect}
           />
         </div>
@@ -482,7 +686,12 @@ export default function App() {
         {status === "locating"
           ? "Buscando tu ubicación."
           : geoError ??
-            (nearMode && nearby ? `${nearby.length} rutas en un radio de 1 kilómetro.` : "")}
+            nearbyError ??
+            (nearbyLoading
+              ? `Buscando rutas cerca de ${origin?.label ?? "tu ubicación"}.`
+              : nearMode && nearby
+                ? `${nearby.length} rutas cerca de ${origin?.label ?? "tu ubicación"}.`
+                : "")}
       </p>
 
       <AboutDialog dialogRef={aboutRef} city={city} />

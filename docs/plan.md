@@ -12,6 +12,7 @@ Mapa web de transporte público para Tunja que responda en segundos: qué rutas 
 - [x] 26 rutas reales con trazados KML del operador, horarios y tarifa 2026.
 - [x] Endpoint de cercanía con distancia punto-polilínea y pruebas.
 - [x] Web React+Vite+SCSS con mapa Leaflet, geolocalización, búsqueda y detalle de ruta.
+- [x] Buscador de origen por barrio o lugar (42 sitios de Tunja), con rutas a 500 m y distancias.
 - [x] Dockerfile multi-stage + compose en `127.0.0.1:5179`.
 - [x] Pruebas de API, datos y geometría; build de producción.
 - [x] Validación visual desktop y móvil (Playwright).
