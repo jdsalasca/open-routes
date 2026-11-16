@@ -1,0 +1,12 @@
+node_modules/
+web/dist/
+api/target/
+tools/.cache/
+.env
+.env.*
+!.env.example
+*.log
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/

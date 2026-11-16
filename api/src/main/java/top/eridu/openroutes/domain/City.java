@@ -1,0 +1,21 @@
+package top.eridu.openroutes.domain;
+
+import java.util.List;
+
+/**
+ * Una ciudad es solo datos: para publicar otra basta con dejar un JSON en
+ * resources/cities con este mismo esquema.
+ */
+public record City(
+        String slug,
+        String name,
+        String department,
+        String country,
+        Point center,
+        int zoom,
+        String description,
+        List<Source> sources,
+        Fare fare,
+        List<Route> routes
+) {
+}

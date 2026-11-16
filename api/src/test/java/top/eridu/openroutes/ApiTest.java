@@ -1,0 +1,71 @@
+package top.eridu.openroutes;
+
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.web.servlet.MockMvc;
+
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
+@SpringBootTest
+@AutoConfigureMockMvc
+class ApiTest {
+
+    @Autowired
+    private MockMvc mvc;
+
+    @Test
+    void listaCiudades() throws Exception {
+        mvc.perform(get("/api/cities"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].slug").value("tunja"))
+                .andExpect(jsonPath("$[0].routeCount").value(26));
+    }
+
+    @Test
+    void devuelveLaCiudadCompleta() throws Exception {
+        mvc.perform(get("/api/cities/tunja"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.name").value("Tunja"))
+                .andExpect(jsonPath("$.routes.length()").value(26))
+                .andExpect(jsonPath("$.routes[0].directions[0].paths[0].length()").isNumber());
+    }
+
+    @Test
+    void encuentraRutasCercaDeLaPlaza() throws Exception {
+        mvc.perform(get("/api/cities/tunja/routes/near")
+                        .param("lat", "5.5325")
+                        .param("lng", "-73.3617")
+                        .param("radius", "500"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.length()").value(org.hamcrest.Matchers.greaterThan(0)))
+                .andExpect(jsonPath("$[0].distanceMeters").value(org.hamcrest.Matchers.lessThanOrEqualTo(500)));
+    }
+
+    @Test
+    void listasYDetalleLlevanCabecerasDeSeguridad() throws Exception {
+        mvc.perform(get("/api/cities/tunja"))
+                .andExpect(status().isOk())
+                .andExpect(org.springframework.test.web.servlet.result.MockMvcResultMatchers
+                        .header().string("X-Content-Type-Options", "nosniff"))
+                .andExpect(org.springframework.test.web.servlet.result.MockMvcResultMatchers
+                        .header().exists("Content-Security-Policy"));
+    }
+
+    @Test
+    void rechazaCoordenadasInvalidas() throws Exception {
+        mvc.perform(get("/api/cities/tunja/routes/near")
+                        .param("lat", "500")
+                        .param("lng", "-73.3617"))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void ciudadDesconocidaDevuelve404() throws Exception {
+        mvc.perform(get("/api/cities/atacama"))
+                .andExpect(status().isNotFound());
+    }
+}

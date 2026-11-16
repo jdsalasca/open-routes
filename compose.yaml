@@ -1,0 +1,19 @@
+name: open-routes
+
+services:
+  web:
+    build: .
+    image: open-routes:local
+    container_name: open-routes
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:5179:8080"
+    environment:
+      - TZ=America/Bogota
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://127.0.0.1:8080/api/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 25s
+    mem_limit: 512m
