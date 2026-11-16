@@ -8,16 +8,18 @@ Rutas de transporte público claras y cerca de ti. Empieza en **Tunja, Boyacá**
 |---|---|
 | ![Mapa de rutas de Tunja en escritorio](docs/preview-desktop.png) | ![Panel de rutas en móvil](docs/preview-mobile.png) |
 
-**Buscar un origen:**
+**Planear un viaje:**
 
 | Escritorio | Móvil |
 |---|---|
-| ![Búsqueda de Escandinavo como origen](docs/preview-place.png) | ![Rutas cerca de Escandinavo en móvil](docs/preview-place-mobile.png) |
+| ![Opciones de viaje directo entre Escandinavo y Plaza de Bolívar](docs/preview-trip.png) | ![Opciones de viaje en móvil](docs/preview-trip-mobile.png) |
 
 ## Qué hace
 
+- Elige un origen y un destino: muestra rutas directas ordenadas por tiempo estimado, con caminata, espera y tramo en bus.
+- Intercambia origen y destino, o usa tu ubicación como origen.
+- Busca un barrio o lugar (Escandinavo, Plaza de Bolívar, UPTC…) y úsalo como origen o destino.
 - Activa tu ubicación y ordena las rutas por distancia real a su trazado (1 km a la redonda).
-- Busca un barrio o lugar (Escandinavo, Plaza de Bolívar, UPTC…) y úsalo como origen: muestra las rutas a menos de 500 m, con su distancia.
 - Dibuja las 26 rutas de la UT Mi Ruta sobre un mapa claro, cada una con su color.
 - Consulta trazados (ida y vuelta), vías por las que pasa, paradas de despacho, horarios y tarifas de 2026.
 - Busca por código, nombre, barrio o vía.
@@ -53,6 +55,7 @@ Pruebas y build:
 ```bash
 mvn -f api/pom.xml test
 cd web && npm run build
+node tools/planner-check.mjs
 ```
 
 ## API
@@ -85,6 +88,7 @@ El importador `tools/tunja-routes.mjs` documenta cómo se convirtieron los mapas
 - Los recorridos, horarios y tarifas pueden cambiar. La información del operador manda; esta app es una ayuda para leer el sistema, no un aviso oficial.
 - Los trazados son los del mapa público del operador. Algunos ramales se dibujan como segmentos separados porque así están en el KML original.
 - Los lugares buscables son 42 barrios y sitios principales. Cuando no hay un nodo oficial, el punto es el despacho/retorno del operador; por eso el radio de búsqueda es de 500 m.
+- El planificador combina los trazados para encontrar **rutas directas** (sin transbordos). Los tiempos son estimaciones sobre la geometría: incluyen caminata, espera y bus, pero no tráfico, semáforos ni paradas oficiales.
 - La geolocalización se calcula contra la línea del recorrido, no contra paradas oficiales (el operador no publica esas paradas).
 - Las coordenadas se envían al endpoint de cercanía para calcular distancias. No se guardan en la app ni en base de datos; la respuesta se marca `Cache-Control: no-store`.
 

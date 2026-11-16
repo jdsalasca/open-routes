@@ -46,6 +46,10 @@ export function AboutDialog({ dialogRef, city }: Props) {
         punto oficial en el mapa, usamos el punto de despacho o retorno que el operador dibuja en
         su recorrido; por eso buscamos rutas en un radio de 500 m.
       </p>
+      <p>
+        Con origen y destino, el planificador busca rutas directas y ordena las opciones por tiempo
+        estimado: caminata, espera y tramo en bus. Por ahora no combina transbordos.
+      </p>
 
       <h3>Datos y límites</h3>
       <p>

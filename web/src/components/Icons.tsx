@@ -130,3 +130,12 @@ export function InfoIcon({ size = 15, className }: IconProps) {
     </svg>
   );
 }
+
+export function SwapIcon({ size = 16, className }: IconProps) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" aria-hidden="true" {...stroke} className={className}>
+      <path d="m7 4-4 4 4 4M3 8h13" />
+      <path d="m17 20 4-4-4-4M21 16H8" />
+    </svg>
+  );
+}
