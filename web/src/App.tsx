@@ -289,7 +289,7 @@ export default function App() {
         </div>
       </header>
 
-      <div className="layout">
+      <main className="layout">
         <aside className="sidebar" ref={sidebarRef} aria-label="Rutas de transporte">
           {selected ? (
             <RouteDetail
@@ -418,13 +418,9 @@ export default function App() {
                       className={`route-card${selectedId === route.id ? " route-card--selected" : ""}`}
                       style={{ "--route-color": route.color } as CSSProperties}
                       onClick={() => handleSelect(route.id)}
-                      aria-label={`Ruta ${route.code}: ${route.name}${
-                        nearMode && hit ? `. A ${distanceLabel(hit.distanceMeters)} de ti` : ""
-                      }`}
                     >
-                      <span className="route-card__code" aria-hidden="true">
-                        {route.code}
-                      </span>
+                      <span className="visually-hidden">Ruta </span>
+                      <span className="route-card__code">{route.code}</span>
                       <span className="route-card__body">
                         <span className="route-card__name">{route.name}</span>
                         <span className="route-card__meta">
@@ -480,7 +476,7 @@ export default function App() {
             onSelect={handleSelect}
           />
         </div>
-      </div>
+      </main>
 
       <p className="visually-hidden" aria-live="polite">
         {status === "locating"
