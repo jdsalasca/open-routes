@@ -3,6 +3,7 @@
  "name": "Tunja",
  "department": "Boyacá",
  "country": "Colombia",
+ "timezone": "America/Bogota",
  "center": {
   "lat": 5.536,
   "lng": -73.356

@@ -54,8 +54,9 @@ export function AboutDialog({ dialogRef, city }: Props) {
       </p>
       <p>
         Algunos sentidos (R8, R13 y R18) están divididos en el mapa; el planificador los marca como
-        no verificados en lugar de inventar una conexión. La espera usa la frecuencia de hoy y no
-        comprueba festivos, disponibilidad ni tráfico.
+        no verificados en lugar de inventar una conexión. La espera usa la frecuencia del día en la
+        zona horaria de la ciudad y no comprueba festivos, disponibilidad ni tráfico; las consultas
+        fuera de horario se marcan.
       </p>
 
       <h3>Privacidad</h3>

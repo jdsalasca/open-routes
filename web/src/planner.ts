@@ -13,6 +13,7 @@ export interface TripOption {
   rideMinutes: number;
   waitMinutes: number | null;
   waitKnown: boolean;
+  outsideHours: boolean;
   totalMinutes: number;
 }
 
@@ -28,7 +29,7 @@ const MIN_RIDE_METERS = 150;
 const WALK_METERS_PER_MIN = 75;
 const BUS_METERS_PER_MIN = 300;
 const WALK_DETOUR_FACTOR = 1.2;
-const MAX_CANDIDATES = 6;
+const MAX_CANDIDATES = 20;
 const CANDIDATE_DEDUPE_METERS = 30;
 const LOOP_MAX_GAP_METERS = 150;
 
@@ -48,6 +49,53 @@ export function distanceMeters(
 
 function haversine(a: [number, number], b: [number, number]) {
   return distanceMeters({ lat: a[0], lng: a[1] }, { lat: b[0], lng: b[1] });
+}
+
+export function isSundayInTimeZone(now: Date, timeZone?: string) {
+  return (
+    new Intl.DateTimeFormat("en-US", {
+      timeZone,
+      weekday: "short"
+    }).format(now) === "Sun"
+  );
+}
+
+export function dayKeyInTimeZone(now: Date, timeZone?: string) {
+  return new Intl.DateTimeFormat("en-CA", {
+    timeZone,
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit"
+  }).format(now);
+}
+
+function minutesInTimeZone(now: Date, timeZone?: string) {
+  if (!timeZone) return now.getHours() * 60 + now.getMinutes();
+  const parts = new Intl.DateTimeFormat("en-US", {
+    timeZone,
+    hour: "2-digit",
+    minute: "2-digit",
+    hourCycle: "h23"
+  }).formatToParts(now);
+  const hour = Number(parts.find((part) => part.type === "hour")?.value ?? 0) % 24;
+  const minute = Number(parts.find((part) => part.type === "minute")?.value ?? 0);
+  return hour * 60 + minute;
+}
+
+function isOutsideSchedule(
+  schedule: { start: string; end: string },
+  now: Date,
+  timeZone?: string
+) {
+  const parse = (value: string) => {
+    const [hour, minute] = value.split(":").map(Number);
+    return hour * 60 + minute;
+  };
+  const start = parse(schedule.start);
+  const end = parse(schedule.end);
+  const current = minutesInTimeZone(now, timeZone);
+  if (start <= end) return current < start || current >= end;
+  return current < start && current >= end;
 }
 
 type Nearest = {
@@ -108,8 +156,8 @@ function nearestOnPath(lat: number, lng: number, path: [number, number][]): Near
 
 /**
  * El punto puede estar cerca de la ruta en más de un tramo (ida y vuelta,
- * calles paralelas o una ruta que se cruza). Se evalúan hasta 6 apariciones
- * para no quedarse con la primera y elegir un rodeo.
+ * calles paralelas o una ruta que se cruza). Se conservan los mínimos locales
+ * a lo largo de todo el trazado, no solo las seis apariciones más cercanas.
  */
 function candidatesOnPath(
   lat: number,
@@ -119,12 +167,12 @@ function candidatesOnPath(
   if (path.length < 2) return [];
   const mPerLng = Math.cos((lat * Math.PI) / 180) * METERS_PER_DEG_LAT;
   const cumulative = cumulativeDistances(path);
-  const candidates: Nearest[] = [];
+  const raw: Nearest[] = [];
 
   for (let i = 0; i < path.length - 1; i++) {
     const hit = projectOnSegment(lat, lng, path[i], path[i + 1], mPerLng);
     if (hit.distance > MAX_WALK_METERS) continue;
-    candidates.push({
+    raw.push({
       distance: hit.distance,
       index: i,
       point: hit.point,
@@ -132,16 +180,43 @@ function candidatesOnPath(
     });
   }
 
-  candidates.sort((a, b) => a.distance - b.distance);
+  raw.sort((a, b) => a.along - b.along);
   const unique: Nearest[] = [];
-  for (const candidate of candidates) {
-    if (unique.some((item) => Math.abs(item.along - candidate.along) < CANDIDATE_DEDUPE_METERS)) {
-      continue;
+  for (const candidate of raw) {
+    const last = unique[unique.length - 1];
+    if (last && Math.abs(last.along - candidate.along) < CANDIDATE_DEDUPE_METERS) {
+      if (candidate.distance < last.distance) unique[unique.length - 1] = candidate;
+    } else {
+      unique.push(candidate);
     }
-    unique.push(candidate);
-    if (unique.length >= MAX_CANDIDATES) break;
   }
-  return unique;
+
+  const minima = unique.filter(
+    (candidate, index) =>
+      index === 0 ||
+      index === unique.length - 1 ||
+      (candidate.distance <= unique[index - 1].distance &&
+        candidate.distance <= unique[index + 1].distance)
+  );
+  const closest = [...unique].sort((a, b) => a.distance - b.distance).slice(0, 3);
+  const merged: Nearest[] = [];
+  for (const candidate of [...minima, ...closest]) {
+    if (!merged.some((item) => Math.abs(item.along - candidate.along) < CANDIDATE_DEDUPE_METERS)) {
+      merged.push(candidate);
+    }
+  }
+  merged.sort((a, b) => a.along - b.along);
+  if (merged.length <= MAX_CANDIDATES) return merged;
+
+  const keep = new Map<number, Nearest>();
+  for (const candidate of [...merged].sort((a, b) => a.distance - b.distance).slice(0, 10)) {
+    keep.set(Math.round(candidate.along), candidate);
+  }
+  const step = Math.ceil(merged.length / 10);
+  for (let i = 0; i < merged.length; i += step) {
+    keep.set(Math.round(merged[i].along), merged[i]);
+  }
+  return [...keep.values()].sort((a, b) => a.along - b.along).slice(0, MAX_CANDIDATES);
 }
 
 function buildSegment(
@@ -177,13 +252,16 @@ function buildSegment(
 export function findDirectTrips(
   origin: Origin,
   destination: Place,
-  routes: Route[]
+  routes: Route[],
+  options: { timeZone?: string; now?: Date } = {}
 ): TripOption[] {
   const bestByRoute = new Map<string, TripOption>();
-  const isSunday = new Date().getDay() === 0;
+  const now = options.now ?? new Date();
+  const isSunday = isSundayInTimeZone(now, options.timeZone);
 
   for (const route of routes) {
     const schedule = isSunday ? route.sunday : route.weekday;
+    const outsideHours = isOutsideSchedule(schedule, now, options.timeZone);
     const waitMinutes =
       schedule.frequencyMin && schedule.frequencyMin > 0
         ? schedule.frequencyMin / 2
@@ -235,6 +313,7 @@ export function findDirectTrips(
               rideMinutes,
               waitMinutes,
               waitKnown: waitMinutes !== null,
+              outsideHours,
               totalMinutes
             };
 
@@ -254,13 +333,14 @@ export function findDirectTrips(
     }
   }
 
-  return [...bestByRoute.values()]
-    .sort(
-      (a, b) =>
-        a.totalMinutes - b.totalMinutes ||
-        a.walkToMeters + a.walkFromMeters - (b.walkToMeters + b.walkFromMeters)
-    )
-    .slice(0, 4);
+  return [...bestByRoute.values()].sort((a, b) => {
+    if (a.outsideHours !== b.outsideHours) return a.outsideHours ? 1 : -1;
+    if (a.waitKnown !== b.waitKnown) return a.waitKnown ? -1 : 1;
+    return (
+      a.totalMinutes - b.totalMinutes ||
+      a.walkToMeters + a.walkFromMeters - (b.walkToMeters + b.walkFromMeters)
+    );
+  });
 }
 
 /**
@@ -279,17 +359,28 @@ export function findSplitRoutes(
     const fragments = Math.max(...route.directions.map((direction) => direction.paths.length));
     if (fragments < 2) continue;
 
-    let originServed = false;
-    let destinationServed = false;
+    let split = false;
     for (const direction of route.directions) {
-      for (const path of direction.paths) {
+      if (direction.paths.length < 2) continue;
+      const originPaths = new Set<number>();
+      const destinationPaths = new Set<number>();
+
+      direction.paths.forEach((path, index) => {
         const start = nearestOnPath(origin.lat, origin.lng, path);
         const end = nearestOnPath(destination.lat, destination.lng, path);
-        if (start && start.distance <= MAX_WALK_METERS) originServed = true;
-        if (end && end.distance <= MAX_WALK_METERS) destinationServed = true;
+        if (start && start.distance <= MAX_WALK_METERS) originPaths.add(index);
+        if (end && end.distance <= MAX_WALK_METERS) destinationPaths.add(index);
+      });
+
+      for (const originPath of originPaths) {
+        for (const destinationPath of destinationPaths) {
+          if (originPath !== destinationPath) split = true;
+        }
       }
+      if (split) break;
     }
-    if (originServed && destinationServed) {
+
+    if (split) {
       result.push({ route, fragments });
     }
   }

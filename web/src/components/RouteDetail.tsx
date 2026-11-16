@@ -56,7 +56,14 @@ export function RouteDetail({ route, activeDirection, onDirection, onBack, fare 
           <BusIcon size={13} /> {route.type}
         </span>
         <span className="meta-chip">{route.operator}</span>
-        {route.circular && <span className="meta-chip">Circular</span>}
+        {route.circular && (
+          <span
+            className="meta-chip"
+            title="Clasificación del operador; el trazado del mapa puede no cerrar el circuito."
+          >
+            Circular
+          </span>
+        )}
       </div>
 
       <h3 className="detail__section-title">

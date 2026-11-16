@@ -90,7 +90,7 @@ El importador `tools/tunja-routes.mjs` documenta cómo se convirtieron los mapas
 - Los lugares buscables son 42 barrios y sitios principales. Cuando no hay un nodo oficial, el punto es el despacho/retorno del operador; por eso el radio de búsqueda es de 500 m.
 - El planificador combina los trazados para encontrar **rutas directas** (sin transbordos). Los tiempos son estimaciones sobre la geometría: incluyen caminata, espera y bus, pero no tráfico, semáforos ni paradas oficiales.
 - R10 y R22 están marcadas como circulares por el operador; el planificador cierra la vuelta solo si el trazado termina cerca del inicio. R8, R13 y R18 tienen fragmentos en el mapa: se avisa que no se pueden verificar como directas en vez de inventar la conexión.
-- La espera usa la frecuencia del día actual (domingo usa horario dominical); no comprueba festivos ni disponibilidad en tiempo real.
+- La espera usa la frecuencia del día actual en la zona horaria de la ciudad; no comprueba festivos ni disponibilidad en tiempo real. Las consultas fuera del horario publicado se marcan; una frecuencia desconocida se muestra como “sin espera”.
 - La geolocalización se calcula contra la línea del recorrido, no contra paradas oficiales (el operador no publica esas paradas).
 - Las coordenadas se procesan en el navegador: la web no envía tu ubicación a la API. La API sigue exponiendo `/near` para integraciones.
 - El mapa base consulta teselas de OpenStreetMap (recibe la zona visible y tu IP) y Cloudflare sirve el sitio con analítica sin cookies.

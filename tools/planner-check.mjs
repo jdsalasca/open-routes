@@ -61,8 +61,17 @@ assert.equal(
   "un punto rural lejano no debe tener ruta directa"
 );
 
-function syntheticRoute({ id = "X", code = "X", circular = false, paths, weekday = 10, sunday = 10 }) {
-  const schedule = (frequency) => ({ start: "00:00", end: "23:59", frequencyMin: frequency });
+function syntheticRoute({
+  id = "X",
+  code = "X",
+  circular = false,
+  paths,
+  weekday = 10,
+  sunday = 10,
+  start = "00:00",
+  end = "23:59"
+}) {
+  const schedule = (frequency) => ({ start, end, frequencyMin: frequency });
   return {
     id,
     code,
@@ -136,6 +145,95 @@ assert.ok(
   "debe subir en la segunda aparición, no en la primera"
 );
 assert.ok(repeated[0].rideMeters < 3000, "no debe dar la vuelta completa como rodeo");
+
+// Muchas pasadas por el origen: no basta con mirar solo las seis más cercanas.
+const manyPasses = [[0, 0]];
+for (let i = 0; i < 7; i++) {
+  manyPasses.push([0.01, 0], [0, 0]);
+}
+manyPasses.push([0, 0.02]);
+const manyPassTrips = findDirectTrips(
+  { kind: "place", lat: 0, lng: 0, label: "O", type: "Sitio" },
+  { id: "d", name: "D", type: "Sitio", lat: 0, lng: 0.02, aliases: [] },
+  [syntheticRoute({ id: "many", paths: [manyPasses] })]
+);
+assert.equal(manyPassTrips.length, 1, "debe encontrar el viaje entre muchas pasadas");
+assert.ok(
+  manyPassTrips[0].rideMeters < 3000,
+  `debe subir en la última pasada, no hacer ${manyPassTrips[0].rideMeters} m`
+);
+
+// Las esperas desconocidas no deben adelantar a las conocidas.
+const straightPath = [
+  [0, 0],
+  [0, 0.01]
+];
+const originPoint = { kind: "place", lat: 0, lng: 0, label: "O", type: "Sitio" };
+const destinationPoint = { id: "d", name: "D", type: "Sitio", lat: 0, lng: 0.01, aliases: [] };
+const knownWait = syntheticRoute({ id: "known", paths: [straightPath] });
+const noWait = syntheticRoute({
+  id: "no-wait",
+  paths: [straightPath],
+  weekday: null,
+  sunday: null
+});
+const ordered = findDirectTrips(originPoint, destinationPoint, [noWait, knownWait]);
+assert.equal(ordered[0].route.id, "known", "una opción con espera conocida debe ir primero");
+assert.equal(ordered[1].waitKnown, false, "la espera desconocida se conserva, pero después");
+
+// El planificador devuelve todas las directas; la interfaz decide cuántas tarjetas mostrar.
+const fiveRoutes = [1, 2, 3, 4, 5].map((index) =>
+  syntheticRoute({ id: `r${index}`, paths: [straightPath] })
+);
+assert.equal(
+  findDirectTrips(originPoint, destinationPoint, fiveRoutes).length,
+  5,
+  "no debe recortar a cuatro antes de filtrar los avisos"
+);
+
+// Domingo en zona horaria de la ciudad y consulta fuera de horario.
+const sundayRoute = syntheticRoute({
+  id: "sunday",
+  paths: [straightPath],
+  weekday: 10,
+  sunday: 20,
+  start: "05:00",
+  end: "22:00"
+});
+const sundayTrip = findDirectTrips(originPoint, destinationPoint, [sundayRoute], {
+  now: new Date("2026-01-04T17:00:00Z"),
+  timeZone: "UTC"
+});
+assert.equal(sundayTrip[0].waitMinutes, 10, "el domingo debe usar la frecuencia dominical");
+assert.equal(sundayTrip[0].outsideHours, false, "las 17:00 están dentro del horario");
+
+const lateTrip = findDirectTrips(originPoint, destinationPoint, [sundayRoute], {
+  now: new Date("2026-01-04T23:00:00Z"),
+  timeZone: "UTC"
+});
+assert.equal(lateTrip[0].outsideHours, true, "las 23:00 están fuera del horario");
+
+// No avisar de fragmentos si ambos extremos están en el mismo fragmento.
+const sameFragment = findSplitRoutes(
+  { kind: "place", lat: 0, lng: 0.002, label: "O", type: "Sitio" },
+  { id: "d", name: "D", type: "Sitio", lat: 0, lng: 0.008, aliases: [] },
+  [
+    syntheticRoute({
+      id: "same-fragment",
+      paths: [
+        [
+          [0, 0],
+          [0, 0.01]
+        ],
+        [
+          [1, 1],
+          [1, 1.01]
+        ]
+      ]
+    })
+  ]
+);
+assert.equal(sameFragment.length, 0, "no debe avisar si ambos extremos están en el mismo fragmento");
 
 // Sin frecuencia conocida no se inventan diez minutos de espera.
 const unknownWait = findDirectTrips(

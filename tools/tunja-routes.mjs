@@ -302,6 +302,7 @@ async function main() {
     name: "Tunja",
     department: "Boyacá",
     country: "Colombia",
+    timezone: "America/Bogota",
     center: { lat: 5.536, lng: -73.356 },
     zoom: 14,
     description: "Capital de Boyacá. Rutas urbanas e intermunicipales de la UT Mi Ruta, trazadas sobre el mapa oficial de cada recorrido.",

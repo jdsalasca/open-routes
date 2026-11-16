@@ -19,7 +19,7 @@ import { PlaceField } from "./components/PlaceField";
 import { RouteDetail } from "./components/RouteDetail";
 import { TripDetail } from "./components/TripDetail";
 import { useGeolocation } from "./hooks/useGeolocation";
-import { distanceMeters, findDirectTrips, findNearbyRoutes, findSplitRoutes } from "./planner";
+import { distanceMeters, dayKeyInTimeZone, findDirectTrips, findNearbyRoutes, findSplitRoutes } from "./planner";
 import type { TripOption } from "./planner";
 import type { City, CitySummary, NearbyRoute, Origin, Place, Route } from "./types";
 
@@ -63,6 +63,7 @@ export default function App() {
   const [nearby, setNearby] = useState<NearbyRoute[] | null>(null);
   const [nearMode, setNearMode] = useState(false);
   const [query, setQuery] = useState("");
+  const [clock, setClock] = useState(() => Date.now());
   const { status, error: geoError, locate } = useGeolocation();
 
   useEffect(() => {
@@ -108,6 +109,11 @@ export default function App() {
     return () => controller.abort();
   }, [slug]);
 
+  useEffect(() => {
+    const timer = window.setInterval(() => setClock(Date.now()), 60_000);
+    return () => window.clearInterval(timer);
+  }, []);
+
   const selected = useMemo(
     () => city?.routes.find((route) => route.id === selectedId) ?? null,
     [city, selectedId]
@@ -144,22 +150,35 @@ export default function App() {
     origin && destination && distanceMeters(origin, destination) < 30
   );
 
-  const tripOptions = useMemo(() => {
+  const timeZone = city?.timezone ?? "America/Bogota";
+  const dayKey = useMemo(() => dayKeyInTimeZone(new Date(clock), timeZone), [clock, timeZone]);
+
+  const allTripOptions = useMemo(() => {
     if (!city || !origin || !destination || samePlace) return [];
-    return findDirectTrips(origin, destination, city.routes);
-  }, [city, origin, destination, samePlace]);
+    return findDirectTrips(origin, destination, city.routes, {
+      timeZone,
+      now: new Date(clock)
+    });
+    // dayKey obliga a recalcular al cruzar la medianoche en la ciudad.
+  }, [city, origin, destination, samePlace, timeZone, dayKey]);
+
+  const tripOptions = useMemo(() => allTripOptions.slice(0, 4), [allTripOptions]);
+  const directRouteIds = useMemo(
+    () => new Set(allTripOptions.map((option) => option.route.id)),
+    [allTripOptions]
+  );
 
   const tripRouteIds = useMemo(
-    () => tripOptions.map((option) => option.route.id),
-    [tripOptions]
+    () => allTripOptions.map((option) => option.route.id),
+    [allTripOptions]
   );
 
   const splitRoutes = useMemo(() => {
     if (!city || !origin || !destination || samePlace) return [];
     return findSplitRoutes(origin, destination, city.routes)
-      .filter((hit) => !tripOptions.some((option) => option.route.id === hit.route.id))
+      .filter((hit) => !directRouteIds.has(hit.route.id))
       .slice(0, 3);
-  }, [city, origin, destination, samePlace, tripOptions]);
+  }, [city, origin, destination, samePlace, directRouteIds]);
 
   const tripMode = Boolean(origin && destination);
   const destinationOnly = Boolean(!origin && destination);
@@ -381,8 +400,10 @@ export default function App() {
   const listNote = tripMode
     ? samePlace
       ? "mismo lugar"
-      : tripOptions.length
-        ? `${tripOptions.length} ${tripOptions.length === 1 ? "ruta directa" : "rutas directas"}`
+      : allTripOptions.length
+        ? `${tripOptions.length}${
+            allTripOptions.length > tripOptions.length ? ` de ${allTripOptions.length}` : ""
+          } ${allTripOptions.length === 1 ? "ruta directa" : "rutas directas"}`
         : "sin ruta directa"
     : destinationOnly
       ? "destino elegido"
@@ -685,11 +706,17 @@ export default function App() {
                           <span className="trip-card__body">
                             <span className="trip-card__name">{option.route.name}</span>
                             <span className="trip-card__meta">
-                              <strong>≈ {Math.round(option.totalMinutes)} min</strong>
+                              <strong>
+                                ≈ {Math.round(option.totalMinutes)} min
+                                {option.waitKnown ? "" : " + espera"}
+                              </strong>
                               <span>
                                 ≈ {distanceLabel(option.walkToMeters + option.walkFromMeters)} a pie
                               </span>
                               <span>{Math.round(option.rideMinutes)} min en bus</span>
+                              {option.outsideHours && (
+                                <span className="trip-card__warn">fuera de horario</span>
+                              )}
                             </span>
                             <span className="trip-card__hint">
                               Sube cerca de {origin?.label} · baja cerca de {destination?.name}

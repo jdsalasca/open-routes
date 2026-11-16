@@ -27,6 +27,7 @@ class CityDataTest {
     @Test
     void tunjaTieneRutasConTrazadosValidos() {
         assertThat(city.slug()).isEqualTo("tunja");
+        assertThat(city.timezone()).isEqualTo("America/Bogota");
         assertThat(city.routes()).hasSize(26);
         assertThat(city.routes()).allSatisfy(route -> {
             assertThat(route.id()).isNotBlank();

@@ -49,6 +49,13 @@ export function TripDetail({
         </div>
       </div>
 
+      {trip.outsideHours && (
+        <p className="trip-warning">
+          Esta consulta está fuera del horario publicado de la ruta. Confirma si hay servicio antes
+          de salir.
+        </p>
+      )}
+
       <div className="trip-steps">
         <div className="trip-step">
           <span className="trip-step__num">1</span>
@@ -91,7 +98,13 @@ export function TripDetail({
       <div className="trip-total">
         <ClockIcon size={18} />
         <div>
-          <span>{trip.waitKnown ? "Tiempo estimado" : "Tiempo estimado sin espera"}</span>
+          <span>
+            {trip.outsideHours
+              ? "Tiempo estimado fuera de horario"
+              : trip.waitKnown
+                ? "Tiempo estimado"
+                : "Tiempo estimado sin espera"}
+          </span>
           <strong>{Math.round(trip.totalMinutes)} min</strong>
         </div>
         <p>

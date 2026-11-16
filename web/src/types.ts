@@ -76,6 +76,7 @@ export interface CitySummary {
 }
 
 export interface City extends Omit<CitySummary, "routeCount"> {
+  timezone: string;
   places: Place[];
   routes: Route[];
 }

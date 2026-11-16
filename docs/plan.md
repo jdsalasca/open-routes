@@ -15,6 +15,7 @@ Mapa web de transporte público para Tunja que responda en segundos: qué rutas 
 - [x] Buscador de origen por barrio o lugar (42 sitios de Tunja), con rutas a 500 m y distancias.
 - [x] Planificador origen → destino con rutas directas, tiempos estimados y guía de subida/bajada.
 - [x] Proyecciones múltiples, circuitos explícitos (R10/R22), aviso de fragmentos y espera según el día.
+- [x] Ronda Terra: cobertura de pasadas, espera desconocida, zona horaria, fuera de horario y avisos de fragmentos precisos.
 - [x] Auditoría de calidad y correcciones P1/P2 (campos, GPS, foco, cercanía en cliente, teclado, pruebas).
 - [x] Dockerfile multi-stage + compose en `127.0.0.1:5179`.
 - [x] Pruebas de API, datos y geometría; build de producción.

@@ -11,6 +11,7 @@ public record City(
         String name,
         String department,
         String country,
+        String timezone,
         Point center,
         int zoom,
         String description,
