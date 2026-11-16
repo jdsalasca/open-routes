@@ -64,10 +64,15 @@ export function MapView({
     mapRef.current = map;
     const observer = new ResizeObserver(() => map.invalidateSize());
     observer.observe(container);
-    requestAnimationFrame(() => map.invalidateSize());
+    const frame = requestAnimationFrame(() => map.invalidateSize());
 
     return () => {
+      cancelAnimationFrame(frame);
       observer.disconnect();
+      map.stop();
+      // Leaflet programa un setTimeout de 250 ms que termina el zoom sobre un
+      // mapa ya retirado y revienta al leer _leaflet_pos; se anula antes.
+      (map as unknown as { _animatingZoom?: boolean })._animatingZoom = false;
       map.remove();
       mapRef.current = null;
     };

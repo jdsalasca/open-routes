@@ -23,6 +23,16 @@ Mapa web de transporte público para Tunja que responda en segundos: qué rutas 
 - [x] Revisión externa (Codex) y correcciones.
 - [x] Despliegue en `open-routes.eridu.top` y verificación de sitios existentes.
 
+### R1.5 · Paquete de ciudad y GTFS
+
+- [x] Contrato de ciudad validado al arrancar (`CityValidator`): slug, zona horaria, tarifa, IDs únicos, colores, horarios y trazados.
+- [x] Selector de ciudad con `?city=` y `localStorage`; la elección sobrevive al recargar.
+- [x] Importador `tools/gtfs-import.py` (zip o carpeta) con horario, paradas y lugares deduplicados.
+- [x] Fixture GTFS mínimo y autoprueba `tools/gtfs-check.py` (carpeta, zip y centro manual).
+- [x] La muestra importada pasa el mismo validador que las ciudades reales.
+- [x] Ficha tolera ciudades sin `streets` y muestra “Paradas” en vez de “Paradas de despacho”.
+- [x] Verificación multi-ciudad en navegador con una segunda ciudad simulada.
+
 ### R2 · Datos y comunidad (después)
 
 - Paradas oficiales y tiempos de paso cuando el operador los publique.
@@ -33,7 +43,7 @@ Mapa web de transporte público para Tunja que responda en segundos: qué rutas 
 
 ## Criterios de aceptación
 
-1. `mvn -f api/pom.xml test` y `npm run build` pasan.
+1. `mvn -f api/pom.xml test`, `npm run build`, `node tools/planner-check.mjs` y `python tools/gtfs-check.py` pasan.
 2. La geolocalización devuelve rutas ordenadas por distancia y el mapa las resalta.
 3. La ficha de ruta muestra horarios, trayectos, vías, paradas y fuente.
 4. Móvil: el panel no tapa la ruta seleccionada y todo es navegable con teclado.

@@ -1,0 +1,242 @@
+{
+ "slug": "prueba",
+ "name": "Ciudad Prueba",
+ "department": "Boyacá",
+ "country": "Colombia",
+ "timezone": "America/Bogota",
+ "center": {
+  "lat": 5.535,
+  "lng": -73.35775
+ },
+ "zoom": 14,
+ "description": "Rutas de transporte público de Ciudad Prueba, importadas desde GTFS.",
+ "sources": [
+  {
+   "label": "Fixture",
+   "url": "https://example.com"
+  }
+ ],
+ "fare": {
+  "day": 2600,
+  "night": 2700,
+  "currency": "COP",
+  "note": "Tarifa configurada al importar el feed; verifica el valor vigente con el operador."
+ },
+ "places": [
+  {
+   "id": "parque-central",
+   "name": "Parque Central",
+   "type": "Parada",
+   "lat": 5.53,
+   "lng": -73.36,
+   "aliases": []
+  },
+  {
+   "id": "plaza-del-norte",
+   "name": "Plaza del Norte",
+   "type": "Parada",
+   "lat": 5.54,
+   "lng": -73.3605,
+   "aliases": []
+  },
+  {
+   "id": "terminal",
+   "name": "Terminal",
+   "type": "Parada",
+   "lat": 5.55,
+   "lng": -73.36,
+   "aliases": []
+  },
+  {
+   "id": "mercado",
+   "name": "Mercado",
+   "type": "Parada",
+   "lat": 5.52,
+   "lng": -73.36,
+   "aliases": []
+  },
+  {
+   "id": "universidad",
+   "name": "Universidad",
+   "type": "Parada",
+   "lat": 5.525,
+   "lng": -73.355,
+   "aliases": []
+  }
+ ],
+ "routes": [
+  {
+   "id": "r1",
+   "code": "10",
+   "name": "Centro - Terminal",
+   "color": "#1D6FA5",
+   "type": "Urbana",
+   "description": "Recorrido 10.",
+   "weekday": {
+    "start": "05:30",
+    "end": "06:23",
+    "frequencyMin": 10
+   },
+   "sunday": {
+    "start": "05:30",
+    "end": "06:23",
+    "frequencyMin": 10
+   },
+   "operator": "Fixture",
+   "sourceUrl": "https://example.com",
+   "circular": false,
+   "directions": [
+    {
+     "name": "Parque Central → Terminal",
+     "streets": [],
+     "paths": [
+      [
+       [
+        5.53,
+        -73.36
+       ],
+       [
+        5.535,
+        -73.36
+       ],
+       [
+        5.54,
+        -73.3605
+       ],
+       [
+        5.545,
+        -73.36
+       ],
+       [
+        5.55,
+        -73.36
+       ]
+      ]
+     ],
+     "stops": [
+      {
+       "name": "Parque Central",
+       "lat": 5.53,
+       "lng": -73.36
+      },
+      {
+       "name": "Plaza del Norte",
+       "lat": 5.54,
+       "lng": -73.3605
+      },
+      {
+       "name": "Terminal",
+       "lat": 5.55,
+       "lng": -73.36
+      }
+     ]
+    },
+    {
+     "name": "Terminal → Parque Central",
+     "streets": [],
+     "paths": [
+      [
+       [
+        5.55,
+        -73.36
+       ],
+       [
+        5.545,
+        -73.36
+       ],
+       [
+        5.54,
+        -73.3605
+       ],
+       [
+        5.535,
+        -73.36
+       ],
+       [
+        5.53,
+        -73.36
+       ]
+      ]
+     ],
+     "stops": [
+      {
+       "name": "Terminal",
+       "lat": 5.55,
+       "lng": -73.36
+      },
+      {
+       "name": "Plaza del Norte",
+       "lat": 5.54,
+       "lng": -73.3605
+      },
+      {
+       "name": "Parque Central",
+       "lat": 5.53,
+       "lng": -73.36
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "r2",
+   "code": "20",
+   "name": "Mercado - Universidad",
+   "color": "#1D6FA5",
+   "type": "Urbana",
+   "description": "Recorrido 20.",
+   "weekday": {
+    "start": "06:00",
+    "end": "06:22",
+    "frequencyMin": 12
+   },
+   "sunday": {
+    "start": "06:00",
+    "end": "06:22",
+    "frequencyMin": 12
+   },
+   "operator": "Fixture",
+   "sourceUrl": "https://example.com",
+   "circular": false,
+   "directions": [
+    {
+     "name": "Mercado → Parque Central",
+     "streets": [],
+     "paths": [
+      [
+       [
+        5.52,
+        -73.36
+       ],
+       [
+        5.525,
+        -73.355
+       ],
+       [
+        5.53,
+        -73.36
+       ]
+      ]
+     ],
+     "stops": [
+      {
+       "name": "Mercado",
+       "lat": 5.52,
+       "lng": -73.36
+      },
+      {
+       "name": "Universidad",
+       "lat": 5.525,
+       "lng": -73.355
+      },
+      {
+       "name": "Parque Central",
+       "lat": 5.53,
+       "lng": -73.36
+      }
+     ]
+    }
+   ]
+  }
+ ]
+}

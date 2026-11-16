@@ -50,9 +50,15 @@ export default function App() {
   const returnFocusToTrip = useRef(false);
   const locateToken = useRef(0);
   const [cities, setCities] = useState<CitySummary[] | null>(null);
-  const [slug, setSlug] = useState<string | null>(
-    () => new URLSearchParams(window.location.search).get("city")
-  );
+  const [slug, setSlug] = useState<string | null>(() => {
+    const fromUrl = new URLSearchParams(window.location.search).get("city");
+    if (fromUrl) return fromUrl;
+    try {
+      return window.localStorage.getItem("open-routes-city");
+    } catch {
+      return null;
+    }
+  });
   const [city, setCity] = useState<City | null>(null);
   const [boot, setBoot] = useState<"loading" | "ready" | "error">("loading");
   const [selectedId, setSelectedId] = useState<string | null>(null);
@@ -102,6 +108,12 @@ export default function App() {
         setNearMode(false);
         setQuery("");
         document.title = `open-routes · Rutas de ${data.name}`;
+        document
+          .querySelector('meta[name="description"]')
+          ?.setAttribute(
+            "content",
+            `Rutas de transporte público de ${data.name}, ${data.department}: ubícate, consulta recorridos, horarios y tarifas.`
+          );
       })
       .catch(() => {
         if (!controller.signal.aborted) setBoot("error");
@@ -124,6 +136,18 @@ export default function App() {
   }, [selectedId, activeTrip]);
 
   const places = city?.places ?? [];
+
+  const changeCity = useCallback((next: string) => {
+    setSlug(next);
+    const url = new URL(window.location.href);
+    url.searchParams.set("city", next);
+    window.history.replaceState(null, "", url);
+    try {
+      window.localStorage.setItem("open-routes-city", next);
+    } catch {
+      // El navegador puede bloquear el almacenamiento; la URL ya conserva la elección.
+    }
+  }, []);
   const nearbyById = useMemo(
     () => new Map((nearby ?? []).map((hit) => [hit.id, hit])),
     [nearby]
@@ -459,10 +483,10 @@ export default function App() {
           <label className="city-pill">
             <PinIcon size={14} />
             <span className="visually-hidden">Ciudad</span>
-            <select value={city.slug} onChange={(event) => setSlug(event.target.value)}>
+            <select value={city.slug} onChange={(event) => changeCity(event.target.value)}>
               {cities.map((item) => (
                 <option key={item.slug} value={item.slug}>
-                  {item.name}, {item.department}
+                  {item.name}, {item.department} · {item.routeCount} rutas
                 </option>
               ))}
             </select>

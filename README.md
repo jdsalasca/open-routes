@@ -17,11 +17,12 @@ Rutas de transporte público claras y cerca de ti. Empieza en **Tunja, Boyacá**
 ## Qué hace
 
 - Elige un origen y un destino: muestra rutas directas ordenadas por tiempo estimado, con caminata, espera y tramo en bus.
+- Cambia de ciudad desde la cabecera; la elección queda en `?city=` y en el navegador.
 - Intercambia origen y destino, o usa tu ubicación como origen.
 - Busca un barrio o lugar (Escandinavo, Plaza de Bolívar, UPTC…) y úsalo como origen o destino.
 - Activa tu ubicación y ordena las rutas por distancia real a su trazado (1 km a la redonda).
-- Dibuja las 26 rutas de la UT Mi Ruta sobre un mapa claro, cada una con su color.
-- Consulta trazados (ida y vuelta), vías por las que pasa, paradas de despacho, horarios y tarifas de 2026.
+- Dibuja las rutas de la ciudad sobre un mapa claro, cada una con su color.
+- Consulta trazados (ida y vuelta), vías por las que pasa, paradas, horarios y tarifas.
 - Busca por código, nombre, barrio o vía.
 - Responsive: sidebar en escritorio, panel inferior fijo en móvil.
 - Sin cuentas, sin publicidad y sin guardar la ubicación.
@@ -32,7 +33,7 @@ Rutas de transporte público claras y cerca de ti. Empieza en **Tunja, Boyacá**
 |---|---|
 | Web | React 19 + Vite + TypeScript + SCSS + Leaflet |
 | API | Java 21 + Spring Boot 3.5 |
-| Datos | JSON por ciudad en el classpath (sin base de datos) |
+| Datos | JSON por ciudad en el classpath, validado al arrancar (sin base de datos) |
 | Mapa base | OpenStreetMap (sin API key ni Google Maps) |
 | Despliegue | Docker multi-stage → JRE 21, publicado detrás de Cloudflare |
 
@@ -55,7 +56,8 @@ Pruebas y build:
 ```bash
 mvn -f api/pom.xml test
 cd web && npm run build
-node tools/planner-check.mjs  # requiere Node 24 (TypeScript nativo)
+node tools/planner-check.mjs   # requiere Node 24 (TypeScript nativo)
+python tools/gtfs-check.py     # importador GTFS + fixture (Python 3.11+)
 ```
 
 ## API
@@ -71,23 +73,56 @@ node tools/planner-check.mjs  # requiere Node 24 (TypeScript nativo)
 
 ## Agregar una ciudad
 
-La abstracción es el archivo de datos, no la ciudad:
+La abstracción es el paquete de datos, no la ciudad: el código no cambia. Hay dos caminos.
 
-1. Crea `api/src/main/resources/cities/<slug>.json` con el esquema de `tunja.json` (ciudad, tarifa, fuentes, lugares y rutas).
-2. Cada ruta necesita `id`, `code`, `name`, `color`, `directions` y, por sentido, `paths` (listas de `[lat, lng]`) y `streets`.
+### 1. Importar un feed GTFS (recomendado)
+
+```bash
+python tools/gtfs-import.py --gtfs feed.zip \
+  --slug mi-ciudad --name "Mi Ciudad" --department "Boyacá" \
+  --timezone America/Bogota --fare-day 2600 --fare-night 2700 \
+  --source-label "Operador" --source-url "https://ejemplo.com/gtfs" \
+  --output api/src/main/resources/cities/mi-ciudad.json
+```
+
+El feed puede ser un `.zip` o una carpeta con `routes.txt`, `trips.txt`, `shapes.txt`, `stops.txt` y `stop_times.txt`. El importador:
+
+- convierte cada ruta en hasta dos sentidos (los grupos de viajes más frecuentes);
+- usa el `shapes.txt` como trazado y cae a la secuencia de paradas si falta;
+- deriva el horario del primer/último viaje y la frecuencia media;
+- crea los lugares buscables a partir de las paradas, sin duplicarlas entre ida y vuelta;
+- valida el resultado antes de escribirlo.
+
+Después, reinicia la API. La ciudad aparece en `GET /api/cities` y el selector de la web se activa solo.
+
+### 2. Escribir el JSON a mano
+
+1. Crea `api/src/main/resources/cities/<slug>.json` con el esquema de `tunja.json` (ciudad, zona horaria, tarifa, fuentes, lugares y rutas).
+2. Cada ruta necesita `id`, `code`, `name`, `color`, `weekday`, `sunday`, `circular`, `directions` y, por sentido, `paths` (listas de `[lat, lng]`) y `stops`. `streets` puede ir vacío: la ficha oculta esa sección.
 3. Agrega en `places` los barrios y sitios buscables: `id`, `name`, `type`, `lat`, `lng` y `aliases`. Es lo que alimenta el buscador de origen.
-4. Reinicia la API. La ciudad aparece en `GET /api/cities` y el selector de la web se activa solo.
+4. Reinicia la API. `CityValidator` rechaza el arranque si falta un campo, hay IDs repetidos, un color inválido, una zona horaria que no existe o un trazado con menos de dos puntos; el mensaje dice qué ciudad y qué ruta corregir.
 
-El importador `tools/tunja-routes.mjs` documenta cómo se convirtieron los mapas KML de la UT Mi Ruta en el JSON de Tunja. Sirve de referencia para escribir otros importadores; no se ejecuta en producción.
+`python tools/gtfs-check.py` importa el fixture `tools/fixtures/gtfs-mini` como carpeta y como zip, comprueba el contrato y compara el resultado con la muestra que valida el backend. Si cambias el importador a propósito, regenera la muestra con `--update`.
+
+El importador `tools/tunja-routes.mjs` documenta cómo se convirtieron los KML de la UT Mi Ruta en el JSON de Tunja. Queda como referencia para feeds que no son GTFS.
+
+### Límites del importador
+
+- Toma hasta dos sentidos por ruta; ramales adicionales del mismo `route_id` se descartan.
+- El horario es aproximado (primer viaje, último viaje y frecuencia media); no modela franjas, festivos ni servicios por calendario.
+- No infiere circuitos: deja `circular: false`, incluso si el trazado cierra.
+- No inventa vías: deja `streets` vacío y la ficha muestra solo el trazado y las paradas.
+- La tarifa se pasa a mano porque GTFS no la incluye.
 
 ## Datos y límites
 
-- Fuente de trazados y horarios: [UT Mi Ruta · Rutas y ramales](https://www.utmiruta.com/rutasyramalaesutmiruta) (2026).
+- Tunja: fuente de trazados y horarios, [UT Mi Ruta · Rutas y ramales](https://www.utmiruta.com/rutasyramalaesutmiruta) (2026).
 - Los datos del operador se usan como referencia; el proyecto no reclama una licencia abierta sobre ellos. La licencia MIT cubre el código.
 - Tarifa: $2.600 de lunes a sábado entre 06:00 y 19:00; $2.700 en horario nocturno (19:01–05:59), domingos y festivos (Decreto 0006 de 2026). No aplica a la ruta intermunicipal R19.
 - Los recorridos, horarios y tarifas pueden cambiar. La información del operador manda; esta app es una ayuda para leer el sistema, no un aviso oficial.
 - Los trazados son los del mapa público del operador. Algunos ramales se dibujan como segmentos separados porque así están en el KML original.
 - Los lugares buscables son 42 barrios y sitios principales. Cuando no hay un nodo oficial, el punto es el despacho/retorno del operador; por eso el radio de búsqueda es de 500 m.
+- Cada ciudad es un JSON independiente y validado al arrancar; el selector de ciudad aparece cuando hay más de una publicada.
 - El planificador combina los trazados para encontrar **rutas directas** (sin transbordos). Los tiempos son estimaciones sobre la geometría: incluyen caminata, espera y bus, pero no tráfico, semáforos ni paradas oficiales.
 - R10 y R22 están marcadas como circulares por el operador; el planificador cierra la vuelta solo si el trazado termina cerca del inicio. R8, R13 y R18 tienen fragmentos en el mapa: se avisa que no se pueden verificar como directas en vez de inventar la conexión.
 - La espera usa la frecuencia del día actual en la zona horaria de la ciudad; no comprueba festivos ni disponibilidad en tiempo real. Las consultas fuera del horario publicado se marcan; una frecuencia desconocida se muestra como “sin espera”.

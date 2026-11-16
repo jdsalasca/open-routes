@@ -8,6 +8,8 @@ type Props = {
 };
 
 export function AboutDialog({ dialogRef, city }: Props) {
+  const circular = city.routes.filter((route) => route.circular).map((route) => route.code);
+
   return (
     <dialog
       ref={dialogRef}
@@ -37,26 +39,29 @@ export function AboutDialog({ dialogRef, city }: Props) {
 
       <h3>Cómo leer el mapa</h3>
       <p>
-        Cada color es una ruta. Al elegirla, el mapa dibuja su trazado, sus paradas de despacho y
-        las vías por las que pasa. El botón de ubicación ordena las rutas por distancia real a la
-        línea del recorrido (no a una parada inventada).
+        Cada color es una ruta. Al elegirla, el mapa dibuja su trazado, sus paradas y, cuando el
+        operador las publica, las vías por las que pasa. El botón de ubicación ordena las rutas por
+        distancia real a la línea del recorrido (no a una parada inventada).
       </p>
       <p>
-        Los buscadores de origen y destino aceptan barrios y sitios principales. Cuando un barrio
-        no tiene un punto oficial en el mapa, usamos el punto de despacho o retorno que el operador
-        dibuja en su recorrido; por eso buscamos rutas en un radio de 500 m.
+        Los buscadores de origen y destino aceptan barrios, sitios y paradas. La cercanía se mide
+        contra la línea del recorrido; por eso buscamos rutas en un radio de 500 m.
       </p>
       <p>
         Con origen y destino, el planificador busca rutas directas y ordena las opciones por tiempo
-        estimado: caminata, espera y tramo en bus. R10 y R22 están marcadas como circulares por el
-        operador; el planificador solo cierra la vuelta cuando el trazado termina cerca del inicio.
-        Por ahora no combina transbordos.
+        estimado: caminata, espera y tramo en bus. Por ahora no combina transbordos.
       </p>
+      {circular.length > 0 && (
+        <p>
+          Rutas marcadas como circulares por el operador: {circular.join(", ")}. El planificador solo
+          cierra la vuelta cuando el trazado termina cerca del inicio.
+        </p>
+      )}
       <p>
-        Algunos sentidos (R8, R13 y R18) están divididos en el mapa; el planificador los marca como
-        no verificados en lugar de inventar una conexión. La espera usa la frecuencia del día en la
-        zona horaria de la ciudad y no comprueba festivos, disponibilidad ni tráfico; las consultas
-        fuera de horario se marcan.
+        Cuando un sentido está dividido en el mapa, el planificador lo marca como no verificado en
+        lugar de inventar una conexión. La espera usa la frecuencia del día en la zona horaria de la
+        ciudad y no comprueba festivos, disponibilidad ni tráfico; las consultas fuera de horario se
+        marcan.
       </p>
 
       <h3>Privacidad</h3>
@@ -69,7 +74,7 @@ export function AboutDialog({ dialogRef, city }: Props) {
 
       <h3>Datos y límites</h3>
       <p>
-        Los trazados provienen de los mapas públicos de la UT Mi Ruta y se publican como referencia.
+        Los datos provienen de las fuentes públicas listadas abajo y se publican como referencia.
         Las rutas, horarios y tarifas pueden cambiar; la información oficial del operador siempre
         manda. Esta herramienta no reemplaza los avisos del conductor ni de la empresa.
       </p>
@@ -86,14 +91,14 @@ export function AboutDialog({ dialogRef, city }: Props) {
       <h3>Tecnología</h3>
       <p>
         React, Vite, SCSS, Leaflet y Spring Boot. El mapa base es de OpenStreetMap y las rutas
-        usan los trazados publicados por el operador. El código está bajo licencia MIT.
+        usan datos publicados por cada operador o su feed GTFS. El código está bajo licencia MIT.
       </p>
 
       <div className="about__footer">
         <a href="https://github.com/jdsalasca/open-routes" target="_blank" rel="noreferrer">
           github.com/jdsalasca/open-routes
         </a>
-        <span>Hecho para las comunidades de Boyacá.</span>
+        <span>Hecho para las comunidades.</span>
       </div>
     </dialog>
   );

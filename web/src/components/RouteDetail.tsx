@@ -39,7 +39,7 @@ export function RouteDetail({ route, activeDirection, onDirection, onBack, fare 
         >
           <ArrowLeftIcon />
         </button>
-        <span className="detail__kicker">Ruta de bus</span>
+        <span className="detail__kicker">{route.type}</span>
       </div>
 
       <div className="detail__heading">
@@ -145,7 +145,7 @@ export function RouteDetail({ route, activeDirection, onDirection, onBack, fare 
       )}
       <p className="direction-name">{direction?.name}</p>
 
-      {direction && (
+      {direction && direction.streets.length > 0 && (
         <details className="streets">
           <summary>
             Vías del recorrido <span>{direction.streets.length} vías</span>
@@ -161,7 +161,7 @@ export function RouteDetail({ route, activeDirection, onDirection, onBack, fare 
       {stops.length > 0 && (
         <>
           <h3 className="detail__section-title">
-            <PinIcon size={13} /> Paradas de despacho
+            <PinIcon size={13} /> Paradas
           </h3>
           <ul className="stop-list">
             {stops.map((stop) => (
