@@ -16,6 +16,7 @@ public record City(
         int zoom,
         String description,
         List<Source> sources,
+        List<SocialAccount> social,
         Fare fare,
         List<Place> places,
         List<Route> routes

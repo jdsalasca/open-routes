@@ -1,0 +1,1841 @@
+[
+ {
+  "id": "las-nieves",
+  "name": "Las Nieves",
+  "type": "Barrio",
+  "lat": 5.5381,
+  "lng": -73.359339,
+  "aliases": [
+   "las nieves",
+   "barrio las nieves",
+   "comuna 5"
+  ]
+ },
+ {
+  "id": "libertador",
+  "name": "Libertador",
+  "type": "Barrio",
+  "lat": 5.520352,
+  "lng": -73.369682,
+  "aliases": [
+   "libertador",
+   "barrio libertador",
+   "comuna 2"
+  ]
+ },
+ {
+  "id": "maldonado",
+  "name": "Maldonado",
+  "type": "Barrio",
+  "lat": 5.541496,
+  "lng": -73.35743,
+  "aliases": [
+   "maldonado",
+   "barrio maldonado",
+   "comuna 5"
+  ]
+ },
+ {
+  "id": "antonia-santos",
+  "name": "Antonia Santos",
+  "type": "Barrio",
+  "lat": 5.512022,
+  "lng": -73.366871,
+  "aliases": [
+   "antonia santos",
+   "barrio antonia santos",
+   "comuna 1"
+  ]
+ },
+ {
+  "id": "altamira",
+  "name": "Altamira",
+  "type": "Barrio",
+  "lat": 5.544016,
+  "lng": -73.369274,
+  "aliases": [
+   "altamira",
+   "barrio altamira",
+   "comuna 6"
+  ]
+ },
+ {
+  "id": "dona-eva",
+  "name": "Doña Eva",
+  "type": "Barrio",
+  "lat": 5.517639,
+  "lng": -73.363717,
+  "aliases": [
+   "dona eva",
+   "barrio dona eva",
+   "comuna 3"
+  ]
+ },
+ {
+  "id": "san-francisco",
+  "name": "San Francisco",
+  "type": "Barrio",
+  "lat": 5.508135,
+  "lng": -73.367987,
+  "aliases": [
+   "san francisco",
+   "barrio san francisco",
+   "comuna 1"
+  ]
+ },
+ {
+  "id": "la-fuente",
+  "name": "La Fuente",
+  "type": "Barrio",
+  "lat": 5.547433,
+  "lng": -73.365068,
+  "aliases": [
+   "la fuente",
+   "barrio la fuente",
+   "comuna 6"
+  ]
+ },
+ {
+  "id": "centro",
+  "name": "Centro",
+  "type": "Barrio",
+  "lat": 5.532325,
+  "lng": -73.361635,
+  "aliases": [
+   "centro",
+   "barrio centro",
+   "comuna 5"
+  ]
+ },
+ {
+  "id": "el-dorado",
+  "name": "El Dorado",
+  "type": "Barrio",
+  "lat": 5.537694,
+  "lng": -73.349147,
+  "aliases": [
+   "el dorado",
+   "barrio el dorado",
+   "comuna 4"
+  ]
+ },
+ {
+  "id": "ciudad-jardin",
+  "name": "Ciudad Jardin",
+  "type": "Barrio",
+  "lat": 5.501428,
+  "lng": -73.364339,
+  "aliases": [
+   "ciudad jardin",
+   "barrio ciudad jardin",
+   "comuna 1"
+  ]
+ },
+ {
+  "id": "las-quintas",
+  "name": "Las Quintas",
+  "type": "Barrio",
+  "lat": 5.553287,
+  "lng": -73.348289,
+  "aliases": [
+   "las quintas",
+   "barrio las quintas",
+   "comuna 8"
+  ]
+ },
+ {
+  "id": "20-de-julio",
+  "name": "20 de Julio",
+  "type": "Barrio",
+  "lat": 5.542224478,
+  "lng": -73.36282072,
+  "aliases": [
+   "20 de julio",
+   "barrio 20 de julio",
+   "comuna 6"
+  ]
+ },
+ {
+  "id": "bello-horizonte",
+  "name": "Bello Horizonte",
+  "type": "Barrio",
+  "lat": 5.54284754,
+  "lng": -73.36754125,
+  "aliases": [
+   "bello horizonte",
+   "barrio bello horizonte",
+   "comuna 6"
+  ]
+ },
+ {
+  "id": "asis-boyacense",
+  "name": "Asís Boyacense",
+  "type": "Barrio",
+  "lat": 5.568106604,
+  "lng": -73.3453918,
+  "aliases": [
+   "asis boyacense",
+   "barrio asis boyacense",
+   "comuna 10"
+  ]
+ },
+ {
+  "id": "el-carmen",
+  "name": "El Carmen",
+  "type": "Barrio",
+  "lat": 5.541694625,
+  "lng": -73.3666912,
+  "aliases": [
+   "el carmen",
+   "barrio el carmen",
+   "comuna 6"
+  ]
+ },
+ {
+  "id": "el-topo",
+  "name": "El Topo",
+  "type": "Barrio",
+  "lat": 5.532772616,
+  "lng": -73.36802992,
+  "aliases": [
+   "el topo",
+   "barrio el topo",
+   "comuna 2"
+  ]
+ },
+ {
+  "id": "el-triunfo",
+  "name": "El Triunfo",
+  "type": "Barrio",
+  "lat": 5.512600152,
+  "lng": -73.37370048,
+  "aliases": [
+   "el triunfo",
+   "barrio el triunfo",
+   "comuna 2"
+  ]
+ },
+ {
+  "id": "jorge-eliecer-gaitan",
+  "name": "Jorge Eliécer Gaitán",
+  "type": "Barrio",
+  "lat": 5.544465,
+  "lng": -73.360884,
+  "aliases": [
+   "jorge eliecer gaitan",
+   "barrio jorge eliecer gaitan",
+   "comuna 6"
+  ]
+ },
+ {
+  "id": "santa-rita",
+  "name": "Santa Rita",
+  "type": "Barrio",
+  "lat": 5.565165509,
+  "lng": -73.34857188,
+  "aliases": [
+   "santa rita",
+   "barrio santa rita",
+   "comuna 10"
+  ]
+ },
+ {
+  "id": "bolivar",
+  "name": "Bolívar",
+  "type": "Barrio",
+  "lat": 5.515589,
+  "lng": -73.372149,
+  "aliases": [
+   "bolivar",
+   "barrio bolivar",
+   "comuna 2"
+  ]
+ },
+ {
+  "id": "el-milagro",
+  "name": "El Milagro",
+  "type": "Barrio",
+  "lat": 5.537925579,
+  "lng": -73.36835742,
+  "aliases": [
+   "el milagro",
+   "barrio el milagro",
+   "comuna 6"
+  ]
+ },
+ {
+  "id": "estancia-el-roble",
+  "name": "Estancia el Roble",
+  "type": "Barrio",
+  "lat": 5.560672955,
+  "lng": -73.35449147,
+  "aliases": [
+   "estancia el roble",
+   "barrio estancia el roble",
+   "comuna 7"
+  ]
+ },
+ {
+  "id": "la-florida",
+  "name": "La Florida",
+  "type": "Barrio",
+  "lat": 5.51458143,
+  "lng": -73.36729847,
+  "aliases": [
+   "la florida",
+   "barrio la florida",
+   "comuna 1"
+  ]
+ },
+ {
+  "id": "mirador-escandinavo",
+  "name": "Mirador Escandinavo",
+  "type": "Barrio",
+  "lat": 5.524896099,
+  "lng": -73.37415071,
+  "aliases": [
+   "mirador escandinavo",
+   "barrio mirador escandinavo",
+   "comuna 2"
+  ]
+ },
+ {
+  "id": "san-carlos",
+  "name": "San Carlos",
+  "type": "Barrio",
+  "lat": 5.508647,
+  "lng": -73.372493,
+  "aliases": [
+   "san carlos",
+   "barrio san carlos",
+   "comuna 1"
+  ]
+ },
+ {
+  "id": "trinidad",
+  "name": "Trinidad",
+  "type": "Barrio",
+  "lat": 5.513923,
+  "lng": -73.37275,
+  "aliases": [
+   "trinidad",
+   "barrio trinidad",
+   "comuna 2"
+  ]
+ },
+ {
+  "id": "los-muiscas",
+  "name": "Los Muiscas",
+  "type": "Barrio",
+  "lat": 5.570328,
+  "lng": -73.339684,
+  "aliases": [
+   "los muiscas",
+   "barrio los muiscas",
+   "comuna 9"
+  ]
+ },
+ {
+  "id": "santa-lucia",
+  "name": "Santa Lucia",
+  "type": "Barrio",
+  "lat": 5.539489243,
+  "lng": -73.36207826,
+  "aliases": [
+   "santa lucia",
+   "barrio santa lucia",
+   "comuna 6"
+  ]
+ },
+ {
+  "id": "sol-de-oriente",
+  "name": "Sol de Oriente",
+  "type": "Barrio",
+  "lat": 5.514618055,
+  "lng": -73.36457323,
+  "aliases": [
+   "sol de oriente",
+   "barrio sol de oriente",
+   "comuna 3"
+  ]
+ },
+ {
+  "id": "villa-luz",
+  "name": "Villa Luz",
+  "type": "Barrio",
+  "lat": 5.567798926,
+  "lng": -73.34773643,
+  "aliases": [
+   "villa luz",
+   "barrio villa luz",
+   "comuna 10"
+  ]
+ },
+ {
+  "id": "la-calleja",
+  "name": "La Calleja",
+  "type": "Barrio",
+  "lat": 5.550039,
+  "lng": -73.363094,
+  "aliases": [
+   "la calleja",
+   "barrio la calleja",
+   "comuna 6"
+  ]
+ },
+ {
+  "id": "la-granja",
+  "name": "La Granja",
+  "type": "Barrio",
+  "lat": 5.561678,
+  "lng": -73.350499,
+  "aliases": [
+   "la granja",
+   "barrio la granja",
+   "comuna 7"
+  ]
+ },
+ {
+  "id": "los-patriotas",
+  "name": "Los Patriotas",
+  "type": "Barrio",
+  "lat": 5.525189299,
+  "lng": -73.35490821,
+  "aliases": [
+   "los patriotas",
+   "barrio los patriotas",
+   "comuna 3"
+  ]
+ },
+ {
+  "id": "centenario",
+  "name": "Centenario",
+  "type": "Barrio",
+  "lat": 5.530006,
+  "lng": -73.367901,
+  "aliases": [
+   "centenario",
+   "barrio centenario",
+   "comuna 2"
+  ]
+ },
+ {
+  "id": "kennedy",
+  "name": "Kennedy",
+  "type": "Barrio",
+  "lat": 5.535055448,
+  "lng": -73.36868346,
+  "aliases": [
+   "kennedy",
+   "barrio kennedy",
+   "comuna 6"
+  ]
+ },
+ {
+  "id": "paraiso",
+  "name": "Paraiso",
+  "type": "Barrio",
+  "lat": 5.526417,
+  "lng": -73.370562,
+  "aliases": [
+   "paraiso",
+   "barrio paraiso",
+   "comuna 2"
+  ]
+ },
+ {
+  "id": "pirgua",
+  "name": "Pirgua",
+  "type": "Vereda",
+  "lat": 5.575627914,
+  "lng": -73.3203273,
+  "aliases": [
+   "pirgua",
+   "vereda pirgua"
+  ]
+ },
+ {
+  "id": "ricaurte",
+  "name": "Ricaurte",
+  "type": "Barrio",
+  "lat": 5.530475,
+  "lng": -73.369725,
+  "aliases": [
+   "ricaurte",
+   "barrio ricaurte",
+   "comuna 2"
+  ]
+ },
+ {
+  "id": "san-ignacio",
+  "name": "San Ignacio",
+  "type": "Barrio",
+  "lat": 5.530005565,
+  "lng": -73.35927485,
+  "aliases": [
+   "san ignacio",
+   "barrio san ignacio",
+   "comuna 5"
+  ]
+ },
+ {
+  "id": "san-lazaro",
+  "name": "San Lazaro",
+  "type": "Barrio",
+  "lat": 5.543322211,
+  "lng": -73.37335079,
+  "aliases": [
+   "san lazaro",
+   "barrio san lazaro",
+   "comuna 6"
+  ]
+ },
+ {
+  "id": "suamox",
+  "name": "Suamox",
+  "type": "Barrio",
+  "lat": 5.570892709,
+  "lng": -73.33775246,
+  "aliases": [
+   "suamox",
+   "barrio suamox",
+   "comuna 9"
+  ]
+ },
+ {
+  "id": "aquimin",
+  "name": "Aquimín",
+  "type": "Barrio",
+  "lat": 5.524773,
+  "lng": -73.363974,
+  "aliases": [
+   "aquimin",
+   "barrio aquimin",
+   "comuna 5"
+  ]
+ },
+ {
+  "id": "fuente-higueras",
+  "name": "Fuente Higueras",
+  "type": "Barrio",
+  "lat": 5.534576,
+  "lng": -73.35258,
+  "aliases": [
+   "fuente higueras",
+   "barrio fuente higueras",
+   "comuna 4"
+  ]
+ },
+ {
+  "id": "jose-antonio-galan",
+  "name": "José Antonio Galán",
+  "type": "Barrio",
+  "lat": 5.564093639,
+  "lng": -73.35075275,
+  "aliases": [
+   "jose antonio galan",
+   "barrio jose antonio galan",
+   "comuna 10"
+  ]
+ },
+ {
+  "id": "los-cojines",
+  "name": "Los Cojines",
+  "type": "Barrio",
+  "lat": 5.537624607,
+  "lng": -73.37002291,
+  "aliases": [
+   "los cojines",
+   "barrio los cojines",
+   "comuna 6"
+  ]
+ },
+ {
+  "id": "runta",
+  "name": "Runta",
+  "type": "Vereda",
+  "lat": 5.490578,
+  "lng": -73.382664,
+  "aliases": [
+   "runta",
+   "vereda runta"
+  ]
+ },
+ {
+  "id": "avenida-circunvalar",
+  "name": "Avenida Circunvalar",
+  "type": "Barrio",
+  "lat": 5.527955,
+  "lng": -73.345585,
+  "aliases": [
+   "avenida circunvalar",
+   "barrio avenida circunvalar",
+   "comuna 4"
+  ]
+ },
+ {
+  "id": "santa-catalina",
+  "name": "Santa Catalina",
+  "type": "Barrio",
+  "lat": 5.573230319,
+  "lng": -73.34293432,
+  "aliases": [
+   "santa catalina",
+   "barrio santa catalina",
+   "comuna 10"
+  ]
+ },
+ {
+  "id": "surinama",
+  "name": "Surinama",
+  "type": "Barrio",
+  "lat": 5.516638103,
+  "lng": -73.36943228,
+  "aliases": [
+   "surinama",
+   "barrio surinama",
+   "comuna 2"
+  ]
+ },
+ {
+  "id": "tras-del-alto",
+  "name": "Tras del Alto",
+  "type": "Vereda",
+  "lat": 5.546109,
+  "lng": -73.399143,
+  "aliases": [
+   "tras del alto",
+   "vereda tras del alto"
+  ]
+ },
+ {
+  "id": "villa-bachue",
+  "name": "Villa Bachué",
+  "type": "Barrio",
+  "lat": 5.5164,
+  "lng": -73.361399,
+  "aliases": [
+   "villa bachue",
+   "barrio villa bachue",
+   "comuna 3"
+  ]
+ },
+ {
+  "id": "villas-del-norte",
+  "name": "Villas del Norte",
+  "type": "Barrio",
+  "lat": 5.57099,
+  "lng": -73.345563,
+  "aliases": [
+   "villas del norte",
+   "barrio villas del norte",
+   "comuna 10"
+  ]
+ },
+ {
+  "id": "bochica",
+  "name": "Bochica",
+  "type": "Barrio",
+  "lat": 5.517127,
+  "lng": -73.362086,
+  "aliases": [
+   "bochica",
+   "barrio bochica",
+   "comuna 3"
+  ]
+ },
+ {
+  "id": "coeducadores",
+  "name": "Coeducadores",
+  "type": "Barrio",
+  "lat": 5.57304,
+  "lng": -73.337281,
+  "aliases": [
+   "coeducadores",
+   "barrio coeducadores",
+   "comuna 9"
+  ]
+ },
+ {
+  "id": "el-bosque",
+  "name": "El Bosque",
+  "type": "Barrio",
+  "lat": 5.527913,
+  "lng": -73.364596,
+  "aliases": [
+   "el bosque",
+   "barrio el bosque",
+   "comuna 5"
+  ]
+ },
+ {
+  "id": "el-consuelo",
+  "name": "El Consuelo",
+  "type": "Barrio",
+  "lat": 5.525606,
+  "lng": -73.361464,
+  "aliases": [
+   "el consuelo",
+   "barrio el consuelo",
+   "comuna 5"
+  ]
+ },
+ {
+  "id": "cooservicios",
+  "name": "Cooservicios",
+  "type": "Barrio",
+  "lat": 5.516272,
+  "lng": -73.358996,
+  "aliases": [
+   "cooservicios",
+   "barrio cooservicios",
+   "comuna 3"
+  ]
+ },
+ {
+  "id": "florencia",
+  "name": "Florencia",
+  "type": "Barrio",
+  "lat": 5.565525619,
+  "lng": -73.35257123,
+  "aliases": [
+   "florencia",
+   "barrio florencia",
+   "comuna 7"
+  ]
+ },
+ {
+  "id": "la-esmeralda",
+  "name": "La Esmeralda",
+  "type": "Barrio",
+  "lat": 5.544999,
+  "lng": -73.347366,
+  "aliases": [
+   "la esmeralda",
+   "barrio la esmeralda",
+   "comuna 8"
+  ]
+ },
+ {
+  "id": "la-maria",
+  "name": "La María",
+  "type": "Barrio",
+  "lat": 5.552495,
+  "lng": -73.361056,
+  "aliases": [
+   "la maria",
+   "barrio la maria",
+   "comuna 6"
+  ]
+ },
+ {
+  "id": "los-cristales",
+  "name": "Los Cristales",
+  "type": "Barrio",
+  "lat": 5.555784,
+  "lng": -73.351958,
+  "aliases": [
+   "los cristales",
+   "barrio los cristales",
+   "comuna 7"
+  ]
+ },
+ {
+  "id": "manzanarez",
+  "name": "Manzanarez",
+  "type": "Barrio",
+  "lat": 5.529002,
+  "lng": -73.353825,
+  "aliases": [
+   "manzanarez",
+   "barrio manzanarez",
+   "comuna 4"
+  ]
+ },
+ {
+  "id": "parques-del-nogal",
+  "name": "Parques del Nogal",
+  "type": "Barrio",
+  "lat": 5.573019,
+  "lng": -73.345306,
+  "aliases": [
+   "parques del nogal",
+   "barrio parques del nogal",
+   "comuna 10"
+  ]
+ },
+ {
+  "id": "nazareth",
+  "name": "Nazareth",
+  "type": "Barrio",
+  "lat": 5.515909,
+  "lng": -73.36391,
+  "aliases": [
+   "nazareth",
+   "barrio nazareth",
+   "comuna 1"
+  ]
+ },
+ {
+  "id": "tunjuelito",
+  "name": "Tunjuelito",
+  "type": "Barrio",
+  "lat": 5.517255,
+  "lng": -73.366678,
+  "aliases": [
+   "tunjuelito",
+   "barrio tunjuelito",
+   "comuna 1"
+  ]
+ },
+ {
+  "id": "la-perla",
+  "name": "La Perla",
+  "type": "Barrio",
+  "lat": 5.510179859,
+  "lng": -73.36988652,
+  "aliases": [
+   "la perla",
+   "barrio la perla",
+   "comuna 1"
+  ]
+ },
+ {
+  "id": "dona-leonilde",
+  "name": "Doña Leonilde",
+  "type": "Barrio",
+  "lat": 5.510356,
+  "lng": -73.371806,
+  "aliases": [
+   "dona leonilde",
+   "barrio dona leonilde",
+   "comuna 1"
+  ]
+ },
+ {
+  "id": "altos-del-triunfo",
+  "name": "Altos del Triunfo",
+  "type": "Barrio",
+  "lat": 5.513026,
+  "lng": -73.37702,
+  "aliases": [
+   "altos del triunfo",
+   "barrio altos del triunfo",
+   "comuna 2"
+  ]
+ },
+ {
+  "id": "las-americas",
+  "name": "Las Américas",
+  "type": "Barrio",
+  "lat": 5.526909,
+  "lng": -73.367665,
+  "aliases": [
+   "las americas",
+   "barrio las americas",
+   "comuna 2"
+  ]
+ },
+ {
+  "id": "la-sierra",
+  "name": "La Sierra",
+  "type": "Barrio",
+  "lat": 5.52819,
+  "lng": -73.370111,
+  "aliases": [
+   "la sierra",
+   "barrio la sierra",
+   "comuna 2"
+  ]
+ },
+ {
+  "id": "obrero",
+  "name": "Obrero",
+  "type": "Barrio",
+  "lat": 5.518921,
+  "lng": -73.366764,
+  "aliases": [
+   "obrero",
+   "barrio obrero",
+   "comuna 2"
+  ]
+ },
+ {
+  "id": "urazandy",
+  "name": "Urazandy",
+  "type": "Barrio",
+  "lat": 5.527849063,
+  "lng": -73.36774393,
+  "aliases": [
+   "urazandy",
+   "barrio urazandy",
+   "comuna 2"
+  ]
+ },
+ {
+  "id": "jordan",
+  "name": "Jordán",
+  "type": "Barrio",
+  "lat": 5.521292,
+  "lng": -73.362558,
+  "aliases": [
+   "jordan",
+   "barrio jordan",
+   "comuna 3"
+  ]
+ },
+ {
+  "id": "hunza",
+  "name": "Hunza",
+  "type": "Barrio",
+  "lat": 5.524986,
+  "lng": -73.359296,
+  "aliases": [
+   "hunza",
+   "barrio hunza",
+   "comuna 3"
+  ]
+ },
+ {
+  "id": "penitas",
+  "name": "Peñitas",
+  "type": "Barrio",
+  "lat": 5.519156,
+  "lng": -73.355048,
+  "aliases": [
+   "penitas",
+   "barrio penitas",
+   "comuna 3"
+  ]
+ },
+ {
+  "id": "portal-de-otono",
+  "name": "Portal de Otoño",
+  "type": "Barrio",
+  "lat": 5.517682,
+  "lng": -73.359919,
+  "aliases": [
+   "portal de otono",
+   "barrio portal de otono",
+   "comuna 3"
+  ]
+ },
+ {
+  "id": "san-antonio",
+  "name": "San Antonio",
+  "type": "Barrio",
+  "lat": 5.521377,
+  "lng": -73.358181,
+  "aliases": [
+   "san antonio",
+   "barrio san antonio",
+   "comuna 3"
+  ]
+ },
+ {
+  "id": "santa-marta",
+  "name": "Santa Marta",
+  "type": "Barrio",
+  "lat": 5.515183,
+  "lng": -73.355541,
+  "aliases": [
+   "santa marta",
+   "barrio santa marta",
+   "comuna 3"
+  ]
+ },
+ {
+  "id": "xativilla",
+  "name": "Xativilla",
+  "type": "Barrio",
+  "lat": 5.521035,
+  "lng": -73.353739,
+  "aliases": [
+   "xativilla",
+   "barrio xativilla",
+   "comuna 3"
+  ]
+ },
+ {
+  "id": "ciudadela-comfaboy",
+  "name": "Ciudadela Comfaboy",
+  "type": "Barrio",
+  "lat": 5.542927,
+  "lng": -73.348696,
+  "aliases": [
+   "ciudadela comfaboy",
+   "barrio ciudadela comfaboy",
+   "comuna 8"
+  ]
+ },
+ {
+  "id": "curubal",
+  "name": "Curubal",
+  "type": "Barrio",
+  "lat": 5.526823,
+  "lng": -73.349898,
+  "aliases": [
+   "curubal",
+   "barrio curubal",
+   "comuna 4"
+  ]
+ },
+ {
+  "id": "el-rodeo",
+  "name": "El Rodeo",
+  "type": "Barrio",
+  "lat": 5.530582,
+  "lng": -73.356593,
+  "aliases": [
+   "el rodeo",
+   "barrio el rodeo",
+   "comuna 4"
+  ]
+ },
+ {
+  "id": "prado-de-san-luis",
+  "name": "Prado de San Luis",
+  "type": "Barrio",
+  "lat": 5.531501,
+  "lng": -73.346057,
+  "aliases": [
+   "prado de san luis",
+   "barrio prado de san luis",
+   "comuna 4"
+  ]
+ },
+ {
+  "id": "prados-de-alcala",
+  "name": "Prados de Alcalá",
+  "type": "Barrio",
+  "lat": 5.529242446,
+  "lng": -73.3509666,
+  "aliases": [
+   "prados de alcala",
+   "barrio prados de alcala",
+   "comuna 4"
+  ]
+ },
+ {
+  "id": "liduena",
+  "name": "Lidueña",
+  "type": "Barrio",
+  "lat": 5.533444,
+  "lng": -73.35743,
+  "aliases": [
+   "liduena",
+   "barrio liduena",
+   "comuna 5"
+  ]
+ },
+ {
+  "id": "nueva-santa-barbara",
+  "name": "Nueva Santa Bárbara",
+  "type": "Barrio",
+  "lat": 5.528852,
+  "lng": -73.366163,
+  "aliases": [
+   "nueva santa barbara",
+   "barrio nueva santa barbara",
+   "comuna 5"
+  ]
+ },
+ {
+  "id": "santa-barbara",
+  "name": "Santa Bárbara",
+  "type": "Barrio",
+  "lat": 5.530283,
+  "lng": -73.36524,
+  "aliases": [
+   "santa barbara",
+   "barrio santa barbara",
+   "comuna 5"
+  ]
+ },
+ {
+  "id": "parque-de-los-martires",
+  "name": "Parque de los Mártires",
+  "type": "Barrio",
+  "lat": 5.52819,
+  "lng": -73.363867,
+  "aliases": [
+   "parque de los martires",
+   "barrio parque de los martires",
+   "comuna 5"
+  ]
+ },
+ {
+  "id": "popular",
+  "name": "Popular",
+  "type": "Barrio",
+  "lat": 5.536178,
+  "lng": -73.363888,
+  "aliases": [
+   "popular",
+   "barrio popular",
+   "comuna 5"
+  ]
+ },
+ {
+  "id": "san-laureano",
+  "name": "San Laureano",
+  "type": "Barrio",
+  "lat": 5.526738,
+  "lng": -73.36333,
+  "aliases": [
+   "san laureano",
+   "barrio san laureano",
+   "comuna 5"
+  ]
+ },
+ {
+  "id": "villa-universitaria",
+  "name": "Villa Universitaria",
+  "type": "Barrio",
+  "lat": 5.548224,
+  "lng": -73.3567,
+  "aliases": [
+   "villa universitaria",
+   "barrio villa universitaria",
+   "comuna 7"
+  ]
+ },
+ {
+  "id": "canapro",
+  "name": "Canapro",
+  "type": "Barrio",
+  "lat": 5.554823,
+  "lng": -73.353374,
+  "aliases": [
+   "canapro",
+   "barrio canapro",
+   "comuna 7"
+  ]
+ },
+ {
+  "id": "jose-joaquin-camacho",
+  "name": "José Joaquín Camacho",
+  "type": "Barrio",
+  "lat": 5.557108,
+  "lng": -73.351164,
+  "aliases": [
+   "jose joaquin camacho",
+   "barrio jose joaquin camacho",
+   "comuna 7"
+  ]
+ },
+ {
+  "id": "la-colina",
+  "name": "La Colina",
+  "type": "Barrio",
+  "lat": 5.554161,
+  "lng": -73.358052,
+  "aliases": [
+   "la colina",
+   "barrio la colina",
+   "comuna 7"
+  ]
+ },
+ {
+  "id": "pozo-de-donato",
+  "name": "Pozo de Donato",
+  "type": "Barrio",
+  "lat": 5.551213,
+  "lng": -73.353052,
+  "aliases": [
+   "pozo de donato",
+   "barrio pozo de donato",
+   "comuna 7"
+  ]
+ },
+ {
+  "id": "prados-del-norte",
+  "name": "Prados del Norte",
+  "type": "Barrio",
+  "lat": 5.563173,
+  "lng": -73.349619,
+  "aliases": [
+   "prados del norte",
+   "barrio prados del norte",
+   "comuna 7"
+  ]
+ },
+ {
+  "id": "villa-toledo",
+  "name": "Villa Toledo",
+  "type": "Barrio",
+  "lat": 5.563536,
+  "lng": -73.353717,
+  "aliases": [
+   "villa toledo",
+   "barrio villa toledo",
+   "comuna 7"
+  ]
+ },
+ {
+  "id": "la-gran-reserva",
+  "name": "La Gran Reserva",
+  "type": "Barrio",
+  "lat": 5.53197,
+  "lng": -73.356915,
+  "aliases": [
+   "la gran reserva",
+   "barrio la gran reserva",
+   "comuna 8"
+  ]
+ },
+ {
+  "id": "quince-de-mayo",
+  "name": "Quince de Mayo",
+  "type": "Barrio",
+  "lat": 5.55068,
+  "lng": -73.349748,
+  "aliases": [
+   "quince de mayo",
+   "barrio quince de mayo",
+   "comuna 8"
+  ]
+ },
+ {
+  "id": "remansos-de-santa-ines",
+  "name": "Remansos de Santa Ines",
+  "type": "Barrio",
+  "lat": 5.548394,
+  "lng": -73.352344,
+  "aliases": [
+   "remansos de santa ines",
+   "barrio remansos de santa ines",
+   "comuna 8"
+  ]
+ },
+ {
+  "id": "rincon-de-la-pradera",
+  "name": "Rincón de la Pradera",
+  "type": "Barrio",
+  "lat": 5.545767,
+  "lng": -73.355005,
+  "aliases": [
+   "rincon de la pradera",
+   "barrio rincon de la pradera",
+   "comuna 8"
+  ]
+ },
+ {
+  "id": "santa-ines",
+  "name": "Santa Ines",
+  "type": "Barrio",
+  "lat": 5.549227,
+  "lng": -73.350692,
+  "aliases": [
+   "santa ines",
+   "barrio santa ines",
+   "comuna 8"
+  ]
+ },
+ {
+  "id": "terrazas-de-santa-ines",
+  "name": "Terrazas de Santa Ines",
+  "type": "Barrio",
+  "lat": 5.548074,
+  "lng": -73.348846,
+  "aliases": [
+   "terrazas de santa ines",
+   "barrio terrazas de santa ines",
+   "comuna 8"
+  ]
+ },
+ {
+  "id": "alameda",
+  "name": "Alameda",
+  "type": "Barrio",
+  "lat": 5.558434349,
+  "lng": -73.34681367,
+  "aliases": [
+   "alameda",
+   "barrio alameda",
+   "comuna 9"
+  ]
+ },
+ {
+  "id": "alameda-del-bosque",
+  "name": "Alameda del Bosque",
+  "type": "Barrio",
+  "lat": 5.558434349,
+  "lng": -73.34681367,
+  "aliases": [
+   "alameda del bosque",
+   "barrio alameda del bosque",
+   "comuna 9"
+  ]
+ },
+ {
+  "id": "alcala-real",
+  "name": "Alcala Real",
+  "type": "Barrio",
+  "lat": 5.573531,
+  "lng": -73.333912,
+  "aliases": [
+   "alcala real",
+   "barrio alcala real",
+   "comuna 9"
+  ]
+ },
+ {
+  "id": "altagracia",
+  "name": "Altagracia",
+  "type": "Barrio",
+  "lat": 5.557095584,
+  "lng": -73.34238365,
+  "aliases": [
+   "altagracia",
+   "barrio altagracia",
+   "comuna 9"
+  ]
+ },
+ {
+  "id": "altos-de-san-martin",
+  "name": "Altos de San Martín",
+  "type": "Barrio",
+  "lat": 5.552474,
+  "lng": -73.342946,
+  "aliases": [
+   "altos de san martin",
+   "barrio altos de san martin",
+   "comuna 9"
+  ]
+ },
+ {
+  "id": "altos-de-suamox",
+  "name": "Altos de Suamox",
+  "type": "Barrio",
+  "lat": 5.572527,
+  "lng": -73.339019,
+  "aliases": [
+   "altos de suamox",
+   "barrio altos de suamox",
+   "comuna 9"
+  ]
+ },
+ {
+  "id": "arboleda",
+  "name": "Arboleda",
+  "type": "Barrio",
+  "lat": 5.572399,
+  "lng": -73.332603,
+  "aliases": [
+   "arboleda",
+   "barrio arboleda",
+   "comuna 9"
+  ]
+ },
+ {
+  "id": "capitolio",
+  "name": "Capitolio",
+  "type": "Barrio",
+  "lat": 5.570328,
+  "lng": -73.334577,
+  "aliases": [
+   "capitolio",
+   "barrio capitolio",
+   "comuna 9"
+  ]
+ },
+ {
+  "id": "santa-ana",
+  "name": "Santa Ana",
+  "type": "Barrio",
+  "lat": 5.564583,
+  "lng": -73.345907,
+  "aliases": [
+   "santa ana",
+   "barrio santa ana",
+   "comuna 9"
+  ]
+ },
+ {
+  "id": "buenavista",
+  "name": "Buenavista",
+  "type": "Barrio",
+  "lat": 5.569324,
+  "lng": -73.350091,
+  "aliases": [
+   "buenavista",
+   "barrio buenavista",
+   "comuna 10"
+  ]
+ },
+ {
+  "id": "compes",
+  "name": "Compes",
+  "type": "Barrio",
+  "lat": 5.575411,
+  "lng": -73.341937,
+  "aliases": [
+   "compes",
+   "barrio compes",
+   "comuna 10"
+  ]
+ },
+ {
+  "id": "el-poblado",
+  "name": "El Poblado",
+  "type": "Barrio",
+  "lat": 5.566868,
+  "lng": -73.351099,
+  "aliases": [
+   "el poblado",
+   "barrio el poblado",
+   "comuna 10"
+  ]
+ },
+ {
+  "id": "manantial-del-norte",
+  "name": "Manantial del Norte",
+  "type": "Barrio",
+  "lat": 5.581262,
+  "lng": -73.337646,
+  "aliases": [
+   "manantial del norte",
+   "barrio manantial del norte",
+   "comuna 10"
+  ]
+ },
+ {
+  "id": "manantial",
+  "name": "Manantial",
+  "type": "Barrio",
+  "lat": 5.578721,
+  "lng": -73.339019,
+  "aliases": [
+   "manantial",
+   "barrio manantial",
+   "comuna 10"
+  ]
+ },
+ {
+  "id": "seminario-parque",
+  "name": "Seminario Parque",
+  "type": "Barrio",
+  "lat": 5.559884,
+  "lng": -73.347881,
+  "aliases": [
+   "seminario parque",
+   "barrio seminario parque",
+   "comuna 9"
+  ]
+ },
+ {
+  "id": "santa-elena",
+  "name": "Santa Elena",
+  "type": "Barrio",
+  "lat": 5.560653,
+  "lng": -73.338997,
+  "aliases": [
+   "santa elena",
+   "barrio santa elena",
+   "comuna 9"
+  ]
+ },
+ {
+  "id": "reina-cecilia",
+  "name": "Reina Cecilia",
+  "type": "Barrio",
+  "lat": 5.577717,
+  "lng": -73.333225,
+  "aliases": [
+   "reina cecilia",
+   "barrio reina cecilia",
+   "comuna 9"
+  ]
+ },
+ {
+  "id": "el-porvenir",
+  "name": "El Porvenir",
+  "type": "Vereda",
+  "lat": 5.526802,
+  "lng": -73.3885,
+  "aliases": [
+   "el porvenir",
+   "vereda el porvenir"
+  ]
+ },
+ {
+  "id": "baron",
+  "name": "Barón",
+  "type": "Vereda",
+  "lat": 5.489894,
+  "lng": -73.411846,
+  "aliases": [
+   "baron",
+   "vereda baron"
+  ]
+ },
+ {
+  "id": "la-hoya",
+  "name": "La Hoya",
+  "type": "Vereda",
+  "lat": 5.470927,
+  "lng": -73.431244,
+  "aliases": [
+   "la hoya",
+   "vereda la hoya"
+  ]
+ },
+ {
+  "id": "chorro-blanco",
+  "name": "Chorro Blanco",
+  "type": "Vereda",
+  "lat": 5.472977,
+  "lng": -73.40086,
+  "aliases": [
+   "chorro blanco",
+   "vereda chorro blanco"
+  ]
+ },
+ {
+  "id": "la-lajita",
+  "name": "La Lajita",
+  "type": "Vereda",
+  "lat": 5.45025,
+  "lng": -73.415794,
+  "aliases": [
+   "la lajita",
+   "vereda la lajita"
+  ]
+ },
+ {
+  "id": "colorada",
+  "name": "Colorada",
+  "type": "Vereda",
+  "lat": 5.58233,
+  "lng": -73.344727,
+  "aliases": [
+   "colorada",
+   "vereda colorada"
+  ]
+ },
+ {
+  "id": "mesopotamia",
+  "name": "Mesopotamia",
+  "type": "Barrio",
+  "lat": 5.544721,
+  "lng": -73.353202,
+  "aliases": [
+   "mesopotamia",
+   "barrio mesopotamia",
+   "comuna 8"
+  ]
+ },
+ {
+  "id": "montecarlo",
+  "name": "Montecarlo",
+  "type": "Barrio",
+  "lat": 5.565245,
+  "lng": -73.351893,
+  "aliases": [
+   "montecarlo",
+   "barrio montecarlo",
+   "comuna 10"
+  ]
+ },
+ {
+  "id": "nueva-santa-catalina",
+  "name": "Nueva Santa Catalina",
+  "type": "Barrio",
+  "lat": 5.575026,
+  "lng": -73.345134,
+  "aliases": [
+   "nueva santa catalina",
+   "barrio nueva santa catalina",
+   "comuna 10"
+  ]
+ },
+ {
+  "id": "portal-de-hunzahua",
+  "name": "Portal de Hunzahua",
+  "type": "Barrio",
+  "lat": 5.582479,
+  "lng": -73.337409,
+  "aliases": [
+   "portal de hunzahua",
+   "barrio portal de hunzahua",
+   "comuna 10"
+  ]
+ },
+ {
+  "id": "caminitos-de-oicata",
+  "name": "Caminitos de Oicatá",
+  "type": "Barrio",
+  "lat": 5.572634,
+  "lng": -73.335457,
+  "aliases": [
+   "caminitos de oicata",
+   "barrio caminitos de oicata",
+   "comuna 9"
+  ]
+ },
+ {
+  "id": "colinas-del-zue",
+  "name": "Colinas del Zue",
+  "type": "Barrio",
+  "lat": 5.572036,
+  "lng": -73.339491,
+  "aliases": [
+   "colinas del zue",
+   "barrio colinas del zue",
+   "comuna 9"
+  ]
+ },
+ {
+  "id": "condominio-seminario-parque",
+  "name": "Condominio Seminario Parque",
+  "type": "Barrio",
+  "lat": 5.566953,
+  "lng": -73.344791,
+  "aliases": [
+   "condominio seminario parque",
+   "barrio condominio seminario parque",
+   "comuna 9"
+  ]
+ },
+ {
+  "id": "villita",
+  "name": "Villita",
+  "type": "Barrio",
+  "lat": 5.564305,
+  "lng": -73.334835,
+  "aliases": [
+   "villita",
+   "barrio villita",
+   "comuna 9"
+  ]
+ },
+ {
+  "id": "portales-de-mamore",
+  "name": "Portales de Mamore",
+  "type": "Barrio",
+  "lat": 5.578892,
+  "lng": -73.340671,
+  "aliases": [
+   "portales de mamore",
+   "barrio portales de mamore",
+   "comuna 9"
+  ]
+ },
+ {
+  "id": "reserva-campestre",
+  "name": "Reserva Campestre",
+  "type": "Barrio",
+  "lat": 5.564305,
+  "lng": -73.336594,
+  "aliases": [
+   "reserva campestre",
+   "barrio reserva campestre",
+   "comuna 9"
+  ]
+ },
+ {
+  "id": "tejares-del-norte",
+  "name": "Tejares del Norte",
+  "type": "Barrio",
+  "lat": 5.570947,
+  "lng": -73.33432,
+  "aliases": [
+   "tejares del norte",
+   "barrio tejares del norte",
+   "comuna 9"
+  ]
+ },
+ {
+  "id": "torres-de-neuchatel",
+  "name": "Torres de Neuchatel",
+  "type": "Barrio",
+  "lat": 5.573254,
+  "lng": -73.335135,
+  "aliases": [
+   "torres de neuchatel",
+   "barrio torres de neuchatel",
+   "comuna 9"
+  ]
+ },
+ {
+  "id": "ventus",
+  "name": "Ventus",
+  "type": "Barrio",
+  "lat": 5.569772,
+  "lng": -73.338075,
+  "aliases": [
+   "ventus",
+   "barrio ventus",
+   "comuna 9"
+  ]
+ },
+ {
+  "id": "villas-del-lago",
+  "name": "Villas del Lago",
+  "type": "Barrio",
+  "lat": 5.57163,
+  "lng": -73.333654,
+  "aliases": [
+   "villas del lago",
+   "barrio villas del lago",
+   "comuna 9"
+  ]
+ },
+ {
+  "id": "lombardia",
+  "name": "Lombardía",
+  "type": "Barrio",
+  "lat": 5.548523,
+  "lng": -73.346336,
+  "aliases": [
+   "lombardia",
+   "barrio lombardia",
+   "comuna 8"
+  ]
+ },
+ {
+  "id": "lirio-real",
+  "name": "Lirio Real",
+  "type": "Barrio",
+  "lat": 5.553157,
+  "lng": -73.343375,
+  "aliases": [
+   "lirio real",
+   "barrio lirio real",
+   "comuna 8"
+  ]
+ },
+ {
+  "id": "los-urapanes",
+  "name": "Los Urapanes",
+  "type": "Barrio",
+  "lat": 5.548458,
+  "lng": -73.357236,
+  "aliases": [
+   "los urapanes",
+   "barrio los urapanes",
+   "comuna 7"
+  ]
+ },
+ {
+  "id": "suarez",
+  "name": "Suárez",
+  "type": "Barrio",
+  "lat": 5.523513,
+  "lng": -73.364897,
+  "aliases": [
+   "suarez",
+   "barrio suarez",
+   "comuna 5"
+  ]
+ },
+ {
+  "id": "belalcazar",
+  "name": "Belalcázar",
+  "type": "Barrio",
+  "lat": 5.545682,
+  "lng": -73.359082,
+  "aliases": [
+   "belalcazar",
+   "barrio belalcazar",
+   "comuna 6"
+  ]
+ },
+ {
+  "id": "los-trigales",
+  "name": "Los Trigales",
+  "type": "Barrio",
+  "lat": 5.548608,
+  "lng": -73.361678,
+  "aliases": [
+   "los trigales",
+   "barrio los trigales",
+   "comuna 6"
+  ]
+ },
+ {
+  "id": "altos-de-la-maria",
+  "name": "Altos de la Maria",
+  "type": "Barrio",
+  "lat": 5.550103,
+  "lng": -73.360949,
+  "aliases": [
+   "altos de la maria",
+   "barrio altos de la maria",
+   "comuna 6"
+  ]
+ },
+ {
+  "id": "los-rosales",
+  "name": "Los Rosales",
+  "type": "Barrio",
+  "lat": 5.553264,
+  "lng": -73.353353,
+  "aliases": [
+   "los rosales",
+   "barrio los rosales",
+   "comuna 7"
+  ]
+ },
+ {
+  "id": "san-rafael",
+  "name": "San Rafael",
+  "type": "Barrio",
+  "lat": 5.559543,
+  "lng": -73.357108,
+  "aliases": [
+   "san rafael",
+   "barrio san rafael",
+   "comuna 7"
+  ]
+ },
+ {
+  "id": "colinas-del-norte",
+  "name": "Colinas del Norte",
+  "type": "Barrio",
+  "lat": 5.562575,
+  "lng": -73.358395,
+  "aliases": [
+   "colinas del norte",
+   "barrio colinas del norte",
+   "comuna 7"
+  ]
+ },
+ {
+  "id": "los-lanceros",
+  "name": "Los Lanceros",
+  "type": "Barrio",
+  "lat": 5.535345,
+  "lng": -73.355477,
+  "aliases": [
+   "los lanceros",
+   "barrio los lanceros",
+   "comuna 4"
+  ]
+ },
+ {
+  "id": "mirador-de-oriente",
+  "name": "Mirador de Oriente",
+  "type": "Barrio",
+  "lat": 5.52095,
+  "lng": -73.355756,
+  "aliases": [
+   "mirador de oriente",
+   "barrio mirador de oriente",
+   "comuna 3"
+  ]
+ },
+ {
+  "id": "altos-de-cooservicios",
+  "name": "Altos de Cooservicios",
+  "type": "Barrio",
+  "lat": 5.514329,
+  "lng": -73.358266,
+  "aliases": [
+   "altos de cooservicios",
+   "barrio altos de cooservicios",
+   "comuna 3"
+  ]
+ }
+]

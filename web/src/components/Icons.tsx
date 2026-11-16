@@ -139,3 +139,12 @@ export function SwapIcon({ size = 16, className }: IconProps) {
     </svg>
   );
 }
+
+export function NewsIcon({ size = 17, className }: IconProps) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" aria-hidden="true" {...stroke} className={className}>
+      <path d="M4 5h13v14H5a1 1 0 0 1-1-1V5Z" />
+      <path d="M17 8h3v9a2 2 0 0 1-2 2M7 8h6M7 11h6M7 14h4" />
+    </svg>
+  );
+}

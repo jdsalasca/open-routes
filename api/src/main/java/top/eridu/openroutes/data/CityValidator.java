@@ -5,6 +5,7 @@ import top.eridu.openroutes.domain.Direction;
 import top.eridu.openroutes.domain.Place;
 import top.eridu.openroutes.domain.Route;
 import top.eridu.openroutes.domain.Schedule;
+import top.eridu.openroutes.domain.SocialAccount;
 
 import java.time.DateTimeException;
 import java.time.LocalTime;
@@ -47,6 +48,7 @@ public final class CityValidator {
                 "tarifa inválida en " + city.slug());
         require(city.sources() != null && !city.sources().isEmpty(),
                 "sources vacío en " + city.slug());
+        validateSocial(city.social(), city.slug());
         require(city.places() != null && !city.places().isEmpty(),
                 "places vacío en " + city.slug());
         require(city.routes() != null && !city.routes().isEmpty(),
@@ -54,6 +56,18 @@ public final class CityValidator {
 
         validatePlaces(city.places(), city.slug());
         validateRoutes(city.routes(), city.slug());
+    }
+
+    private static void validateSocial(List<SocialAccount> social, String slug) {
+        if (social == null) {
+            return;
+        }
+        for (SocialAccount account : social) {
+            require(account != null && notBlank(account.label()) && notBlank(account.handle())
+                            && notBlank(account.url())
+                            && (account.url().startsWith("https://") || account.url().startsWith("http://")),
+                    "cuenta social inválida en " + slug);
+        }
     }
 
     private static void validatePlaces(List<Place> places, String slug) {

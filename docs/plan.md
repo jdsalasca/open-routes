@@ -33,6 +33,15 @@ Mapa web de transporte público para Tunja que responda en segundos: qué rutas 
 - [x] Ficha tolera ciudades sin `streets` y muestra “Paradas” en vez de “Paradas de despacho”.
 - [x] Verificación multi-ciudad en navegador con una segunda ciudad simulada.
 
+### R1.6 · Rutas superpuestas, barrios y movilidad
+
+- [x] Inspector de punto: tocar el mapa lista las rutas a menos de 150 m, con color, distancia y acceso a la ficha.
+- [x] Los 154 barrios y veredas oficiales de Tunja (Datos Abiertos, CC BY-SA 4.0) entran al buscador local.
+- [x] Búsqueda de direcciones y puntos de interés con Nominatim, acotada a la ciudad, con caché y 1 req/s.
+- [x] Sección de movilidad con titulares de Google News RSS y cuentas oficiales; X no se incrusta para no cargar cookies.
+- [x] Detección de errores externos: la app conserva la búsqueda local y muestra un aviso si OSM o las noticias no responden.
+- [x] Verificación desktop/móvil con datos reales y pruebas de los servicios externos con servidores locales.
+
 ### R2 · Datos y comunidad (después)
 
 - Paradas oficiales y tiempos de paso cuando el operador los publique.
@@ -47,4 +56,7 @@ Mapa web de transporte público para Tunja que responda en segundos: qué rutas 
 2. La geolocalización devuelve rutas ordenadas por distancia y el mapa las resalta.
 3. La ficha de ruta muestra horarios, trayectos, vías, paradas y fuente.
 4. Móvil: el panel no tapa la ruta seleccionada y todo es navegable con teclado.
-5. `https://open-routes.eridu.top/api/health` responde `ok` y los demás sitios del túnel siguen en 200.
+5. Tocar el mapa abre un panel con las rutas a menos de 150 m y permite abrir su ficha.
+6. El buscador encuentra los 154 barrios y veredas oficiales sin red; una dirección se consulta en OpenStreetMap al confirmar.
+7. La sección de movilidad muestra titulares con fuente y enlaces a las cuentas oficiales, sin cookies de X.
+8. `https://open-routes.eridu.top/api/health` responde `ok` y los demás sitios del túnel siguen en 200.

@@ -19,7 +19,9 @@ Rutas de transporte público claras y cerca de ti. Empieza en **Tunja, Boyacá**
 - Elige un origen y un destino: muestra rutas directas ordenadas por tiempo estimado, con caminata, espera y tramo en bus.
 - Cambia de ciudad desde la cabecera; la elección queda en `?city=` y en el navegador.
 - Intercambia origen y destino, o usa tu ubicación como origen.
-- Busca un barrio o lugar (Escandinavo, Plaza de Bolívar, UPTC…) y úsalo como origen o destino.
+- Busca cualquiera de los 154 barrios y veredas oficiales de Tunja, un sitio o una dirección de OpenStreetMap.
+- Toca un punto del mapa y ve todas las rutas que pasan a menos de 150 m, ordenadas por distancia.
+- Consulta novedades de movilidad y las cuentas oficiales de Tunja sin cargar cookies de X.
 - Activa tu ubicación y ordena las rutas por distancia real a su trazado (1 km a la redonda).
 - Dibuja las rutas de la ciudad sobre un mapa claro, cada una con su color.
 - Consulta trazados (ida y vuelta), vías por las que pasa, paradas, horarios y tarifas.
@@ -68,8 +70,10 @@ python tools/gtfs-check.py     # importador GTFS + fixture (Python 3.11+)
 | `GET /api/cities` | Ciudades publicadas y metadatos |
 | `GET /api/cities/{slug}` | Ciudad completa: rutas, geometrías y lugares buscables |
 | `GET /api/cities/{slug}/routes/near?lat=&lng=&radius=800` | Rutas a menos de `radius` metros de un punto, ordenadas por distancia |
+| `GET /api/cities/{slug}/search?q=calle+21` | Direcciones, barrios y sitios en OpenStreetMap, acotados a la ciudad |
+| `GET /api/cities/{slug}/news` | Titulares de movilidad de Google News RSS, con fuente y fecha |
 
-`radius` se limita a 50–5000 m. Las coordenadas fuera de rango devuelven 400.
+`radius` se limita a 50–5000 m. Las coordenadas fuera de rango devuelven 400. `search` exige entre 3 y 120 caracteres y cachea 24 h; `news` cachea 30 min.
 
 ## Agregar una ciudad
 
@@ -99,12 +103,13 @@ Después, reinicia la API. La ciudad aparece en `GET /api/cities` y el selector 
 
 1. Crea `api/src/main/resources/cities/<slug>.json` con el esquema de `tunja.json` (ciudad, zona horaria, tarifa, fuentes, lugares y rutas).
 2. Cada ruta necesita `id`, `code`, `name`, `color`, `weekday`, `sunday`, `circular`, `directions` y, por sentido, `paths` (listas de `[lat, lng]`) y `stops`. `streets` puede ir vacío: la ficha oculta esa sección.
-3. Agrega en `places` los barrios y sitios buscables: `id`, `name`, `type`, `lat`, `lng` y `aliases`. Es lo que alimenta el buscador de origen.
-4. Reinicia la API. `CityValidator` rechaza el arranque si falta un campo, hay IDs repetidos, un color inválido, una zona horaria que no existe o un trazado con menos de dos puntos; el mensaje dice qué ciudad y qué ruta corregir.
+3. Agrega en `places` los barrios y sitios buscables: `id`, `name`, `type`, `lat`, `lng` y `aliases`. Es lo que alimenta el buscador local y define el rectángulo donde Nominatim busca direcciones.
+4. Opcional: agrega `social` con `label`, `handle` y `url` para mostrar cuentas oficiales en la sección de movilidad.
+5. Reinicia la API. `CityValidator` rechaza el arranque si falta un campo, hay IDs repetidos, un color inválido, una zona horaria que no existe o un trazado con menos de dos puntos; el mensaje dice qué ciudad y qué ruta corregir.
 
 `python tools/gtfs-check.py` importa el fixture `tools/fixtures/gtfs-mini` como carpeta y como zip, comprueba el contrato y compara el resultado con la muestra que valida el backend. Si cambias el importador a propósito, regenera la muestra con `--update`.
 
-El importador `tools/tunja-routes.mjs` documenta cómo se convirtieron los KML de la UT Mi Ruta en el JSON de Tunja. Queda como referencia para feeds que no son GTFS.
+`node tools/tunja-places.mjs` actualiza los 154 barrios y veredas oficiales de Tunja desde Datos Abiertos y los mezcla con los lugares curados. `tools/tunja-routes.mjs` lee esa misma lista para no perderla al regenerar las rutas.
 
 ### Límites del importador
 
@@ -117,24 +122,27 @@ El importador `tools/tunja-routes.mjs` documenta cómo se convirtieron los KML d
 ## Datos y límites
 
 - Tunja: fuente de trazados y horarios, [UT Mi Ruta · Rutas y ramales](https://www.utmiruta.com/rutasyramalaesutmiruta) (2026).
+- Barrios y veredas de Tunja: [Datos Abiertos Colombia · Alcaldía de Tunja](https://www.datos.gov.co/Vivienda-Ciudad-y-Territorio/Informaci-n-Barrios-y-veredas-de-Municipio-de-Tunja/4ryc-k7fx), licencia CC BY-SA 4.0. El código sigue bajo MIT.
 - Los datos del operador se usan como referencia; el proyecto no reclama una licencia abierta sobre ellos. La licencia MIT cubre el código.
 - Tarifa: $2.600 de lunes a sábado entre 06:00 y 19:00; $2.700 en horario nocturno (19:01–05:59), domingos y festivos (Decreto 0006 de 2026). No aplica a la ruta intermunicipal R19.
 - Los recorridos, horarios y tarifas pueden cambiar. La información del operador manda; esta app es una ayuda para leer el sistema, no un aviso oficial.
 - Los trazados son los del mapa público del operador. Algunos ramales se dibujan como segmentos separados porque así están en el KML original.
-- Los lugares buscables son 42 barrios y sitios principales. Cuando no hay un nodo oficial, el punto es el despacho/retorno del operador; por eso el radio de búsqueda es de 500 m.
-- Cada ciudad es un JSON independiente y validado al arrancar; el selector de ciudad aparece cuando hay más de una publicada.
+- Los lugares buscables incluyen los 179 barrios, veredas y sitios de Tunja. Los barrios y veredas vienen del dataset oficial de la Alcaldía (CC BY-SA 4.0); las direcciones y puntos de interés se buscan en OpenStreetMap solo cuando el usuario lo pide.
+- Cada ciudad es un JSON independiente y validado al arrancar; el selector de ciudad aparece cuando hay más de una publicada. El paquete puede incluir `social` con cuentas oficiales para la sección de movilidad.
 - El planificador combina los trazados para encontrar **rutas directas** (sin transbordos). Los tiempos son estimaciones sobre la geometría: incluyen caminata, espera y bus, pero no tráfico, semáforos ni paradas oficiales.
 - R10 y R22 están marcadas como circulares por el operador; el planificador cierra la vuelta solo si el trazado termina cerca del inicio. R8, R13 y R18 tienen fragmentos en el mapa: se avisa que no se pueden verificar como directas en vez de inventar la conexión.
 - La espera usa la frecuencia del día actual en la zona horaria de la ciudad; no comprueba festivos ni disponibilidad en tiempo real. Las consultas fuera del horario publicado se marcan; una frecuencia desconocida se muestra como “sin espera”.
 - La geolocalización se calcula contra la línea del recorrido, no contra paradas oficiales (el operador no publica esas paradas).
 - Las coordenadas se procesan en el navegador: la web no envía tu ubicación a la API. La API sigue exponiendo `/near` para integraciones.
+- Las búsquedas de direcciones envían solo el texto consultado a OpenStreetMap a través de la API, con caché y un máximo de una petición por segundo; no se envían coordenadas.
+- Los titulares de movilidad vienen de Google News RSS y conservan el enlace y el crédito de su medio. No incrustamos X: las cuentas oficiales se abren en X para no cargar cookies de terceros.
 - El mapa base consulta teselas de OpenStreetMap (recibe la zona visible y tu IP) y Cloudflare sirve el sitio con analítica sin cookies.
 
 ## Seguridad
 
 - La API solo se publica en loopback; Cloudflare Tunnel es la única entrada externa.
 - CSP estricta: se permite `style-src 'unsafe-inline'` porque Leaflet aplica estilos inline, y `static.cloudflareinsights.com` para la analítica sin cookies de Cloudflare. El resto es same-origin.
-- La web calcula la cercanía en el navegador y no envía coordenadas a la API. El mapa base consulta teselas de OpenStreetMap (recibe IP y zona visible).
+- La web calcula la cercanía en el navegador y no envía coordenadas a la API. Las direcciones se consultan en OpenStreetMap a través de la API; el mapa base consulta teselas de OpenStreetMap (recibe IP y zona visible).
 
 ## Despliegue
 

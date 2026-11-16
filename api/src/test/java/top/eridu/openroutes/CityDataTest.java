@@ -81,17 +81,35 @@ class CityDataTest {
 
     @Test
     void lugaresSonBuscablesYEscandinavoExiste() {
-        assertThat(city.places()).hasSizeGreaterThan(20);
+        assertThat(city.places()).hasSizeGreaterThan(150);
         assertThat(city.places()).extracting(place -> place.id()).doesNotHaveDuplicates();
         assertThat(city.places()).anySatisfy(place -> {
             assertThat(place.name()).isEqualTo("Escandinavo");
             assertThat(place.lat()).isBetween(5.3, 5.65);
             assertThat(place.lng()).isBetween(-73.55, -73.25);
         });
+        assertThat(city.places()).anySatisfy(place -> {
+            assertThat(place.name()).isEqualTo("El Dorado");
+            assertThat(place.type()).isEqualTo("Barrio");
+        });
+        assertThat(city.places()).anySatisfy(place -> {
+            assertThat(place.name()).isEqualTo("Pirgua");
+            assertThat(place.type()).isEqualTo("Vereda");
+        });
         assertThat(city.places()).allSatisfy(place -> {
             assertThat(place.name()).isNotBlank();
             assertThat(place.type()).isNotBlank();
             assertThat(place.aliases()).isNotEmpty();
+        });
+    }
+
+    @Test
+    void cuentasOficialesSonEnlacesSeguros() {
+        assertThat(city.social()).hasSize(3);
+        assertThat(city.social()).allSatisfy(account -> {
+            assertThat(account.handle()).startsWith("@");
+            assertThat(account.label()).isNotBlank();
+            assertThat(account.url()).startsWith("https://");
         });
     }
 }

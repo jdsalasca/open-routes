@@ -18,7 +18,9 @@ type Props = {
   trip: TripOption | null;
   tripRouteIds: string[];
   originRadius: number;
+  inspectPoint: { lat: number; lng: number } | null;
   onSelect: (id: string) => void;
+  onInspectPoint: (lat: number, lng: number) => void;
 };
 
 const isMobile = () => window.matchMedia("(max-width: 900px)").matches;
@@ -35,12 +37,19 @@ export function MapView({
   trip,
   tripRouteIds,
   originRadius,
-  onSelect
+  inspectPoint,
+  onSelect,
+  onInspectPoint
 }: Props) {
   const containerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<L.Map | null>(null);
   const routesLayerRef = useRef<L.LayerGroup | null>(null);
   const userLayerRef = useRef<L.LayerGroup | null>(null);
+  const onInspectPointRef = useRef(onInspectPoint);
+
+  useEffect(() => {
+    onInspectPointRef.current = onInspectPoint;
+  }, [onInspectPoint]);
 
   useEffect(() => {
     const container = containerRef.current;
@@ -60,6 +69,9 @@ export function MapView({
       attribution: ATTRIBUTION,
       maxZoom: 19
     }).addTo(map);
+    map.on("click", (event) => {
+      onInspectPointRef.current(event.latlng.lat, event.latlng.lng);
+    });
 
     mapRef.current = map;
     const observer = new ResizeObserver(() => map.invalidateSize());
@@ -96,7 +108,10 @@ export function MapView({
         lineJoin: "round",
         smoothFactor: 0.7
       });
-      line.on("click", () => onSelect(route.id));
+      line.on("click", (event) => {
+        L.DomEvent.stopPropagation(event as unknown as Event);
+        onSelect(route.id);
+      });
       line.bindTooltip(`${route.code} · ${route.name}`, {
         sticky: true,
         direction: "top",
@@ -134,7 +149,10 @@ export function MapView({
         lineCap: "round",
         lineJoin: "round"
       });
-      segment.on("click", () => onSelect(trip.route.id));
+      segment.on("click", (event) => {
+        L.DomEvent.stopPropagation(event as unknown as Event);
+        onSelect(trip.route.id);
+      });
       segment
         .bindTooltip(`${trip.route.code} · ${trip.route.name}`, {
           sticky: true,
@@ -232,7 +250,7 @@ export function MapView({
     if (!map) return;
 
     if (userLayerRef.current) userLayerRef.current.remove();
-    if (!origin && !destination) return;
+    if (!origin && !destination && !inspectPoint) return;
 
     const layer = L.layerGroup().addTo(map);
 
@@ -292,13 +310,25 @@ export function MapView({
         .addTo(layer);
     }
 
+    if (inspectPoint) {
+      L.circleMarker([inspectPoint.lat, inspectPoint.lng], {
+        radius: 7,
+        color: "#0e6e4e",
+        weight: 3,
+        fillColor: "#ffffff",
+        fillOpacity: 1
+      })
+        .bindTooltip("Punto consultado", { direction: "top", className: "stop-tip" })
+        .addTo(layer);
+    }
+
     userLayerRef.current = layer;
 
     return () => {
       layer.remove();
       userLayerRef.current = null;
     };
-  }, [origin, destination, originRadius]);
+  }, [origin, destination, originRadius, inspectPoint]);
 
   const focusCity = useCallback(() => {
     const map = mapRef.current;

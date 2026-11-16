@@ -40,7 +40,8 @@ export function AboutDialog({ dialogRef, city }: Props) {
       <h3>Cómo leer el mapa</h3>
       <p>
         Cada color es una ruta. Al elegirla, el mapa dibuja su trazado, sus paradas y, cuando el
-        operador las publica, las vías por las que pasa. El botón de ubicación ordena las rutas por
+        operador las publica, las vías por las que pasa. Toca cualquier punto para ver las rutas
+        que pasan cerca, ordenadas por distancia. El botón de ubicación ordena las rutas por
         distancia real a la línea del recorrido (no a una parada inventada).
       </p>
       <p>
@@ -67,9 +68,14 @@ export function AboutDialog({ dialogRef, city }: Props) {
       <h3>Privacidad</h3>
       <p>
         Tu ubicación y los lugares que eliges se procesan en tu navegador; la cercanía no se
-        consulta en la API ni se guarda. El mapa base pide teselas a OpenStreetMap, que recibe la
-        zona visible y tu IP. Cloudflare sirve el sitio y mide tráfico sin cookies. No hay cuentas
-        ni publicidad.
+        consulta en la API ni se guarda. Si buscas una dirección o un punto de interés, solo ese
+        texto se consulta en OpenStreetMap a través de nuestro servidor. El mapa base pide teselas
+        a OpenStreetMap, que recibe la zona visible y tu IP. Cloudflare sirve el sitio y mide
+        tráfico sin cookies. No hay cuentas ni publicidad.
+      </p>
+      <p>
+        Las noticias se consultan sin cookies y las publicaciones de X se abren en X; no incrustamos
+        sus scripts.
       </p>
 
       <h3>Datos y límites</h3>
@@ -78,6 +84,12 @@ export function AboutDialog({ dialogRef, city }: Props) {
         Las rutas, horarios y tarifas pueden cambiar; la información oficial del operador siempre
         manda. Esta herramienta no reemplaza los avisos del conductor ni de la empresa.
       </p>
+      {city.slug === "tunja" && (
+        <p>
+          Los barrios y veredas de Tunja provienen de Datos Abiertos Colombia (Alcaldía de Tunja,
+          CC BY-SA 4.0). El código de la aplicación sigue bajo licencia MIT.
+        </p>
+      )}
       <ul>
         {city.sources.map((source) => (
           <li key={source.url}>

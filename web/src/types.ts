@@ -8,6 +8,12 @@ export interface Source {
   url: string;
 }
 
+export interface SocialAccount {
+  label: string;
+  handle: string;
+  url: string;
+}
+
 export interface Place {
   id: string;
   name: string;
@@ -77,6 +83,7 @@ export interface CitySummary {
 
 export interface City extends Omit<CitySummary, "routeCount"> {
   timezone: string;
+  social?: SocialAccount[];
   places: Place[];
   routes: Route[];
 }
@@ -89,4 +96,11 @@ export interface NearbyRoute {
   type: string;
   direction: string;
   distanceMeters: number;
+}
+
+export interface NewsItem {
+  title: string;
+  url: string;
+  source: string;
+  publishedAt: string | null;
 }

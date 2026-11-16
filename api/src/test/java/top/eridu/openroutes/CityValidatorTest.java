@@ -74,6 +74,16 @@ class CityValidatorTest {
     }
 
     @Test
+    void rechazaCuentaSocialConUrlInvalida() throws Exception {
+        ObjectNode bad = root.deepCopy();
+        ((ObjectNode) bad.get("social").get(0)).put("url", "x");
+        City city = mapper.treeToValue(bad, City.class);
+        assertThatThrownBy(() -> CityValidator.validate(city))
+                .isInstanceOf(IllegalStateException.class)
+                .hasMessageContaining("cuenta social inválida");
+    }
+
+    @Test
     void rechazaZonaHorariaInvalida() throws Exception {
         ObjectNode bad = root.deepCopy();
         bad.put("timezone", "Marte/Olympus");

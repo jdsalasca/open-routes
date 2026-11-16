@@ -5,10 +5,12 @@
 import fs from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import { mergePlaces } from "./lib/places.mjs";
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const cacheDir = path.join(root, "tools", ".cache");
 const outFile = path.join(root, "api", "src", "main", "resources", "cities", "tunja.json");
+const barriosFile = path.join(root, "tools", "data", "tunja-barrios.json");
 
 const PALETTE = [
   "#D64545", "#1D6FA5", "#2A9D8F", "#E07A1F", "#7B5EA7", "#6A994E",
@@ -297,6 +299,10 @@ async function main() {
     });
   }
 
+  const barrios = JSON.parse(
+    await fs.readFile(barriosFile, "utf8").catch(() => "[]")
+  );
+
   const city = {
     slug: "tunja",
     name: "Tunja",
@@ -307,7 +313,13 @@ async function main() {
     zoom: 14,
     description: "Capital de Boyacá. Rutas urbanas e intermunicipales de la UT Mi Ruta, trazadas sobre el mapa oficial de cada recorrido.",
     sources: [
-      { label: "UT Mi Ruta · Rutas y ramales", url: "https://www.utmiruta.com/rutasyramalaesutmiruta" }
+      { label: "UT Mi Ruta · Rutas y ramales", url: "https://www.utmiruta.com/rutasyramalaesutmiruta" },
+      { label: "Barrios y veredas de Tunja (Alcaldía de Tunja, CC BY-SA 4.0)", url: "https://www.datos.gov.co/Vivienda-Ciudad-y-Territorio/Informaci-n-Barrios-y-veredas-de-Municipio-de-Tunja/4ryc-k7fx" }
+    ],
+    social: [
+      { label: "Secretaría de Movilidad y Vida Territorial", handle: "@MovilidadTunja", url: "https://x.com/MovilidadTunja" },
+      { label: "Tránsito y Transporte de Tunja", handle: "@transitotunja", url: "https://x.com/transitotunja" },
+      { label: "Alcaldía Mayor de Tunja", handle: "@AlcaldiaTunja", url: "https://x.com/AlcaldiaTunja" }
     ],
     fare: {
       day: 2600,
@@ -315,7 +327,7 @@ async function main() {
       currency: "COP",
       note: "Tarifa 2026 (Decreto 0006 de 2026). Lunes a sábado, 06:00–19:00: $2.600. Nocturno (19:01–05:59), domingos y festivos: $2.700."
     },
-    places: PLACES,
+    places: mergePlaces([...PLACES], barrios),
     routes
   };
 

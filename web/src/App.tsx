@@ -9,13 +9,16 @@ import {
   InfoIcon,
   LocateIcon,
   LogoMark,
+  NewsIcon,
   PinIcon,
   SearchIcon,
   SwapIcon,
   TicketIcon
 } from "./components/Icons";
 import { MapView } from "./components/MapView";
+import { NewsDialog } from "./components/NewsDialog";
 import { PlaceField } from "./components/PlaceField";
+import { PointInspector } from "./components/PointInspector";
 import { RouteDetail } from "./components/RouteDetail";
 import { TripDetail } from "./components/TripDetail";
 import { useGeolocation } from "./hooks/useGeolocation";
@@ -42,6 +45,7 @@ const distanceLabel = (meters: number) =>
 
 export default function App() {
   const aboutRef = useRef<HTMLDialogElement>(null);
+  const newsRef = useRef<HTMLDialogElement>(null);
   const sidebarRef = useRef<HTMLElement>(null);
   const listHeadRef = useRef<HTMLDivElement>(null);
   const routeRefs = useRef(new Map<string, HTMLButtonElement>());
@@ -70,6 +74,8 @@ export default function App() {
   const [nearMode, setNearMode] = useState(false);
   const [query, setQuery] = useState("");
   const [clock, setClock] = useState(() => Date.now());
+  const [newsOpen, setNewsOpen] = useState(false);
+  const [inspectPoint, setInspectPoint] = useState<{ lat: number; lng: number } | null>(null);
   const { status, error: geoError, locate } = useGeolocation();
 
   useEffect(() => {
@@ -107,6 +113,7 @@ export default function App() {
         setNearby(null);
         setNearMode(false);
         setQuery("");
+        setInspectPoint(null);
         document.title = `open-routes · Rutas de ${data.name}`;
         document
           .querySelector('meta[name="description"]')
@@ -139,6 +146,7 @@ export default function App() {
 
   const changeCity = useCallback((next: string) => {
     setSlug(next);
+    setInspectPoint(null);
     const url = new URL(window.location.href);
     url.searchParams.set("city", next);
     window.history.replaceState(null, "", url);
@@ -148,10 +156,28 @@ export default function App() {
       // El navegador puede bloquear el almacenamiento; la URL ya conserva la elección.
     }
   }, []);
+
+  const searchPlaces = useCallback(
+    (term: string, signal?: AbortSignal) =>
+      city ? api.searchPlaces(city.slug, term, signal) : Promise.resolve([]),
+    [city]
+  );
+
   const nearbyById = useMemo(
     () => new Map((nearby ?? []).map((hit) => [hit.id, hit])),
     [nearby]
   );
+
+  const inspectRoutes = useMemo(
+    () => (inspectPoint && city ? findNearbyRoutes(inspectPoint, 150, city.routes) : []),
+    [inspectPoint, city]
+  );
+
+  const inspectAt = useCallback((lat: number, lng: number) => {
+    setInspectPoint({ lat, lng });
+  }, []);
+
+  const closeInspector = useCallback(() => setInspectPoint(null), []);
 
   const visibleRoutes = useMemo(() => {
     if (!city) return [];
@@ -238,6 +264,7 @@ export default function App() {
       setSelectedId(id);
       setActiveDirection(0);
       setActiveTrip(null);
+      setInspectPoint(null);
     },
     [tripOptions]
   );
@@ -251,6 +278,7 @@ export default function App() {
     setActiveTrip(null);
     setSelectedId(null);
     setQuery("");
+    setInspectPoint(null);
     sidebarRef.current?.scrollTo({ top: 0 });
   }, [clearNearby]);
 
@@ -277,6 +305,7 @@ export default function App() {
       setActiveTrip(null);
       setSelectedId(null);
       setQuery("");
+      setInspectPoint(null);
       if (destination) {
         clearNearby();
       } else {
@@ -293,6 +322,7 @@ export default function App() {
       setActiveTrip(null);
       setSelectedId(null);
       setQuery("");
+      setInspectPoint(null);
       clearNearby();
     },
     [clearNearby]
@@ -337,6 +367,7 @@ export default function App() {
     setOrigin(nextOrigin);
     setDestination(nextDestination);
     setActiveTrip(null);
+    setInspectPoint(null);
     clearNearby();
   }, [origin, destination, clearNearby]);
 
@@ -344,6 +375,7 @@ export default function App() {
     if (!city) return;
     const token = ++locateToken.current;
     setSelectedId(null);
+    setInspectPoint(null);
     const point = await locate();
     if (token !== locateToken.current) return;
     if (!point) return;
@@ -505,6 +537,27 @@ export default function App() {
           <button
             type="button"
             className="text-button"
+            onClick={() => {
+              setNewsOpen(true);
+              newsRef.current?.showModal();
+            }}
+          >
+            Movilidad
+          </button>
+          <button
+            type="button"
+            className="icon-button news-icon"
+            aria-label="Movilidad y noticias"
+            onClick={() => {
+              setNewsOpen(true);
+              newsRef.current?.showModal();
+            }}
+          >
+            <NewsIcon size={18} />
+          </button>
+          <button
+            type="button"
+            className="text-button"
             onClick={() => aboutRef.current?.showModal()}
           >
             Acerca de
@@ -583,10 +636,11 @@ export default function App() {
                     selectedHint={
                       origin ? (origin.kind === "gps" ? "Ubicación actual" : origin.type) : undefined
                     }
-                    placeholder="Escandinavo, Plaza de Bolívar…"
+                    placeholder="Barrio, sitio o dirección…"
                     places={places}
                     onSelect={selectOriginPlace}
                     onClear={clearOrigin}
+                    onSearch={searchPlaces}
                   />
                   <button
                     type="button"
@@ -609,16 +663,17 @@ export default function App() {
                     icon={<PinIcon size={16} />}
                     selectedLabel={destination?.name}
                     selectedHint={destination?.type}
-                    placeholder="¿A dónde vas? (opcional)"
+                    placeholder="Barrio, dirección o sitio (opcional)"
                     places={places}
                     onSelect={selectDestination}
                     onClear={clearDestination}
+                    onSearch={searchPlaces}
                   />
                 </div>
 
                 <p className="hero__privacy">
-                  La cercanía se calcula en tu navegador. Tu ubicación no se envía a nuestro
-                  servidor.
+                  La cercanía se calcula en tu navegador. Tu ubicación no se envía; las
+                  direcciones que buscas se consultan en OpenStreetMap.
                 </p>
                 <div className="hero__meta">
                   <span className="meta-chip">
@@ -832,9 +887,9 @@ export default function App() {
 
         <div className="map-wrap">
           <p id="map-instructions" className="visually-hidden">
-            El mapa es una ayuda visual. Usa la lista de rutas y las opciones de viaje para
-            seleccionar recorridos con el teclado; los pasos se describen en texto al abrir una
-            opción.
+            El mapa es una ayuda visual. Toca un punto para ver qué rutas pasan cerca. Usa la
+            lista de rutas y las opciones de viaje para seleccionar recorridos con el teclado;
+            los pasos se describen en texto al abrir una opción.
           </p>
           <MapView
             city={city}
@@ -847,8 +902,20 @@ export default function App() {
             trip={activeTrip}
             tripRouteIds={tripRouteIds}
             originRadius={originRadius}
+            inspectPoint={inspectPoint}
             onSelect={handleSelect}
+            onInspectPoint={inspectAt}
           />
+          {inspectPoint && (
+            <PointInspector
+              routes={inspectRoutes}
+              onClose={closeInspector}
+              onSelect={handleSelect}
+            />
+          )}
+          {!inspectPoint && !selected && !activeTrip && (
+            <p className="map-hint">Toca el mapa y descubre qué rutas pasan por ese punto.</p>
+          )}
         </div>
       </main>
 
@@ -866,6 +933,12 @@ export default function App() {
       </p>
 
       <AboutDialog dialogRef={aboutRef} city={city} />
+      <NewsDialog
+        dialogRef={newsRef}
+        city={city}
+        active={newsOpen}
+        onClose={() => setNewsOpen(false)}
+      />
     </div>
   );
 }
