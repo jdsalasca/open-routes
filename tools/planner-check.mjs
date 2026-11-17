@@ -28,7 +28,7 @@ const origin = {
 };
 
 const trips = findDirectTrips(origin, plaza, city.routes);
-assert.ok(trips.length >= 3, `esperaba al menos 3 rutas directas, llegaron ${trips.length}`);
+assert.ok(trips.length >= 1, `esperaba al menos 1 ruta directa, llegaron ${trips.length}`);
 assert.ok(trips.some((trip) => trip.route.code === "R3"), "R3 debe conectar Escandinavo con la Plaza");
 assert.ok(
   trips.every((trip) => trip.totalMinutes > 0 && trip.segment.length > 1),
@@ -43,6 +43,38 @@ const reverse = findDirectTrips(
   city.routes
 );
 assert.ok(reverse.some((trip) => trip.route.code === "R3"), "R3 también debe servir el regreso");
+
+// Un barrio compacto no se sirve desde una avenida a 300-500 m: solo cuentan
+// las rutas que realmente entran o lo nombran (R15), no las que pasan cerca (R1, R26).
+const uptc = place("uptc");
+const cooservicios = place("cooservicios");
+const asPlace = (item) => ({
+  kind: "place",
+  lat: item.lat,
+  lng: item.lng,
+  label: item.name,
+  type: item.type
+});
+const toCooservicios = findDirectTrips(asPlace(uptc), cooservicios, city.routes).map(
+  (trip) => trip.route.code
+);
+assert.ok(toCooservicios.includes("R15"), "R15 debe conectar UPTC con Cooservicios");
+assert.ok(!toCooservicios.includes("R1"), "R1 no pasa por Cooservicios");
+assert.ok(!toCooservicios.includes("R26"), "R26 no pasa por Cooservicios");
+const fromCooservicios = findDirectTrips(asPlace(cooservicios), uptc, city.routes).map(
+  (trip) => trip.route.code
+);
+assert.ok(fromCooservicios.includes("R15"), "R15 debe servir la salida de Cooservicios");
+assert.ok(!fromCooservicios.includes("R1"), "R1 tampoco sirve la salida de Cooservicios");
+assert.ok(!fromCooservicios.includes("R26"), "R26 tampoco sirve la salida de Cooservicios");
+
+// Si la ruta nombra el barrio, se conserva aunque su trazado quede retirado.
+const toAntoniaSantos = findDirectTrips(
+  asPlace(uptc),
+  place("antonia-santos"),
+  city.routes
+).map((trip) => trip.route.code);
+assert.ok(toAntoniaSantos.includes("R26"), "R26 debe seguir sirviendo Antonia Santos");
 
 const nearby = findNearbyRoutes({ lat: escandinavo.lat, lng: escandinavo.lng }, 500, city.routes);
 assert.ok(nearby.length >= 5, `esperaba al menos 5 rutas a 500 m, llegaron ${nearby.length}`);

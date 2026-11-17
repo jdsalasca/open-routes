@@ -78,6 +78,7 @@ Mapa web de transporte público para Tunja que responda en segundos: qué rutas 
 - [x] Filtro por ciudad, palabras de incidente y últimas 48 horas.
 - [x] Pestaña “Avisos” en la barra superior con contador, sin tarjeta en la ventana principal.
 - [x] Diálogo de avisos con fuente, fecha y advertencia de que no es un aviso oficial.
+- [x] Las rutas solo se ofrecen para un barrio si su trazado entra en él o la ruta lo nombra; pasar a 300–500 m ya no cuenta como servirlo.
 
 ### R2 · Datos y comunidad (después)
 

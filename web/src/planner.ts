@@ -25,6 +25,9 @@ export interface SplitRoute {
 const EARTH_RADIUS_M = 6_371_000;
 const METERS_PER_DEG_LAT = 110_574;
 const MAX_WALK_METERS = 700;
+// Un barrio o sector es una zona compacta: si la ruta no entra en él, no lo sirve.
+const MAX_WALK_AREAL_METERS = 250;
+const AREAL_PLACE_TYPES = new Set(["Barrio", "Sector"]);
 const MIN_RIDE_METERS = 150;
 const WALK_METERS_PER_MIN = 75;
 const BUS_METERS_PER_MIN = 300;
@@ -162,7 +165,8 @@ function nearestOnPath(lat: number, lng: number, path: [number, number][]): Near
 function candidatesOnPath(
   lat: number,
   lng: number,
-  path: [number, number][]
+  path: [number, number][],
+  maxDistance: number
 ): Nearest[] {
   if (path.length < 2) return [];
   const mPerLng = Math.cos((lat * Math.PI) / 180) * METERS_PER_DEG_LAT;
@@ -171,7 +175,7 @@ function candidatesOnPath(
 
   for (let i = 0; i < path.length - 1; i++) {
     const hit = projectOnSegment(lat, lng, path[i], path[i + 1], mPerLng);
-    if (hit.distance > MAX_WALK_METERS) continue;
+    if (hit.distance > maxDistance) continue;
     raw.push({
       distance: hit.distance,
       index: i,
@@ -244,12 +248,41 @@ function buildSegment(
   return segment;
 }
 
+const normalizePlaceText = (value: string) =>
+  value
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase();
+
+/**
+ * Una ruta que nombra el barrio en su nombre, descripción o calles lo sirve
+ * aunque su trazado quede algo retirado del centroide.
+ */
+function routeNamesPlace(route: Route, name: string) {
+  const needle = normalizePlaceText(name).trim();
+  if (needle.length < 5) return false;
+  const haystack = normalizePlaceText(
+    [
+      route.name,
+      route.description,
+      ...route.directions.flatMap((direction) => [direction.name, ...direction.streets])
+    ].join(" ")
+  );
+  return haystack.includes(needle);
+}
+
+function maxWalkTo(route: Route, place: { name: string; type?: string }) {
+  if (AREAL_PLACE_TYPES.has(place.type ?? "") && !routeNamesPlace(route, place.name)) {
+    return MAX_WALK_AREAL_METERS;
+  }
+  return MAX_WALK_METERS;
+}
+
 /**
  * Rutas directas entre un origen y un destino. Evalúa varias proyecciones por
  * extremo y solo permite cerrar un circuito cuando la ruta está marcada como
  * circular y su trazado termina cerca de donde empieza.
- */
-export function findDirectTrips(
+ */export function findDirectTrips(
   origin: Origin,
   destination: Place,
   routes: Route[],
@@ -267,10 +300,16 @@ export function findDirectTrips(
         ? schedule.frequencyMin / 2
         : null;
 
+    const originLimit = maxWalkTo(route, {
+      name: origin.label,
+      type: origin.kind === "place" ? origin.type : undefined
+    });
+    const destinationLimit = maxWalkTo(route, destination);
+
     for (const [directionIndex, direction] of route.directions.entries()) {
       for (const [pathIndex, path] of direction.paths.entries()) {
-        const starts = candidatesOnPath(origin.lat, origin.lng, path);
-        const ends = candidatesOnPath(destination.lat, destination.lng, path);
+        const starts = candidatesOnPath(origin.lat, origin.lng, path, originLimit);
+        const ends = candidatesOnPath(destination.lat, destination.lng, path, destinationLimit);
         if (!starts.length || !ends.length) continue;
 
         const pathLength = path.length
@@ -358,6 +397,11 @@ export function findSplitRoutes(
   for (const route of routes) {
     const fragments = Math.max(...route.directions.map((direction) => direction.paths.length));
     if (fragments < 2) continue;
+    const originLimit = maxWalkTo(route, {
+      name: origin.label,
+      type: origin.kind === "place" ? origin.type : undefined
+    });
+    const destinationLimit = maxWalkTo(route, destination);
 
     let split = false;
     for (const direction of route.directions) {
@@ -368,8 +412,12 @@ export function findSplitRoutes(
       direction.paths.forEach((path, index) => {
         const start = nearestOnPath(origin.lat, origin.lng, path);
         const end = nearestOnPath(destination.lat, destination.lng, path);
-        if (start && start.distance <= MAX_WALK_METERS) originPaths.add(index);
-        if (end && end.distance <= MAX_WALK_METERS) destinationPaths.add(index);
+        if (start && start.distance <= originLimit) {
+          originPaths.add(index);
+        }
+        if (end && end.distance <= destinationLimit) {
+          destinationPaths.add(index);
+        }
       });
 
       for (const originPath of originPaths) {

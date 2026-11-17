@@ -27,6 +27,7 @@ Rutas de transporte público claras y cerca de ti. Empieza en **Tunja, Boyacá**
 - Busca cualquiera de los 154 barrios y veredas oficiales de Tunja, un sitio o una dirección de OpenStreetMap.
 - Toca un punto del mapa y ve todas las rutas del índice a menos de 300 m, no solo las 30 principales.
 - Consulta paradas oficiales ordenadas y una próxima salida aproximada según la frecuencia.
+- Para un barrio, solo se ofrecen rutas que entran en él o lo nombran; no las que pasan a varias cuadras.
 - Ve avisos de cierres, desvíos y obras de las últimas 48 horas en una pestaña superior, sin ocupar la ventana principal.
 - Consulta novedades de movilidad y las cuentas oficiales de Tunja sin cargar cookies de X.
 - Activa tu ubicación y ordena las rutas por distancia real a su trazado (1 km a la redonda).
