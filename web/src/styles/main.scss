@@ -1646,6 +1646,31 @@ summary:focus-visible {
   }
 }
 
+.quick-favorite {
+  display: inline-flex;
+  flex: 0 0 auto;
+  align-items: center;
+  gap: 2px;
+
+  &__remove {
+    display: inline-grid;
+    width: 20px;
+    height: 20px;
+    place-items: center;
+    border: 0;
+    border-radius: 50%;
+    background: transparent;
+    color: $muted;
+    font-size: 13px;
+
+    &:hover,
+    &:focus-visible {
+      background: $canvas;
+      color: $ink;
+    }
+  }
+}
+
 .point-panel {
   position: absolute;
   z-index: 1100;

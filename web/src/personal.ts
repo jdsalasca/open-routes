@@ -57,6 +57,14 @@ export function saveFavorite(city: string, label: FavoriteLabel, place: Place): 
   return all.filter((item) => item.city === city);
 }
 
+export function removeFavorite(city: string, label: FavoriteLabel): FavoritePlace[] {
+  const all = read<FavoritePlace>(FAVORITES).filter(
+    (item) => !(item.city === city && item.label === label)
+  );
+  write(FAVORITES, all);
+  return all.filter((item) => item.city === city);
+}
+
 export function loadRecents(city: string): RecentTrip[] {
   const now = Date.now();
   return read<RecentTrip>(RECENTS)

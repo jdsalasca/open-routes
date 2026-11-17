@@ -8,6 +8,7 @@ type Props = {
   origin: Origin | null;
   onApplyPlace: (place: Place) => void;
   onSaveFavorite: (label: FavoriteLabel) => void;
+  onRemoveFavorite: (label: FavoriteLabel) => void;
   onApplyRecent: (trip: RecentTrip) => void;
 };
 
@@ -17,6 +18,7 @@ export function QuickAccess({
   origin,
   onApplyPlace,
   onSaveFavorite,
+  onRemoveFavorite,
   onApplyRecent
 }: Props) {
   const labels: FavoriteLabel[] = ["Casa", "Trabajo"];
@@ -31,15 +33,24 @@ export function QuickAccess({
         <div className="quick-access__row">
           <span className="quick-access__label">Favoritos</span>
           {favorites.map((favorite) => (
-            <button
-              key={favorite.label}
-              type="button"
-              className="quick-chip"
-              onClick={() => onApplyPlace(favorite.place)}
-              title={`Usar ${favorite.place.name} como origen`}
-            >
-              <PinIcon size={12} /> {favorite.label}
-            </button>
+            <span key={favorite.label} className="quick-favorite">
+              <button
+                type="button"
+                className="quick-chip"
+                onClick={() => onApplyPlace(favorite.place)}
+                title={`Usar ${favorite.place.name} como origen`}
+              >
+                <PinIcon size={12} /> {favorite.label}
+              </button>
+              <button
+                type="button"
+                className="quick-favorite__remove"
+                aria-label={`Quitar ${favorite.label}`}
+                onClick={() => onRemoveFavorite(favorite.label)}
+              >
+                ×
+              </button>
+            </span>
           ))}
           {canSave &&
             labels

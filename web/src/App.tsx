@@ -25,7 +25,7 @@ import { TripDetail } from "./components/TripDetail";
 import { useGeolocation } from "./hooks/useGeolocation";
 import { distanceMeters, dayKeyInTimeZone, findDirectTrips, findNearbyRoutes, findSplitRoutes } from "./planner";
 import type { TripOption } from "./planner";
-import { addRecent, loadFavorites, loadRecents, saveFavorite } from "./personal";
+import { addRecent, loadFavorites, loadRecents, removeFavorite, saveFavorite } from "./personal";
 import type { FavoriteLabel, FavoritePlace, RecentTrip } from "./personal";
 import { readTripRoutes, tripCacheKey, writeTripRoutes } from "./tripCache";
 import type { City, CitySummary, NearbyRoute, Origin, Place, Route } from "./types";
@@ -597,6 +597,11 @@ export default function App() {
     setFavorites(saveFavorite(city.slug, label, place));
   }, [city, origin]);
 
+  const removeFavoritePlace = useCallback((label: FavoriteLabel) => {
+    if (!city) return;
+    setFavorites(removeFavorite(city.slug, label));
+  }, [city]);
+
   const shareTrip = useCallback(async () => {
     if (!city || !origin || !destination) return;
     const url = new URL(window.location.href);
@@ -927,6 +932,7 @@ export default function App() {
                   origin={origin}
                   onApplyPlace={selectOriginPlace}
                   onSaveFavorite={saveFavoritePlace}
+                  onRemoveFavorite={removeFavoritePlace}
                   onApplyRecent={applyRecent}
                 />
 
