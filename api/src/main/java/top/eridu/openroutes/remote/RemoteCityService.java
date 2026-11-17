@@ -160,7 +160,11 @@ public class RemoteCityService {
             try {
                 memory.remove(slug);
                 LoadedRemoteCity built = build(definition);
-                writeDisk(file, built);
+                try {
+                    writeDisk(file, built);
+                } catch (IOException error) {
+                    log.warn("No se pudo guardar la caché de {}: {}", slug, error.getMessage());
+                }
                 remember(built);
                 log.info("Ciudad remota {} construida: {} rutas, {} lugares",
                         slug, built.allRoutes().size(), built.city().places().size());
