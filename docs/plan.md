@@ -75,8 +75,9 @@ Mapa web de transporte público para Tunja que responda en segundos: qué rutas 
 
 - [x] “Usar mi ubicación” carga todas las rutas cercanas del índice, no solo las 30 del mapa.
 - [x] Avisos de movilidad por ciudad (cierres, desvíos, manifestaciones, obras) desde Google News, separados de las noticias.
-- [x] Filtro por ciudad y por palabras de incidente para evitar titulares de otras regiones.
-- [x] Tarjeta de avisos con fuente, fecha y advertencia de que no es un aviso oficial.
+- [x] Filtro por ciudad, palabras de incidente y últimas 48 horas.
+- [x] Pestaña “Avisos” en la barra superior con contador, sin tarjeta en la ventana principal.
+- [x] Diálogo de avisos con fuente, fecha y advertencia de que no es un aviso oficial.
 
 ### R2 · Datos y comunidad (después)
 
@@ -99,5 +100,5 @@ Mapa web de transporte público para Tunja que responda en segundos: qué rutas 
 9. Casa/Trabajo, viajes recientes y un enlace compartido restauran el viaje; la PWA abre la última ciudad sin conexión.
 10. Las paradas GTFS aparecen ordenadas y la ficha muestra una próxima salida aproximada por frecuencia.
 11. Los viajes guardados y su bundle de rutas siguen disponibles sin conexión.
-12. “Usar mi ubicación” muestra todas las rutas cercanas del índice y los avisos de movilidad se filtran por ciudad.
+12. “Usar mi ubicación” muestra todas las rutas cercanas del índice y los avisos de movilidad de las últimas 48 h se abren desde una pestaña superior.
 13. `https://open-routes.eridu.top/api/health` responde `ok` y los demás sitios del túnel siguen en 200.

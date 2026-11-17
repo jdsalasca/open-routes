@@ -12,6 +12,10 @@ import top.eridu.openroutes.external.MobilityNewsService.NewsItem;
 import java.io.OutputStream;
 import java.net.InetSocketAddress;
 import java.nio.charset.StandardCharsets;
+import java.time.Instant;
+import java.time.ZoneOffset;
+import java.time.format.DateTimeFormatter;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
@@ -87,18 +91,25 @@ class MobilityNewsServiceTest {
     }
 
     @Test
-    void filtraSoloTitularesDeAvisos() {
+    void filtraAvisosRecientesPorCiudad() {
+        String recent = DateTimeFormatter.RFC_1123_DATE_TIME.format(
+                Instant.now().minus(2, ChronoUnit.HOURS).atZone(ZoneOffset.UTC));
+        String old = DateTimeFormatter.RFC_1123_DATE_TIME.format(
+                Instant.now().minus(72, ChronoUnit.HOURS).atZone(ZoneOffset.UTC));
         body.set("""
                 <?xml version="1.0" encoding="UTF-8"?>
                 <rss version="2.0"><channel>
                   <item><title>Cierre vial en Tunja por obra</title><link>https://medio.test/a</link>
                     <source>Boyacá 7 Días</source>
-                    <pubDate>Mon, 16 Nov 2026 12:00:00 GMT</pubDate></item>
+                    <pubDate>%s</pubDate></item>
+                  <item><title>Cierre vial viejo en Tunja</title><link>https://medio.test/c</link>
+                    <source>Boyacá 7 Días</source>
+                    <pubDate>%s</pubDate></item>
                   <item><title>Triunfo deportivo de Boyacá</title><link>https://medio.test/b</link>
                     <source>Deportes</source>
-                    <pubDate>Tue, 17 Nov 2026 12:00:00 GMT</pubDate></item>
+                    <pubDate>%s</pubDate></item>
                 </channel></rss>
-                """);
+                """.formatted(recent, old, recent));
         List<NewsItem> alerts = service.alerts(city);
         assertThat(alerts).extracting(NewsItem::title)
                 .containsExactly("Cierre vial en Tunja por obra");

@@ -2,7 +2,9 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { CSSProperties } from "react";
 import { api } from "./api";
 import { AboutDialog } from "./components/AboutDialog";
+import { AlertsDialog } from "./components/AlertsDialog";
 import {
+  AlertIcon,
   BusIcon,
   ChevronRightIcon,
   GithubIcon,
@@ -133,6 +135,7 @@ const readSharedTrip = (): { origin: Origin; destination: Place } | null => {
 export default function App() {
   const aboutRef = useRef<HTMLDialogElement>(null);
   const newsRef = useRef<HTMLDialogElement>(null);
+  const alertsRef = useRef<HTMLDialogElement>(null);
   const sidebarRef = useRef<HTMLElement>(null);
   const initialSlug = useRef(initialCitySlug());
   const autoDetectTried = useRef(false);
@@ -1014,6 +1017,22 @@ export default function App() {
         <div className="topbar__actions">
           <button
             type="button"
+            className={`alerts-tab${alerts.length > 0 ? " alerts-tab--active" : ""}`}
+            aria-label={`Avisos de movilidad: ${alerts.length} en las últimas 48 horas`}
+            onClick={() => {
+              alertsRef.current?.showModal();
+            }}
+          >
+            <AlertIcon size={15} />
+            <span className="alerts-tab__label">Avisos</span>
+            {alerts.length > 0 && (
+              <span className="alerts-tab__badge" aria-hidden="true">
+                {alerts.length}
+              </span>
+            )}
+          </button>
+          <button
+            type="button"
             className="text-button"
             onClick={() => {
               setNewsOpen(true);
@@ -1193,34 +1212,6 @@ export default function App() {
                       </span>
                     )}
                   </span>
-                </div>
-              )}
-
-              {alerts.length > 0 && (
-                <div className="service-alerts">
-                  <div className="service-alerts__head">
-                    <InfoIcon size={13} /> Avisos de movilidad
-                  </div>
-                  <ul>
-                    {alerts.slice(0, 2).map((alert) => (
-                      <li key={alert.url}>
-                        <a href={alert.url} target="_blank" rel="noreferrer">
-                          {alert.title}
-                        </a>
-                        <span>
-                          {alert.source}
-                          {alert.publishedAt
-                            ? ` · ${new Intl.DateTimeFormat("es-CO", {
-                                day: "numeric",
-                                month: "short",
-                                timeZone: city.timezone
-                              }).format(new Date(alert.publishedAt))}`
-                            : ""}
-                        </span>
-                      </li>
-                    ))}
-                  </ul>
-                  <p>Titulares de prensa; confirma con el operador antes de salir.</p>
                 </div>
               )}
 
@@ -1544,6 +1535,7 @@ export default function App() {
         active={newsOpen}
         onClose={() => setNewsOpen(false)}
       />
+      <AlertsDialog dialogRef={alertsRef} city={city} items={alerts} />
     </div>
   );
 }

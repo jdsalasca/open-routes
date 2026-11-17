@@ -16,6 +16,7 @@ import java.io.StringReader;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.text.Normalizer;
+import java.time.Duration;
 import java.time.Instant;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
@@ -82,6 +83,7 @@ public class MobilityNewsService {
             if (!"movilidad".equals(topic)) {
                 items = items.stream()
                         .filter(item -> isAlert(item, city))
+                        .filter(MobilityNewsService::withinLast48Hours)
                         .limit(3)
                         .toList();
             }
@@ -105,6 +107,20 @@ public class MobilityNewsService {
                 || text.contains("manifestacion")
                 || text.contains("obra")
                 || text.contains("vial");
+    }
+
+    private static boolean withinLast48Hours(NewsItem item) {
+        if (item.publishedAt() == null) {
+            return false;
+        }
+        try {
+            Instant published = Instant.parse(item.publishedAt());
+            Instant now = Instant.now();
+            return !published.isBefore(now.minus(Duration.ofHours(48)))
+                    && !published.isAfter(now.plus(Duration.ofMinutes(5)));
+        } catch (RuntimeException error) {
+            return false;
+        }
     }
 
     private List<NewsItem> parse(String xml) throws Exception {
