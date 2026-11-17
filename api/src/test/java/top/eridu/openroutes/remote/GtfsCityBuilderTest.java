@@ -58,5 +58,8 @@ class GtfsCityBuilderTest {
         assertThat(loaded.city().routes().get(0).weekday().end()).isEqualTo("06:23");
         assertThat(loaded.city().routes().get(0).weekday().frequencyMin()).isEqualTo(10);
         assertThat(loaded.city().routes().get(0).directions().get(0).stops()).isNotEmpty();
+        assertThat(loaded.city().routes().get(0).directions().get(0).stops())
+                .extracting(stop -> stop.name())
+                .containsExactly("Parque Central", "Plaza del Norte", "Terminal");
     }
 }

@@ -85,6 +85,18 @@ class ApiTest {
     }
 
     @Test
+    void rutasDeUnPuntoDevuelvenLasCercanas() throws Exception {
+        mvc.perform(get("/api/cities/tunja/routes/near-bundle")
+                        .param("lat", "5.530131")
+                        .param("lng", "-73.359513")
+                        .param("radius", "300"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.length()").value(org.hamcrest.Matchers.greaterThan(0)))
+                .andExpect(org.springframework.test.web.servlet.result.MockMvcResultMatchers
+                        .header().string("Cache-Control", "private, max-age=259200"));
+    }
+
+    @Test
     void rechazaCoordenadasInvalidas() throws Exception {
         mvc.perform(get("/api/cities/tunja/routes/near")
                         .param("lat", "500")

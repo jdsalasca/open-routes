@@ -45,6 +45,26 @@ public class TripRouteService {
         return candidates.stream().limit(MAX_ROUTES).map(Candidate::route).toList();
     }
 
+    public List<Route> pointCandidates(City city, double lat, double lng, int radius) {
+        if (city.partial()) {
+            return remote.pointRoutes(city.slug(), lat, lng, radius);
+        }
+        List<Candidate> candidates = new ArrayList<>();
+        for (Route route : city.routes()) {
+            double distance = Double.POSITIVE_INFINITY;
+            for (var direction : route.directions()) {
+                for (var path : direction.paths()) {
+                    distance = Math.min(distance, Geo.distanceToPathMeters(lat, lng, path));
+                }
+            }
+            if (distance <= radius) {
+                candidates.add(new Candidate(route, distance));
+            }
+        }
+        candidates.sort(Comparator.comparingDouble(Candidate::score));
+        return candidates.stream().limit(MAX_ROUTES).map(Candidate::route).toList();
+    }
+
     private record Candidate(Route route, double score) {
     }
 }

@@ -61,6 +61,16 @@ Mapa web de transporte público para Tunja que responda en segundos: qué rutas 
 - [x] Fecha de actualización del GTFS visible en la ciudad remota.
 - [x] Verificación de offline real, favoritos, recientes y enlace compartido en navegador.
 
+### R1.9 · Inspector completo, paradas y viajes offline
+
+- [x] `routes/near-bundle`: todas las rutas del índice a menos de 300 m de un punto.
+- [x] Inspector con estado de carga, error y acceso a rutas que no están en las 30 principales.
+- [x] Paradas ordenadas por secuencia del viaje representativo en ciudades GTFS.
+- [x] Próxima salida aproximada por frecuencia y zona horaria en la ficha de ruta.
+- [x] Viajes guardados con su bundle precargado en IndexedDB para consulta offline.
+- [x] Botón “Instalar app” cuando el navegador ofrece el prompt PWA.
+- [x] Verificación de Bogotá con 45 rutas en un punto y viaje guardado sin conexión.
+
 ### R2 · Datos y comunidad (después)
 
 - Paradas oficiales y tiempos de paso cuando el operador los publique.
@@ -75,9 +85,11 @@ Mapa web de transporte público para Tunja que responda en segundos: qué rutas 
 2. La geolocalización devuelve rutas ordenadas por distancia y el mapa las resalta.
 3. La ficha de ruta muestra horarios, trayectos, vías, paradas y fuente.
 4. Móvil: el panel no tapa la ruta seleccionada y todo es navegable con teclado.
-5. Tocar el mapa abre un panel con las rutas a menos de 150 m y permite abrir su ficha.
+5. Tocar el mapa abre un panel con todas las rutas del índice a menos de 300 m y permite abrir su ficha.
 6. El buscador encuentra los 154 barrios y veredas oficiales sin red; una dirección se consulta en OpenStreetMap al confirmar.
 7. La sección de movilidad muestra titulares con fuente y enlaces a las cuentas oficiales, sin cookies de X.
 8. Bogotá se construye desde GTFS, muestra 30 rutas principales y carga bajo demanda las rutas de un viaje; la caché dura 72 h.
 9. Casa/Trabajo, viajes recientes y un enlace compartido restauran el viaje; la PWA abre la última ciudad sin conexión.
-10. `https://open-routes.eridu.top/api/health` responde `ok` y los demás sitios del túnel siguen en 200.
+10. Las paradas GTFS aparecen ordenadas y la ficha muestra una próxima salida aproximada por frecuencia.
+11. Los viajes guardados y su bundle de rutas siguen disponibles sin conexión.
+12. `https://open-routes.eridu.top/api/health` responde `ok` y los demás sitios del túnel siguen en 200.

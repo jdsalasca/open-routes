@@ -25,13 +25,14 @@ import { TripDetail } from "./components/TripDetail";
 import { useGeolocation } from "./hooks/useGeolocation";
 import { distanceMeters, dayKeyInTimeZone, findDirectTrips, findNearbyRoutes, findSplitRoutes } from "./planner";
 import type { TripOption } from "./planner";
-import { addRecent, loadFavorites, loadRecents, removeFavorite, saveFavorite } from "./personal";
-import type { FavoriteLabel, FavoritePlace, RecentTrip } from "./personal";
+import { addRecent, loadFavorites, loadRecents, loadSavedTrips, removeFavorite, removeSavedTrip, sameTrip, saveFavorite, saveTrip } from "./personal";
+import type { FavoriteLabel, FavoritePlace, RecentTrip, SavedTrip } from "./personal";
 import { readTripRoutes, tripCacheKey, writeTripRoutes } from "./tripCache";
 import type { City, CitySummary, NearbyRoute, Origin, Place, Route } from "./types";
 
 const GPS_RADIUS = 1000;
 const PLACE_RADIUS = 500;
+const INSPECT_RADIUS = 300;
 
 const normalize = (value: string) =>
   value
@@ -75,6 +76,11 @@ const copyText = async (text: string) => {
       return false;
     }
   }
+};
+
+type InstallPromptEvent = Event & {
+  prompt: () => Promise<void>;
+  userChoice: Promise<{ outcome: "accepted" | "dismissed" }>;
 };
 
 const initialCitySlug = () => {
@@ -152,6 +158,9 @@ export default function App() {
   const [clock, setClock] = useState(() => Date.now());
   const [newsOpen, setNewsOpen] = useState(false);
   const [inspectPoint, setInspectPoint] = useState<{ lat: number; lng: number } | null>(null);
+  const [inspectBundle, setInspectBundle] = useState<Route[]>([]);
+  const [inspectLoading, setInspectLoading] = useState(false);
+  const [inspectError, setInspectError] = useState<string | null>(null);
   const [extraRoutes, setExtraRoutes] = useState<Route[]>([]);
   const [tripRoutesLoading, setTripRoutesLoading] = useState(false);
   const [tripRoutesError, setTripRoutesError] = useState<string | null>(null);
@@ -159,8 +168,10 @@ export default function App() {
   const [cityDetectError, setCityDetectError] = useState<string | null>(null);
   const [favorites, setFavorites] = useState<FavoritePlace[]>([]);
   const [recents, setRecents] = useState<RecentTrip[]>([]);
+  const [savedTrips, setSavedTrips] = useState<SavedTrip[]>([]);
   const [shareNotice, setShareNotice] = useState("");
   const [online, setOnline] = useState(() => navigator.onLine);
+  const [installPrompt, setInstallPrompt] = useState<InstallPromptEvent | null>(null);
   const { status, error: geoError, locate } = useGeolocation();
 
   useEffect(() => {
@@ -201,11 +212,15 @@ export default function App() {
         setNearMode(false);
         setQuery("");
         setInspectPoint(null);
+        setInspectBundle([]);
+        setInspectError(null);
+        setInspectLoading(false);
         setExtraRoutes([]);
         setTripRoutesError(null);
         setTripRoutesLoading(false);
         setFavorites(loadFavorites(data.slug));
         setRecents(loadRecents(data.slug));
+        setSavedTrips(loadSavedTrips(data.slug));
         document.title = `open-routes · Rutas de ${data.name}`;
         document
           .querySelector('meta[name="description"]')
@@ -228,8 +243,12 @@ export default function App() {
   const routePool = useMemo(() => {
     if (!city) return [];
     const seen = new Set(city.routes.map((route) => route.id));
-    return [...city.routes, ...extraRoutes.filter((route) => !seen.has(route.id))];
-  }, [city, extraRoutes]);
+    return [
+      ...city.routes,
+      ...extraRoutes.filter((route) => !seen.has(route.id)),
+      ...inspectBundle.filter((route) => !seen.has(route.id))
+    ];
+  }, [city, extraRoutes, inspectBundle]);
 
   const selected = useMemo(
     () => routePool.find((route) => route.id === selectedId) ?? null,
@@ -313,16 +332,22 @@ export default function App() {
     [nearby]
   );
 
-  const inspectRoutes = useMemo(
-    () => (inspectPoint && city ? findNearbyRoutes(inspectPoint, 150, routePool) : []),
-    [inspectPoint, routePool]
-  );
+  const inspectRoutes = useMemo(() => {
+    if (!inspectPoint) return [];
+    const source = city?.partial && inspectBundle.length > 0 ? inspectBundle : routePool;
+    return findNearbyRoutes(inspectPoint, INSPECT_RADIUS, source);
+  }, [inspectPoint, inspectBundle, routePool, city]);
 
   const inspectAt = useCallback((lat: number, lng: number) => {
     setInspectPoint({ lat, lng });
   }, []);
 
-  const closeInspector = useCallback(() => setInspectPoint(null), []);
+  const closeInspector = useCallback(() => {
+    setInspectPoint(null);
+    setInspectBundle([]);
+    setInspectError(null);
+    setInspectLoading(false);
+  }, []);
 
   const samePlace = Boolean(
     origin && destination && distanceMeters(origin, destination) < 30
@@ -374,6 +399,37 @@ export default function App() {
       controller.abort();
     };
   }, [city, origin, destination, samePlace]);
+
+  useEffect(() => {
+    if (!inspectPoint || !city?.partial) {
+      setInspectBundle([]);
+      setInspectLoading(false);
+      setInspectError(null);
+      return;
+    }
+    let cancelled = false;
+    const controller = new AbortController();
+    setInspectBundle([]);
+    setInspectLoading(true);
+    setInspectError(null);
+    api
+      .pointRoutes(city.slug, inspectPoint, controller.signal)
+      .then((routes) => {
+        if (!cancelled) setInspectBundle(routes);
+      })
+      .catch(() => {
+        if (!cancelled && !controller.signal.aborted) {
+          setInspectError("No pudimos cargar todas las rutas de este punto.");
+        }
+      })
+      .finally(() => {
+        if (!cancelled) setInspectLoading(false);
+      });
+    return () => {
+      cancelled = true;
+      controller.abort();
+    };
+  }, [inspectPoint, city]);
 
   const visibleRoutes = useMemo(() => {
     if (!city) return [];
@@ -469,6 +525,19 @@ export default function App() {
       setInspectPoint(null);
     },
     [tripOptions]
+  );
+
+  const selectInspected = useCallback(
+    (id: string) => {
+      const route = routePool.find((item) => item.id === id);
+      if (route && city && !city.routes.some((item) => item.id === id)) {
+        setExtraRoutes((current) =>
+          current.some((item) => item.id === id) ? current : [...current, route]
+        );
+      }
+      handleSelect(id);
+    },
+    [routePool, city, handleSelect]
   );
 
   const showAll = useCallback(() => {
@@ -602,6 +671,45 @@ export default function App() {
     setFavorites(removeFavorite(city.slug, label));
   }, [city]);
 
+  const saveCurrentTrip = useCallback(() => {
+    if (!city || !origin || !destination) return;
+    setSavedTrips(saveTrip(city.slug, origin, destination));
+  }, [city, origin, destination]);
+
+  const removeSaved = useCallback((trip: SavedTrip) => {
+    if (!city) return;
+    setSavedTrips(removeSavedTrip(city.slug, trip));
+  }, [city]);
+
+  const isCurrentTripSaved = Boolean(
+    origin && destination && savedTrips.some((trip) => sameTrip(origin, destination, trip))
+  );
+
+  useEffect(() => {
+    if (!city?.partial || !online || savedTrips.length === 0) return;
+    let cancelled = false;
+    for (const trip of savedTrips.slice(0, 5)) {
+      const key = tripCacheKey(city.slug, trip.origin, trip.destination);
+      void (async () => {
+        const cached = await readTripRoutes(key);
+        if (cached || cancelled) return;
+        try {
+          const routes = await api.tripRoutes(
+            city.slug,
+            { lat: trip.origin.lat, lng: trip.origin.lng },
+            { lat: trip.destination.lat, lng: trip.destination.lng }
+          );
+          if (!cancelled) await writeTripRoutes(key, routes);
+        } catch {
+          // Se reintentará en la próxima apertura.
+        }
+      })();
+    }
+    return () => {
+      cancelled = true;
+    };
+  }, [city, online, savedTrips]);
+
   const shareTrip = useCallback(async () => {
     if (!city || !origin || !destination) return;
     const url = new URL(window.location.href);
@@ -649,6 +757,23 @@ export default function App() {
       window.removeEventListener("offline", down);
     };
   }, []);
+
+  useEffect(() => {
+    const handler = (event: Event) => {
+      event.preventDefault();
+      setInstallPrompt(event as InstallPromptEvent);
+    };
+    window.addEventListener("beforeinstallprompt", handler);
+    return () => window.removeEventListener("beforeinstallprompt", handler);
+  }, []);
+
+  const installApp = useCallback(async () => {
+    const prompt = installPrompt;
+    if (!prompt) return;
+    await prompt.prompt();
+    await prompt.userChoice;
+    setInstallPrompt(null);
+  }, [installPrompt]);
 
   const handleLocate = useCallback(async () => {
     if (!city) return;
@@ -899,6 +1024,7 @@ export default function App() {
               onDirection={setActiveDirection}
               onBack={handleBack}
               fare={city.fare}
+              timeZone={city.timezone}
             />
           ) : (
             <>
@@ -928,11 +1054,14 @@ export default function App() {
 
                 <QuickAccess
                   favorites={favorites}
+                  savedTrips={savedTrips}
                   recents={recents}
                   origin={origin}
                   onApplyPlace={selectOriginPlace}
                   onSaveFavorite={saveFavoritePlace}
                   onRemoveFavorite={removeFavoritePlace}
+                  onApplySaved={applyRecent}
+                  onRemoveSaved={removeSaved}
                   onApplyRecent={applyRecent}
                 />
 
@@ -1100,6 +1229,16 @@ export default function App() {
                 <h2 title={headTitle}>{headTitle}</h2>
                 <div className="list-head__side">
                   <span className="list-head__note">{listNote}</span>
+                  {tripMode && !samePlace && (
+                    <button
+                      type="button"
+                      className="share-button"
+                      onClick={saveCurrentTrip}
+                      title={isCurrentTripSaved ? "Este viaje ya está guardado" : "Guardar este viaje"}
+                    >
+                      {isCurrentTripSaved ? "Guardado" : "Guardar"}
+                    </button>
+                  )}
                   {tripMode && !samePlace && (
                     <button type="button" className="share-button" onClick={() => void shareTrip()}>
                       {shareNotice || "Compartir"}
@@ -1273,8 +1412,10 @@ export default function App() {
           {inspectPoint && (
             <PointInspector
               routes={inspectRoutes}
+              loading={inspectLoading}
+              error={inspectError}
               onClose={closeInspector}
-              onSelect={handleSelect}
+              onSelect={selectInspected}
             />
           )}
           {!inspectPoint && !selected && !activeTrip && (
@@ -1296,7 +1437,12 @@ export default function App() {
                 : "")}
       </p>
 
-      <AboutDialog dialogRef={aboutRef} city={city} />
+      <AboutDialog
+        dialogRef={aboutRef}
+        city={city}
+        canInstall={Boolean(installPrompt)}
+        onInstall={() => void installApp()}
+      />
       <NewsDialog
         dialogRef={newsRef}
         city={city}

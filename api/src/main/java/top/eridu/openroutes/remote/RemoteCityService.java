@@ -62,6 +62,7 @@ public class RemoteCityService {
     private final Map<String, Cached> memory = new ConcurrentHashMap<>();
     private final Map<String, ReentrantLock> locks = new ConcurrentHashMap<>();
     private final Map<String, CachedRoutes> tripCache = new ConcurrentHashMap<>();
+    private final Map<String, CachedRoutes> pointCache = new ConcurrentHashMap<>();
 
     @Autowired
     public RemoteCityService(
@@ -125,6 +126,41 @@ public class RemoteCityService {
             tripCache.clear();
         }
         tripCache.put(key, new CachedRoutes(result, now + ttlMillis));
+        return result;
+    }
+
+    public List<Route> pointRoutes(String slug, double lat, double lng, int radius) {
+        List<Route> all = allRoutes(slug);
+        String key = slug + "|p|" + cell(lat) + "," + cell(lng) + "|" + radius;
+        long now = System.currentTimeMillis();
+        CachedRoutes cached = pointCache.get(key);
+        if (cached != null && cached.expiresAt() > now) {
+            return cached.routes();
+        }
+        List<Candidate> candidates = new ArrayList<>();
+        for (Route route : all) {
+            double distance = Double.POSITIVE_INFINITY;
+            for (var direction : route.directions()) {
+                for (var path : direction.paths()) {
+                    distance = Math.min(distance, Geo.distanceToPathMeters(lat, lng, path));
+                }
+            }
+            if (distance <= radius) {
+                candidates.add(new Candidate(route, distance));
+            }
+        }
+        candidates.sort(Comparator.comparingDouble(Candidate::score));
+        List<Route> result = candidates.stream()
+                .limit(MAX_TRIP_ROUTES)
+                .map(Candidate::route)
+                .toList();
+        if (pointCache.size() > 800) {
+            pointCache.entrySet().removeIf(entry -> entry.getValue().expiresAt() <= now);
+        }
+        if (pointCache.size() > 800) {
+            pointCache.clear();
+        }
+        pointCache.put(key, new CachedRoutes(result, now + ttlMillis));
         return result;
     }
 

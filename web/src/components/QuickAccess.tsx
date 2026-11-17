@@ -1,30 +1,36 @@
 import type { Origin, Place } from "../types";
-import type { FavoriteLabel, FavoritePlace, RecentTrip } from "../personal";
+import type { FavoriteLabel, FavoritePlace, RecentTrip, SavedTrip } from "../personal";
 import { ClockIcon, PinIcon } from "./Icons";
 
 type Props = {
   favorites: FavoritePlace[];
+  savedTrips: SavedTrip[];
   recents: RecentTrip[];
   origin: Origin | null;
   onApplyPlace: (place: Place) => void;
   onSaveFavorite: (label: FavoriteLabel) => void;
   onRemoveFavorite: (label: FavoriteLabel) => void;
+  onApplySaved: (trip: SavedTrip) => void;
+  onRemoveSaved: (trip: SavedTrip) => void;
   onApplyRecent: (trip: RecentTrip) => void;
 };
 
 export function QuickAccess({
   favorites,
+  savedTrips,
   recents,
   origin,
   onApplyPlace,
   onSaveFavorite,
   onRemoveFavorite,
+  onApplySaved,
+  onRemoveSaved,
   onApplyRecent
 }: Props) {
   const labels: FavoriteLabel[] = ["Casa", "Trabajo"];
   const saved = new Set(favorites.map((favorite) => favorite.label));
   const canSave = origin?.kind === "place";
-  const show = favorites.length > 0 || recents.length > 0 || canSave;
+  const show = favorites.length > 0 || savedTrips.length > 0 || recents.length > 0 || canSave;
   if (!show) return null;
 
   return (
@@ -66,6 +72,34 @@ export function QuickAccess({
                   + {label}
                 </button>
               ))}
+        </div>
+      )}
+      {savedTrips.length > 0 && (
+        <div className="quick-access__row">
+          <span className="quick-access__label">Guardados</span>
+          {savedTrips.slice(0, 3).map((trip) => {
+            const label = `${trip.origin.label} → ${trip.destination.name}`;
+            return (
+              <span key={`${trip.at}-${label}`} className="quick-favorite">
+                <button
+                  type="button"
+                  className="quick-chip quick-chip--trip"
+                  onClick={() => onApplySaved(trip)}
+                  title={label}
+                >
+                  {label}
+                </button>
+                <button
+                  type="button"
+                  className="quick-favorite__remove"
+                  aria-label={`Quitar viaje ${label}`}
+                  onClick={() => onRemoveSaved(trip)}
+                >
+                  ×
+                </button>
+              </span>
+            );
+          })}
         </div>
       )}
       {recents.length > 0 && (

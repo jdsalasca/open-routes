@@ -29,5 +29,11 @@ export const api = {
       `/api/cities/${encodeURIComponent(slug)}/trip-routes?fromLat=${from.lat.toFixed(4)}` +
         `&fromLng=${from.lng.toFixed(4)}&toLat=${to.lat.toFixed(4)}&toLng=${to.lng.toFixed(4)}&radius=150`,
       signal
+    ),
+  pointRoutes: (slug: string, point: { lat: number; lng: number }, signal?: AbortSignal) =>
+    getJson<Route[]>(
+      `/api/cities/${encodeURIComponent(slug)}/routes/near-bundle?lat=${point.lat.toFixed(4)}` +
+        `&lng=${point.lng.toFixed(4)}&radius=300`,
+      signal
     )
 };

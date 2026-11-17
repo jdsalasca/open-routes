@@ -5,9 +5,11 @@ import { CloseIcon, ExternalLinkIcon } from "./Icons";
 type Props = {
   dialogRef: RefObject<HTMLDialogElement | null>;
   city: City;
+  canInstall: boolean;
+  onInstall: () => void;
 };
 
-export function AboutDialog({ dialogRef, city }: Props) {
+export function AboutDialog({ dialogRef, city, canInstall, onInstall }: Props) {
   const circular = city.routes.filter((route) => route.circular).map((route) => route.code);
 
   return (
@@ -121,6 +123,16 @@ export function AboutDialog({ dialogRef, city }: Props) {
         React, Vite, SCSS, Leaflet y Spring Boot. El mapa base es de OpenStreetMap y las rutas
         usan datos publicados por cada operador o su feed GTFS. El código está bajo licencia MIT.
       </p>
+
+      {canInstall && (
+        <>
+          <h3>Aplicación</h3>
+          <p>Instala open-routes para abrirla como app y conservar la última ciudad sin conexión.</p>
+          <button type="button" className="primary-button" onClick={onInstall}>
+            Instalar app
+          </button>
+        </>
+      )}
 
       <div className="about__footer">
         <a href="https://github.com/jdsalasca/open-routes" target="_blank" rel="noreferrer">

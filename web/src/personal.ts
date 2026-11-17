@@ -2,7 +2,9 @@ import type { Origin, Place } from "./types";
 
 const FAVORITES = "open-routes-favorites";
 const RECENTS = "open-routes-recents";
+const SAVED = "open-routes-saved-trips";
 const MAX_RECENTS = 5;
+const MAX_SAVED = 8;
 const RECENT_TTL = 30 * 24 * 60 * 60 * 1000;
 
 export type FavoriteLabel = "Casa" | "Trabajo";
@@ -19,6 +21,8 @@ export type RecentTrip = {
   destination: Place;
   at: number;
 };
+
+export type SavedTrip = RecentTrip;
 
 function read<T>(key: string): T[] {
   try {
@@ -41,6 +45,9 @@ const cell = (value: number) => Math.round(value * 10_000);
 
 const tripKey = (origin: Origin, destination: Place) =>
   `${cell(origin.lat)},${cell(origin.lng)}|${cell(destination.lat)},${cell(destination.lng)}`;
+
+export const sameTrip = (origin: Origin, destination: Place, saved: RecentTrip) =>
+  tripKey(origin, destination) === tripKey(saved.origin, saved.destination);
 
 export function loadFavorites(city: string): FavoritePlace[] {
   return read<FavoritePlace>(FAVORITES).filter(
@@ -82,4 +89,31 @@ export function addRecent(city: string, origin: Origin, destination: Place): Rec
   const others = read<RecentTrip>(RECENTS).filter((item) => item.city !== city);
   write(RECENTS, [...others, ...next]);
   return next;
+}
+
+export function loadSavedTrips(city: string): SavedTrip[] {
+  return read<SavedTrip>(SAVED)
+    .filter((item) => item.city === city)
+    .sort((a, b) => b.at - a.at)
+    .slice(0, MAX_SAVED);
+}
+
+export function saveTrip(city: string, origin: Origin, destination: Place): SavedTrip[] {
+  const key = tripKey(origin, destination);
+  const current = loadSavedTrips(city).filter(
+    (item) => tripKey(item.origin, item.destination) !== key
+  );
+  const next = [{ city, origin, destination, at: Date.now() }, ...current].slice(0, MAX_SAVED);
+  const others = read<SavedTrip>(SAVED).filter((item) => item.city !== city);
+  write(SAVED, [...others, ...next]);
+  return next;
+}
+
+export function removeSavedTrip(city: string, trip: SavedTrip): SavedTrip[] {
+  const key = tripKey(trip.origin, trip.destination);
+  const all = read<SavedTrip>(SAVED).filter(
+    (item) => !(item.city === city && tripKey(item.origin, item.destination) === key)
+  );
+  write(SAVED, all);
+  return all.filter((item) => item.city === city).sort((a, b) => b.at - a.at);
 }

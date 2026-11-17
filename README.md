@@ -21,10 +21,12 @@ Rutas de transporte público claras y cerca de ti. Empieza en **Tunja, Boyacá**
 - Cambia de ciudad desde la cabecera o usa **Detectar mi ciudad**; la elección queda en `?city=` y en el navegador.
 - Guarda **Casa** y **Trabajo** como favoritos y repite los últimos viajes con un toque.
 - Comparte un viaje por enlace para que otra persona vea el mismo origen y destino.
+- Guarda viajes completos para repetirlos y conservarlos sin conexión.
 - Instala la app como PWA y consulta la última ciudad guardada sin conexión.
 - Intercambia origen y destino, o usa tu ubicación como origen.
 - Busca cualquiera de los 154 barrios y veredas oficiales de Tunja, un sitio o una dirección de OpenStreetMap.
-- Toca un punto del mapa y ve todas las rutas que pasan a menos de 150 m, ordenadas por distancia.
+- Toca un punto del mapa y ve todas las rutas del índice a menos de 300 m, no solo las 30 principales.
+- Consulta paradas oficiales ordenadas y una próxima salida aproximada según la frecuencia.
 - Consulta novedades de movilidad y las cuentas oficiales de Tunja sin cargar cookies de X.
 - Activa tu ubicación y ordena las rutas por distancia real a su trazado (1 km a la redonda).
 - Dibuja las rutas de la ciudad sobre un mapa claro, cada una con su color.
@@ -77,8 +79,9 @@ python tools/gtfs-check.py     # importador GTFS + fixture (Python 3.11+)
 | `GET /api/cities/{slug}/search?q=calle+21` | Direcciones, barrios y sitios en OpenStreetMap, acotados a la ciudad |
 | `GET /api/cities/{slug}/news` | Titulares de movilidad de Google News RSS, con fuente y fecha |
 | `GET /api/cities/{slug}/trip-routes?fromLat=&fromLng=&toLat=&toLng=` | Rutas cercanas al origen y al destino, para cargar solo lo necesario |
+| `GET /api/cities/{slug}/routes/near-bundle?lat=&lng=&radius=300` | Todas las rutas del índice que pasan cerca de un punto |
 
-`radius` se limita a 50–5000 m. Las coordenadas fuera de rango devuelven 400. `search` exige entre 3 y 120 caracteres y cachea 24 h; `news` cachea 30 min. `trip-routes` cachea 72 h y devuelve como máximo 60 rutas.
+`radius` se limita a 50–5000 m. Las coordenadas fuera de rango devuelven 400. `search` exige entre 3 y 120 caracteres y cachea 24 h; `news` cachea 30 min. `trip-routes` y `routes/near-bundle` cachean 72 h y devuelven como máximo 60 rutas.
 
 ## Agregar una ciudad
 
@@ -160,7 +163,8 @@ La primera construcción de Bogotá tarda decenas de segundos (119 MB, 1.053 rut
 - Los trazados son los del mapa público del operador. Algunos ramales se dibujan como segmentos separados porque así están en el KML original.
 - Los lugares buscables incluyen los 179 barrios, veredas y sitios de Tunja. Los barrios y veredas vienen del dataset oficial de la Alcaldía (CC BY-SA 4.0); las direcciones y puntos de interés se buscan en OpenStreetMap solo cuando el usuario lo pide.
 - Bogotá: [TransMilenio · GTFS estático](https://datosabiertos.bogota.gov.co/dataset/especificacion-gtfs-general-transport-feed-specification-sitp), CC BY-SA 4.0. El feed se descubre y se cachea 72 h; el mapa muestra 30 rutas principales y el planificador carga el resto por viaje. La ficha indica cuándo se actualizaron los datos.
-- Los favoritos, viajes recientes y enlaces compartidos se guardan en el navegador. La PWA cachea la app, la última ciudad y sus rutas para funcionar sin conexión; las búsquedas nuevas y las noticias necesitan red.
+- Los favoritos, viajes recientes y enlaces compartidos se guardan en el navegador. Los viajes guardados precargan su bundle de rutas para funcionar sin conexión; las búsquedas nuevas y las noticias necesitan red.
+- En ciudades GTFS las paradas se muestran en el orden del viaje representativo. La “próxima salida” es una estimación por frecuencia, no un tiempo real ni una parada oficial de paso.
 - Cada ciudad puede ser un JSON local o una entrada del catálogo remoto, validada al arrancar. El selector aparece cuando hay más de una y `Detectar mi ciudad` usa la ubicación del navegador si el usuario lo permite.
 - El planificador combina los trazados para encontrar **rutas directas** (sin transbordos). Los tiempos son estimaciones sobre la geometría: incluyen caminata, espera y bus, pero no tráfico, semáforos ni paradas oficiales.
 - R10 y R22 están marcadas como circulares por el operador; el planificador cierra la vuelta solo si el trazado termina cerca del inicio. R8, R13 y R18 tienen fragmentos en el mapa: se avisa que no se pueden verificar como directas en vez de inventar la conexión.

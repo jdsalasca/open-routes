@@ -57,7 +57,9 @@ public class GtfsCityBuilder {
             Map<String, List<Integer>> routeFirsts = new HashMap<>();
             Map<String, Integer> routeMin = new HashMap<>();
             Map<String, Integer> routeMax = new HashMap<>();
-            readStopTimes(zip, trips.tripToRoute(), routeStopIds, routeFirsts, routeMin, routeMax);
+            Map<String, List<StopTimeRow>> tripStops = new HashMap<>();
+            readStopTimes(zip, trips.tripToRoute(), trips.representativeTrips(),
+                    routeStopIds, tripStops, routeFirsts, routeMin, routeMax);
 
             List<RouteWithCount> built = new ArrayList<>();
             Set<String> usedIds = new HashSet<>();
@@ -82,11 +84,15 @@ public class GtfsCityBuilder {
                     if (path.size() < 2) {
                         continue;
                     }
-                    List<Stop> routeStops = routeStopIds.getOrDefault(row.id, Set.of()).stream()
-                            .map(stops::get)
-                            .filter(stop -> stop != null)
-                            .map(stop -> new Stop(stop.name, stop.lat, stop.lng))
-                            .toList();
+                    List<Stop> routeStops = orderedStops(
+                            tripStops.get(group.tripId), stops);
+                    if (routeStops.isEmpty()) {
+                        routeStops = routeStopIds.getOrDefault(row.id, Set.of()).stream()
+                                .map(stops::get)
+                                .filter(stop -> stop != null)
+                                .map(stop -> new Stop(stop.name, stop.lat, stop.lng))
+                                .toList();
+                    }
                     String directionName = index == 0
                             ? (row.longName.isBlank() ? "Ida" : row.longName)
                             : (row.longName.isBlank() ? "Vuelta" : row.longName + " · vuelta");
@@ -212,15 +218,21 @@ public class GtfsCityBuilder {
             throw new IOException("trips.txt no tiene viajes");
         }
         Set<String> selectedShapes = new HashSet<>();
+        Set<String> representativeTrips = new HashSet<>();
         for (Map<String, GroupStat> routeGroups : groups.values()) {
             routeGroups.values().stream()
                     .sorted(Comparator.comparingInt(stat -> -stat.count))
                     .limit(2)
-                    .map(stat -> stat.shapeId)
-                    .filter(shape -> shape != null && !shape.isBlank())
-                    .forEach(selectedShapes::add);
+                    .forEach(stat -> {
+                        if (stat.shapeId != null && !stat.shapeId.isBlank()) {
+                            selectedShapes.add(stat.shapeId);
+                        }
+                        if (stat.tripId != null) {
+                            representativeTrips.add(stat.tripId);
+                        }
+                    });
         }
-        return new TripIndex(groups, tripToRoute, tripCounts, selectedShapes);
+        return new TripIndex(groups, tripToRoute, tripCounts, selectedShapes, representativeTrips);
     }
 
     private static Map<String, StopRow> readStops(ZipFile zip) throws IOException {
@@ -291,7 +303,9 @@ public class GtfsCityBuilder {
     private static void readStopTimes(
             ZipFile zip,
             Map<String, String> tripToRoute,
+            Set<String> representativeTrips,
             Map<String, Set<String>> routeStopIds,
+            Map<String, List<StopTimeRow>> tripStops,
             Map<String, List<Integer>> routeFirsts,
             Map<String, Integer> routeMin,
             Map<String, Integer> routeMax
@@ -318,6 +332,11 @@ public class GtfsCityBuilder {
                 String stopId = GtfsCsv.value(row, index, "stop_id");
                 if (!stopId.isBlank()) {
                     routeStopIds.computeIfAbsent(routeId, ignored -> new HashSet<>()).add(stopId);
+                    if (representativeTrips.contains(tripId)) {
+                        int sequence = (int) number(GtfsCsv.value(row, index, "stop_sequence"));
+                        tripStops.computeIfAbsent(tripId, ignored -> new ArrayList<>())
+                                .add(new StopTimeRow(sequence, stopId));
+                    }
                 }
                 String departure = GtfsCsv.value(row, index, "departure_time");
                 String arrival = GtfsCsv.value(row, index, "arrival_time");
@@ -340,6 +359,23 @@ public class GtfsCityBuilder {
             routeMin.merge(routeId, start, Math::min);
             routeMax.merge(routeId, end, Math::max);
         }
+        tripStops.values().forEach(rows ->
+                rows.sort(Comparator.comparingInt(StopTimeRow::sequence)));
+    }
+
+    private static List<Stop> orderedStops(
+            List<StopTimeRow> rows, Map<String, StopRow> stops) {
+        if (rows == null || rows.isEmpty()) {
+            return List.of();
+        }
+        List<Stop> result = new ArrayList<>();
+        for (StopTimeRow row : rows) {
+            StopRow stop = stops.get(row.stopId);
+            if (stop != null) {
+                result.add(new Stop(stop.name, stop.lat, stop.lng));
+            }
+        }
+        return result;
     }
 
     private static List<Place> places(Map<String, StopRow> stops) {
@@ -599,8 +635,12 @@ public class GtfsCityBuilder {
             Map<String, Map<String, GroupStat>> groups,
             Map<String, String> tripToRoute,
             Map<String, Integer> tripCounts,
-            Set<String> selectedShapeIds
+            Set<String> selectedShapeIds,
+            Set<String> representativeTrips
     ) {
+    }
+
+    private record StopTimeRow(int sequence, String stopId) {
     }
 
     private record RouteWithCount(Route route, int trips) {

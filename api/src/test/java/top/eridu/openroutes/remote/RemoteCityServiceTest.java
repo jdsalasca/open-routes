@@ -105,5 +105,8 @@ class RemoteCityServiceTest {
                 service.tripRoutes("prueba", 5.53, -73.36, 5.55, -73.36, 150);
         assertThat(routes).extracting(route -> route.code()).contains("10");
         assertThat(service.tripRoutes("prueba", 5.49, -73.43, 5.49, -73.43, 150)).isEmpty();
+        assertThat(service.pointRoutes("prueba", 5.53, -73.36, 150))
+                .extracting(route -> route.code()).contains("10");
+        assertThat(service.pointRoutes("prueba", 5.49, -73.43, 150)).isEmpty();
     }
 }

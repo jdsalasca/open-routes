@@ -5,13 +5,15 @@ import { CloseIcon, PinIcon } from "./Icons";
 
 type Props = {
   routes: NearbyRoute[];
+  loading: boolean;
+  error: string | null;
   onClose: () => void;
   onSelect: (id: string) => void;
 };
 
 const meters = (value: number) => (value < 1000 ? `${value} m` : `${(value / 1000).toFixed(1)} km`);
 
-export function PointInspector({ routes, onClose, onSelect }: Props) {
+export function PointInspector({ routes, loading, error, onClose, onSelect }: Props) {
   useEffect(() => {
     const onKey = (event: KeyboardEvent) => {
       if (event.key === "Escape") onClose();
@@ -29,9 +31,13 @@ export function PointInspector({ routes, onClose, onSelect }: Props) {
           </span>
           <h2 id="point-panel-title">Rutas en este punto</h2>
           <p>
-            {routes.length
-              ? `${routes.length} ${routes.length === 1 ? "ruta pasa" : "rutas pasan"} a menos de 150 m`
-              : "No hay rutas a menos de 150 m"}
+            {loading
+              ? "Buscando todas las rutas del punto…"
+              : error
+                ? error
+                : routes.length
+                  ? `${routes.length} ${routes.length === 1 ? "ruta pasa" : "rutas pasan"} a menos de 300 m`
+                  : "No hay rutas a menos de 300 m"}
           </p>
         </div>
         <button type="button" className="icon-button" aria-label="Cerrar rutas del punto" onClick={onClose}>
@@ -39,7 +45,14 @@ export function PointInspector({ routes, onClose, onSelect }: Props) {
         </button>
       </header>
 
-      {routes.length > 0 ? (
+      {loading ? (
+        <div className="point-panel__empty point-panel__loading" role="status">
+          <span className="place-status__spinner" aria-hidden="true" />
+          Buscando en el índice completo…
+        </div>
+      ) : error ? (
+        <p className="point-panel__empty">{error} Toca otro punto o inténtalo de nuevo.</p>
+      ) : routes.length > 0 ? (
         <>
           <ul className="point-list">
             {routes.map((route) => (

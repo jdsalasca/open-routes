@@ -15,6 +15,7 @@ type Props = {
   onDirection: (index: number) => void;
   onBack: () => void;
   fare: Fare;
+  timeZone: string;
 };
 
 const money = (value: number) =>
@@ -23,9 +24,50 @@ const money = (value: number) =>
 const frequency = (value: number | null) =>
   value ? `Cada ${value} min` : "Frecuencia variable";
 
-export function RouteDetail({ route, activeDirection, onDirection, onBack, fare }: Props) {
+const minutesInZone = (now: Date, timeZone: string) => {
+  const parts = new Intl.DateTimeFormat("en-US", {
+    timeZone,
+    hour: "2-digit",
+    minute: "2-digit",
+    hourCycle: "h23"
+  }).formatToParts(now);
+  const hour = Number(parts.find((part) => part.type === "hour")?.value ?? 0) % 24;
+  const minute = Number(parts.find((part) => part.type === "minute")?.value ?? 0);
+  return hour * 60 + minute;
+};
+
+const parseTime = (value: string) => {
+  const [hour, minute] = value.split(":").map(Number);
+  return hour * 60 + minute;
+};
+
+const nextDeparture = (
+  schedule: { start: string; end: string; frequencyMin: number | null },
+  timeZone: string
+) => {
+  if (!schedule.frequencyMin) return null;
+  const now = minutesInZone(new Date(), timeZone);
+  const start = parseTime(schedule.start);
+  const end = parseTime(schedule.end);
+  const inRange = start <= end ? now >= start && now < end : now >= start || now < end;
+  if (!inRange) return { outside: true, time: "" };
+  const delta = (now - start + 24 * 60) % (24 * 60);
+  const next = start + Math.ceil(delta / schedule.frequencyMin) * schedule.frequencyMin;
+  const minutes = next % (24 * 60);
+  return {
+    outside: false,
+    time: `${String(Math.floor(minutes / 60)).padStart(2, "0")}:${String(minutes % 60).padStart(2, "0")}`
+  };
+};
+
+const isSundayInZone = (now: Date, timeZone: string) =>
+  new Intl.DateTimeFormat("en-US", { timeZone, weekday: "short" }).format(now) === "Sun";
+
+export function RouteDetail({ route, activeDirection, onDirection, onBack, fare, timeZone }: Props) {
   const direction = route.directions[activeDirection] ?? route.directions[0];
   const stops = direction?.stops ?? [];
+  const todaySchedule = isSundayInZone(new Date(), timeZone) ? route.sunday : route.weekday;
+  const next = nextDeparture(todaySchedule, timeZone);
 
   return (
     <article className="detail" style={{ "--route-color": route.color } as CSSProperties}>
@@ -89,6 +131,14 @@ export function RouteDetail({ route, activeDirection, onDirection, onBack, fare 
           </div>
         </div>
       </div>
+
+      {next && (
+        <p className="next-departure">
+          {next.outside
+            ? "Fuera del horario de hoy."
+            : `Próxima salida aprox. ${next.time} · cada ${todaySchedule.frequencyMin} min`}
+        </p>
+      )}
 
       {route.type === "Intermunicipal" ? (
         <>

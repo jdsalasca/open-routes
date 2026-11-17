@@ -46,6 +46,23 @@ public class TripRoutesController {
         return trips.candidates(city, fromLat, fromLng, toLat, toLng, maxDistance);
     }
 
+    @GetMapping("/routes/near-bundle")
+    public List<Route> pointRoutes(
+            @PathVariable String slug,
+            @RequestParam double lat,
+            @RequestParam double lng,
+            @RequestParam(defaultValue = "150") int radius,
+            HttpServletResponse response
+    ) {
+        response.setHeader("Cache-Control", "private, max-age=259200");
+        City city = cities.find(slug).orElseThrow(() -> notFound(slug));
+        if (!valid(lat, lng)) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Coordenadas fuera de rango");
+        }
+        int maxDistance = Math.clamp(radius, 50, 1000);
+        return trips.pointCandidates(city, lat, lng, maxDistance);
+    }
+
     private static boolean valid(double lat, double lng) {
         return Double.isFinite(lat) && Double.isFinite(lng)
                 && lat >= -90 && lat <= 90 && lng >= -180 && lng <= 180;
