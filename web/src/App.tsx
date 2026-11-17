@@ -28,7 +28,7 @@ import type { TripOption } from "./planner";
 import { addRecent, loadFavorites, loadRecents, loadSavedTrips, removeFavorite, removeSavedTrip, sameTrip, saveFavorite, saveTrip } from "./personal";
 import type { FavoriteLabel, FavoritePlace, RecentTrip, SavedTrip } from "./personal";
 import { readTripRoutes, tripCacheKey, writeTripRoutes } from "./tripCache";
-import type { City, CitySummary, NearbyRoute, Origin, Place, Route } from "./types";
+import type { City, CitySummary, NearbyRoute, NewsItem, Origin, Place, Route } from "./types";
 
 const GPS_RADIUS = 1000;
 const PLACE_RADIUS = 500;
@@ -153,6 +153,10 @@ export default function App() {
   const [origin, setOrigin] = useState<Origin | null>(null);
   const [destination, setDestination] = useState<Place | null>(null);
   const [nearby, setNearby] = useState<NearbyRoute[] | null>(null);
+  const [nearbyBundle, setNearbyBundle] = useState<Route[]>([]);
+  const [nearbyLoading, setNearbyLoading] = useState(false);
+  const [nearbyError, setNearbyError] = useState<string | null>(null);
+  const nearbyRequest = useRef(0);
   const [nearMode, setNearMode] = useState(false);
   const [query, setQuery] = useState("");
   const [clock, setClock] = useState(() => Date.now());
@@ -171,6 +175,7 @@ export default function App() {
   const [savedTrips, setSavedTrips] = useState<SavedTrip[]>([]);
   const [shareNotice, setShareNotice] = useState("");
   const [online, setOnline] = useState(() => navigator.onLine);
+  const [alerts, setAlerts] = useState<NewsItem[]>([]);
   const [installPrompt, setInstallPrompt] = useState<InstallPromptEvent | null>(null);
   const { status, error: geoError, locate } = useGeolocation();
 
@@ -209,6 +214,9 @@ export default function App() {
         setDestination(shared?.destination ?? null);
         sharedApplied.current = true;
         setNearby(null);
+        setNearbyBundle([]);
+        setNearbyError(null);
+        setNearbyLoading(false);
         setNearMode(false);
         setQuery("");
         setInspectPoint(null);
@@ -246,9 +254,10 @@ export default function App() {
     return [
       ...city.routes,
       ...extraRoutes.filter((route) => !seen.has(route.id)),
-      ...inspectBundle.filter((route) => !seen.has(route.id))
+      ...inspectBundle.filter((route) => !seen.has(route.id)),
+      ...nearbyBundle.filter((route) => !seen.has(route.id))
     ];
-  }, [city, extraRoutes, inspectBundle]);
+  }, [city, extraRoutes, inspectBundle, nearbyBundle]);
 
   const selected = useMemo(
     () => routePool.find((route) => route.id === selectedId) ?? null,
@@ -436,7 +445,7 @@ export default function App() {
     let list: Route[] = city.routes;
     if (nearMode && nearby) {
       list = nearby
-        .map((hit) => city.routes.find((route) => route.id === hit.id))
+        .map((hit) => routePool.find((route) => route.id === hit.id))
         .filter((route): route is Route => Boolean(route));
     }
     const term = normalize(query.trim());
@@ -446,7 +455,7 @@ export default function App() {
         [route.code, route.name, route.description, ...route.directions.flatMap((d) => d.streets)].join(" ")
       ).includes(term)
     );
-  }, [city, nearMode, nearby, query]);
+  }, [city, nearMode, nearby, query, routePool]);
 
   const timeZone = city?.timezone ?? "America/Bogota";
   const dayKey = useMemo(() => dayKeyInTimeZone(new Date(clock), timeZone), [clock, timeZone]);
@@ -495,7 +504,11 @@ export default function App() {
   const detailOpen = Boolean(selected || activeTrip);
 
   const clearNearby = useCallback(() => {
+    nearbyRequest.current += 1;
     setNearby(null);
+    setNearbyBundle([]);
+    setNearbyError(null);
+    setNearbyLoading(false);
     setNearMode(false);
   }, []);
 
@@ -556,9 +569,34 @@ export default function App() {
   const loadNearby = useCallback(
     (point: { lat: number; lng: number }, radius: number) => {
       if (!city) return;
-      setNearby(findNearbyRoutes(point, radius, city.routes));
       setNearMode(true);
       setQuery("");
+      setNearbyError(null);
+      if (!city.partial) {
+        setNearby(findNearbyRoutes(point, radius, city.routes));
+        setNearbyBundle([]);
+        setNearbyLoading(false);
+        return;
+      }
+      const request = ++nearbyRequest.current;
+      setNearby(null);
+      setNearbyBundle([]);
+      setNearbyLoading(true);
+      api
+        .pointRoutes(city.slug, point)
+        .then((routes) => {
+          if (request !== nearbyRequest.current) return;
+          setNearbyBundle(routes);
+          setNearby(findNearbyRoutes(point, radius, routes));
+        })
+        .catch(() => {
+          if (request !== nearbyRequest.current) return;
+          setNearby(findNearbyRoutes(point, radius, city.routes));
+          setNearbyError("No pudimos cargar todas las rutas cercanas; mostramos las principales.");
+        })
+        .finally(() => {
+          if (request === nearbyRequest.current) setNearbyLoading(false);
+        });
     },
     [city]
   );
@@ -746,6 +784,21 @@ export default function App() {
     const timer = window.setTimeout(() => setShareNotice(""), 2600);
     return () => window.clearTimeout(timer);
   }, [shareNotice]);
+
+  useEffect(() => {
+    if (!city || !online) {
+      setAlerts([]);
+      return;
+    }
+    const controller = new AbortController();
+    api
+      .alerts(city.slug, controller.signal)
+      .then(setAlerts)
+      .catch(() => {
+        if (!controller.signal.aborted) setAlerts([]);
+      });
+    return () => controller.abort();
+  }, [city, online]);
 
   useEffect(() => {
     const up = () => setOnline(true);
@@ -1143,6 +1196,34 @@ export default function App() {
                 </div>
               )}
 
+              {alerts.length > 0 && (
+                <div className="service-alerts">
+                  <div className="service-alerts__head">
+                    <InfoIcon size={13} /> Avisos de movilidad
+                  </div>
+                  <ul>
+                    {alerts.slice(0, 2).map((alert) => (
+                      <li key={alert.url}>
+                        <a href={alert.url} target="_blank" rel="noreferrer">
+                          {alert.title}
+                        </a>
+                        <span>
+                          {alert.source}
+                          {alert.publishedAt
+                            ? ` · ${new Intl.DateTimeFormat("es-CO", {
+                                day: "numeric",
+                                month: "short",
+                                timeZone: city.timezone
+                              }).format(new Date(alert.publishedAt))}`
+                            : ""}
+                        </span>
+                      </li>
+                    ))}
+                  </ul>
+                  <p>Titulares de prensa; confirma con el operador antes de salir.</p>
+                </div>
+              )}
+
               {cityDetectError && (
                 <div className="notice notice--info" role="status">
                   <InfoIcon />
@@ -1208,6 +1289,20 @@ export default function App() {
                 <div className="notice notice--info" role="status">
                   <InfoIcon />
                   <span>Sin conexión: mostramos la última copia guardada.</span>
+                </div>
+              )}
+
+              {nearbyLoading && (
+                <div className="notice notice--info" role="status">
+                  <InfoIcon />
+                  <span>Buscando todas las rutas cerca de ti…</span>
+                </div>
+              )}
+
+              {nearbyError && (
+                <div className="notice" role="status">
+                  <InfoIcon />
+                  <span>{nearbyError}</span>
                 </div>
               )}
 

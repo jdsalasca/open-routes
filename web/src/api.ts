@@ -19,6 +19,8 @@ export const api = {
     ),
   news: (slug: string, signal?: AbortSignal) =>
     getJson<NewsItem[]>(`/api/cities/${encodeURIComponent(slug)}/news`, signal),
+  alerts: (slug: string, signal?: AbortSignal) =>
+    getJson<NewsItem[]>(`/api/cities/${encodeURIComponent(slug)}/alerts`, signal),
   tripRoutes: (
     slug: string,
     from: { lat: number; lng: number },

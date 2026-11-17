@@ -87,6 +87,25 @@ class MobilityNewsServiceTest {
     }
 
     @Test
+    void filtraSoloTitularesDeAvisos() {
+        body.set("""
+                <?xml version="1.0" encoding="UTF-8"?>
+                <rss version="2.0"><channel>
+                  <item><title>Cierre vial en Tunja por obra</title><link>https://medio.test/a</link>
+                    <source>Boyacá 7 Días</source>
+                    <pubDate>Mon, 16 Nov 2026 12:00:00 GMT</pubDate></item>
+                  <item><title>Triunfo deportivo de Boyacá</title><link>https://medio.test/b</link>
+                    <source>Deportes</source>
+                    <pubDate>Tue, 17 Nov 2026 12:00:00 GMT</pubDate></item>
+                </channel></rss>
+                """);
+        List<NewsItem> alerts = service.alerts(city);
+        assertThat(alerts).extracting(NewsItem::title)
+                .containsExactly("Cierre vial en Tunja por obra");
+        assertThat(lastQuery.get()).contains("cierre").contains("Tunja");
+    }
+
+    @Test
     void devuelveErrorClaroSiElFeedNoResponde() {
         server.stop(0);
         assertThatThrownBy(() -> service.latest(city))

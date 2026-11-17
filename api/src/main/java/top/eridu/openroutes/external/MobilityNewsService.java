@@ -42,6 +42,7 @@ public class MobilityNewsService {
     private final String baseUrl;
     private final long cacheTtlMs;
     private final Map<String, Cached> cache = new ConcurrentHashMap<>();
+    private final Map<String, Cached> alertsCache = new ConcurrentHashMap<>();
 
     @Autowired
     public MobilityNewsService(
@@ -57,20 +58,34 @@ public class MobilityNewsService {
     }
 
     public List<NewsItem> latest(City city) {
-        Cached cached = cache.get(city.slug());
+        return fetch(city, "movilidad", cache);
+    }
+
+    public List<NewsItem> alerts(City city) {
+        return fetch(city, "cierre vial OR desvío OR manifestación OR obra", alertsCache);
+    }
+
+    private List<NewsItem> fetch(City city, String topic, Map<String, Cached> store) {
+        Cached cached = store.get(city.slug());
         if (cached != null && cached.expiresAt() > System.currentTimeMillis()) {
             return cached.items();
         }
         boolean colombia = "Colombia".equalsIgnoreCase(city.country());
         String edition = colombia ? "hl=es-419&gl=CO&ceid=CO:es-419" : "hl=es&gl=ES&ceid=ES:es";
-        String query = "movilidad " + city.name() + " " + city.department();
+        String query = topic + " \"" + city.name() + "\"";
         String url = baseUrl + "/rss/search?q=" + URLEncoder.encode(query, StandardCharsets.UTF_8)
                 + "&" + edition;
 
         try {
             String xml = http.get(url, Map.of("Accept", "application/rss+xml, application/xml"));
             List<NewsItem> items = parse(xml);
-            cache.put(city.slug(), new Cached(items, System.currentTimeMillis() + cacheTtlMs));
+            if (!"movilidad".equals(topic)) {
+                items = items.stream()
+                        .filter(item -> isAlert(item, city))
+                        .limit(3)
+                        .toList();
+            }
+            store.put(city.slug(), new Cached(items, System.currentTimeMillis() + cacheTtlMs));
             return items;
         } catch (InterruptedException error) {
             Thread.currentThread().interrupt();
@@ -78,6 +93,18 @@ public class MobilityNewsService {
         } catch (Exception error) {
             throw new ExternalLookupException("No se pudieron consultar las noticias", error);
         }
+    }
+
+    private static boolean isAlert(NewsItem item, City city) {
+        String text = normalize(item.title() + " " + item.source());
+        if (!text.contains(normalize(city.name()))) {
+            return false;
+        }
+        return text.contains("cierre")
+                || text.contains("desvio")
+                || text.contains("manifestacion")
+                || text.contains("obra")
+                || text.contains("vial");
     }
 
     private List<NewsItem> parse(String xml) throws Exception {

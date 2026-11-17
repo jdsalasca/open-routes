@@ -27,6 +27,7 @@ Rutas de transporte público claras y cerca de ti. Empieza en **Tunja, Boyacá**
 - Busca cualquiera de los 154 barrios y veredas oficiales de Tunja, un sitio o una dirección de OpenStreetMap.
 - Toca un punto del mapa y ve todas las rutas del índice a menos de 300 m, no solo las 30 principales.
 - Consulta paradas oficiales ordenadas y una próxima salida aproximada según la frecuencia.
+- Ve avisos recientes de cierres, desvíos y obras, separados de las noticias generales.
 - Consulta novedades de movilidad y las cuentas oficiales de Tunja sin cargar cookies de X.
 - Activa tu ubicación y ordena las rutas por distancia real a su trazado (1 km a la redonda).
 - Dibuja las rutas de la ciudad sobre un mapa claro, cada una con su color.
@@ -78,6 +79,7 @@ python tools/gtfs-check.py     # importador GTFS + fixture (Python 3.11+)
 | `GET /api/cities/{slug}/routes/near?lat=&lng=&radius=800` | Rutas a menos de `radius` metros de un punto, ordenadas por distancia |
 | `GET /api/cities/{slug}/search?q=calle+21` | Direcciones, barrios y sitios en OpenStreetMap, acotados a la ciudad |
 | `GET /api/cities/{slug}/news` | Titulares de movilidad de Google News RSS, con fuente y fecha |
+| `GET /api/cities/{slug}/alerts` | Cierres, desvíos, manifestaciones y obras recientes, filtrados por ciudad |
 | `GET /api/cities/{slug}/trip-routes?fromLat=&fromLng=&toLat=&toLng=` | Rutas cercanas al origen y al destino, para cargar solo lo necesario |
 | `GET /api/cities/{slug}/routes/near-bundle?lat=&lng=&radius=300` | Todas las rutas del índice que pasan cerca de un punto |
 
@@ -173,7 +175,7 @@ La primera construcción de Bogotá tarda decenas de segundos (119 MB, 1.053 rut
 - La cercanía del mapa se calcula en el navegador. En ciudades remotas, al buscar un viaje se envían coordenadas redondeadas a la API para traer solo las rutas que sirven; el resultado se cachea 72 h en IndexedDB. La API sigue exponiendo `/near` para integraciones.
 - Los feeds remotos y sus índices se guardan comprimidos con gzip en el volumen `open-routes-cache`; las respuestas JSON también viajan comprimidas.
 - Las búsquedas de direcciones envían solo el texto consultado a OpenStreetMap a través de la API, con caché y un máximo de una petición por segundo; no se envían coordenadas de ubicación.
-- Los titulares de movilidad vienen de Google News RSS y conservan el enlace y el crédito de su medio. No incrustamos X: las cuentas oficiales se abren en X para no cargar cookies de terceros.
+- Los titulares de movilidad vienen de Google News RSS y conservan el enlace y el crédito de su medio. Los avisos de cierre/desvío son titulares de prensa filtrados por ciudad, no avisos oficiales; confirma con el operador. No incrustamos X: las cuentas oficiales se abren en X para no cargar cookies de terceros.
 - El mapa base consulta teselas de OpenStreetMap (recibe la zona visible y tu IP) y Cloudflare sirve el sitio con analítica sin cookies.
 
 ## Seguridad

@@ -39,6 +39,18 @@ public class CityNewsController {
         }
     }
 
+    @GetMapping("/alerts")
+    public List<NewsItem> alerts(@PathVariable String slug, HttpServletResponse response) {
+        response.setHeader("Cache-Control", "no-store");
+        City city = cities.find(slug).orElseThrow(() -> notFound(slug));
+        try {
+            return news.alerts(city);
+        } catch (ExternalLookupException error) {
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_GATEWAY, "Los avisos no están disponibles ahora");
+        }
+    }
+
     private static ResponseStatusException notFound(String slug) {
         return new ResponseStatusException(HttpStatus.NOT_FOUND, "Ciudad no encontrada: " + slug);
     }
