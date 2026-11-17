@@ -46,6 +46,7 @@ class GtfsCityBuilderTest {
 
         assertThat(loaded.city().partial()).isTrue();
         assertThat(loaded.city().totalRoutes()).isEqualTo(2);
+        assertThat(loaded.city().dataUpdatedAt()).isPositive();
         assertThat(loaded.city().routes()).hasSize(1);
         assertThat(loaded.allRoutes()).hasSize(2);
         assertThat(loaded.city().places()).hasSize(5);

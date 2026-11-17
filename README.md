@@ -19,6 +19,9 @@ Rutas de transporte público claras y cerca de ti. Empieza en **Tunja, Boyacá**
 - Elige un origen y un destino: muestra rutas directas ordenadas por tiempo estimado, con caminata, espera y tramo en bus.
 - En ciudades con GTFS remoto, el mapa carga **30 rutas principales** y, al buscar un viaje, trae bajo demanda solo las rutas que pasan cerca del origen y del destino.
 - Cambia de ciudad desde la cabecera o usa **Detectar mi ciudad**; la elección queda en `?city=` y en el navegador.
+- Guarda **Casa** y **Trabajo** como favoritos y repite los últimos viajes con un toque.
+- Comparte un viaje por enlace para que otra persona vea el mismo origen y destino.
+- Instala la app como PWA y consulta la última ciudad guardada sin conexión.
 - Intercambia origen y destino, o usa tu ubicación como origen.
 - Busca cualquiera de los 154 barrios y veredas oficiales de Tunja, un sitio o una dirección de OpenStreetMap.
 - Toca un punto del mapa y ve todas las rutas que pasan a menos de 150 m, ordenadas por distancia.
@@ -34,7 +37,7 @@ Rutas de transporte público claras y cerca de ti. Empieza en **Tunja, Boyacá**
 
 | Capa | Tecnología |
 |---|---|
-| Web | React 19 + Vite + TypeScript + SCSS + Leaflet |
+| Web | React 19 + Vite + TypeScript + SCSS + Leaflet (PWA instalable) |
 | API | Java 21 + Spring Boot 3.5 |
 | Datos | JSON local por ciudad + catálogo GTFS remoto con caché de 72 h (sin base de datos) |
 | Mapa base | OpenStreetMap (sin API key ni Google Maps) |
@@ -156,7 +159,8 @@ La primera construcción de Bogotá tarda decenas de segundos (119 MB, 1.053 rut
 - Los recorridos, horarios y tarifas pueden cambiar. La información del operador manda; esta app es una ayuda para leer el sistema, no un aviso oficial.
 - Los trazados son los del mapa público del operador. Algunos ramales se dibujan como segmentos separados porque así están en el KML original.
 - Los lugares buscables incluyen los 179 barrios, veredas y sitios de Tunja. Los barrios y veredas vienen del dataset oficial de la Alcaldía (CC BY-SA 4.0); las direcciones y puntos de interés se buscan en OpenStreetMap solo cuando el usuario lo pide.
-- Bogotá: [TransMilenio · GTFS estático](https://datosabiertos.bogota.gov.co/dataset/especificacion-gtfs-general-transport-feed-specification-sitp), CC BY-SA 4.0. El feed se descubre y se cachea 72 h; el mapa muestra 30 rutas principales y el planificador carga el resto por viaje.
+- Bogotá: [TransMilenio · GTFS estático](https://datosabiertos.bogota.gov.co/dataset/especificacion-gtfs-general-transport-feed-specification-sitp), CC BY-SA 4.0. El feed se descubre y se cachea 72 h; el mapa muestra 30 rutas principales y el planificador carga el resto por viaje. La ficha indica cuándo se actualizaron los datos.
+- Los favoritos, viajes recientes y enlaces compartidos se guardan en el navegador. La PWA cachea la app, la última ciudad y sus rutas para funcionar sin conexión; las búsquedas nuevas y las noticias necesitan red.
 - Cada ciudad puede ser un JSON local o una entrada del catálogo remoto, validada al arrancar. El selector aparece cuando hay más de una y `Detectar mi ciudad` usa la ubicación del navegador si el usuario lo permite.
 - El planificador combina los trazados para encontrar **rutas directas** (sin transbordos). Los tiempos son estimaciones sobre la geometría: incluyen caminata, espera y bus, pero no tráfico, semáforos ni paradas oficiales.
 - R10 y R22 están marcadas como circulares por el operador; el planificador cierra la vuelta solo si el trazado termina cerca del inicio. R8, R13 y R18 tienen fragmentos en el mapa: se avisa que no se pueden verificar como directas en vez de inventar la conexión.

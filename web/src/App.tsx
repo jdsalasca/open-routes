@@ -19,11 +19,14 @@ import { MapView } from "./components/MapView";
 import { NewsDialog } from "./components/NewsDialog";
 import { PlaceField } from "./components/PlaceField";
 import { PointInspector } from "./components/PointInspector";
+import { QuickAccess } from "./components/QuickAccess";
 import { RouteDetail } from "./components/RouteDetail";
 import { TripDetail } from "./components/TripDetail";
 import { useGeolocation } from "./hooks/useGeolocation";
 import { distanceMeters, dayKeyInTimeZone, findDirectTrips, findNearbyRoutes, findSplitRoutes } from "./planner";
 import type { TripOption } from "./planner";
+import { addRecent, loadFavorites, loadRecents, saveFavorite } from "./personal";
+import type { FavoriteLabel, FavoritePlace, RecentTrip } from "./personal";
 import { readTripRoutes, tripCacheKey, writeTripRoutes } from "./tripCache";
 import type { City, CitySummary, NearbyRoute, Origin, Place, Route } from "./types";
 
@@ -44,6 +47,36 @@ const frequency = (value: number | null) => (value ? `Cada ${value} min` : "Frec
 const distanceLabel = (meters: number) =>
   meters < 1000 ? `${meters} m` : `${(meters / 1000).toFixed(1).replace(".", ",")} km`;
 
+const relativeTime = (timestamp: number) => {
+  const minutes = Math.max(0, Math.round((Date.now() - timestamp) / 60_000));
+  if (minutes < 1) return "hace un momento";
+  if (minutes < 60) return `hace ${minutes} min`;
+  const hours = Math.round(minutes / 60);
+  if (hours < 24) return `hace ${hours} h`;
+  return `hace ${Math.round(hours / 24)} d`;
+};
+
+const copyText = async (text: string) => {
+  try {
+    await navigator.clipboard.writeText(text);
+    return true;
+  } catch {
+    try {
+      const area = document.createElement("textarea");
+      area.value = text;
+      area.style.position = "fixed";
+      area.style.opacity = "0";
+      document.body.appendChild(area);
+      area.select();
+      const copied = document.execCommand("copy");
+      area.remove();
+      return copied;
+    } catch {
+      return false;
+    }
+  }
+};
+
 const initialCitySlug = () => {
   const fromUrl = new URLSearchParams(window.location.search).get("city");
   if (fromUrl) return fromUrl;
@@ -54,12 +87,50 @@ const initialCitySlug = () => {
   }
 };
 
+const readSharedTrip = (): { origin: Origin; destination: Place } | null => {
+  const params = new URLSearchParams(window.location.search);
+  const raw = ["fromLat", "fromLng", "toLat", "toLng"].map((key) => params.get(key));
+  if (raw.some((value) => value === null || value === "")) {
+    return null;
+  }
+  const [fromLat, fromLng, toLat, toLng] = raw.map((value) => Number(value));
+  if (![fromLat, fromLng, toLat, toLng].every((value) => Number.isFinite(value))) {
+    return null;
+  }
+  if (
+    Math.abs(fromLat) > 90 ||
+    Math.abs(toLat) > 90 ||
+    Math.abs(fromLng) > 180 ||
+    Math.abs(toLng) > 180
+  ) {
+    return null;
+  }
+  return {
+    origin: {
+      kind: "place",
+      lat: fromLat,
+      lng: fromLng,
+      label: params.get("fromLabel") || "Origen",
+      type: params.get("fromType") || "Lugar"
+    },
+    destination: {
+      id: "shared-destination",
+      name: params.get("toLabel") || "Destino",
+      type: params.get("toType") || "Lugar",
+      lat: toLat,
+      lng: toLng,
+      aliases: []
+    }
+  };
+};
+
 export default function App() {
   const aboutRef = useRef<HTMLDialogElement>(null);
   const newsRef = useRef<HTMLDialogElement>(null);
   const sidebarRef = useRef<HTMLElement>(null);
   const initialSlug = useRef(initialCitySlug());
   const autoDetectTried = useRef(false);
+  const sharedApplied = useRef(false);
   const listHeadRef = useRef<HTMLDivElement>(null);
   const routeRefs = useRef(new Map<string, HTMLButtonElement>());
   const tripRefs = useRef(new Map<string, HTMLButtonElement>());
@@ -86,6 +157,10 @@ export default function App() {
   const [tripRoutesError, setTripRoutesError] = useState<string | null>(null);
   const [detectingCity, setDetectingCity] = useState(false);
   const [cityDetectError, setCityDetectError] = useState<string | null>(null);
+  const [favorites, setFavorites] = useState<FavoritePlace[]>([]);
+  const [recents, setRecents] = useState<RecentTrip[]>([]);
+  const [shareNotice, setShareNotice] = useState("");
+  const [online, setOnline] = useState(() => navigator.onLine);
   const { status, error: geoError, locate } = useGeolocation();
 
   useEffect(() => {
@@ -118,8 +193,10 @@ export default function App() {
         setSelectedId(null);
         setActiveDirection(0);
         setActiveTrip(null);
-        setOrigin(null);
-        setDestination(null);
+        const shared = sharedApplied.current ? null : readSharedTrip();
+        setOrigin(shared?.origin ?? null);
+        setDestination(shared?.destination ?? null);
+        sharedApplied.current = true;
         setNearby(null);
         setNearMode(false);
         setQuery("");
@@ -127,6 +204,8 @@ export default function App() {
         setExtraRoutes([]);
         setTripRoutesError(null);
         setTripRoutesLoading(false);
+        setFavorites(loadFavorites(data.slug));
+        setRecents(loadRecents(data.slug));
         document.title = `open-routes · Rutas de ${data.name}`;
         document
           .querySelector('meta[name="description"]')
@@ -168,6 +247,8 @@ export default function App() {
     setInspectPoint(null);
     const url = new URL(window.location.href);
     url.searchParams.set("city", next);
+    ["fromLat", "fromLng", "fromLabel", "fromType", "toLat", "toLng", "toLabel", "toType"]
+      .forEach((key) => url.searchParams.delete(key));
     window.history.replaceState(null, "", url);
     try {
       window.localStorage.setItem("open-routes-city", next);
@@ -341,6 +422,16 @@ export default function App() {
       .slice(0, 3);
   }, [city, origin, destination, samePlace, directRouteIds, routePool]);
 
+  useEffect(() => {
+    if (!city || !origin || !destination || samePlace || tripOptions.length === 0) {
+      return;
+    }
+    const timer = window.setTimeout(() => {
+      setRecents(addRecent(city.slug, origin, destination));
+    }, 1200);
+    return () => window.clearTimeout(timer);
+  }, [city, origin, destination, samePlace, tripOptions.length]);
+
   const tripMode = Boolean(origin && destination);
   const destinationOnly = Boolean(!origin && destination);
   const canSwap = origin?.kind === "place" && destination !== null;
@@ -481,6 +572,78 @@ export default function App() {
     setInspectPoint(null);
     clearNearby();
   }, [origin, destination, clearNearby]);
+
+  const applyRecent = useCallback((trip: RecentTrip) => {
+    locateToken.current += 1;
+    setOrigin(trip.origin);
+    setDestination(trip.destination);
+    setActiveTrip(null);
+    setSelectedId(null);
+    setQuery("");
+    setInspectPoint(null);
+    clearNearby();
+  }, [clearNearby]);
+
+  const saveFavoritePlace = useCallback((label: FavoriteLabel) => {
+    if (!city || !origin || origin.kind !== "place") return;
+    const place: Place = {
+      id: `favorite-${label.toLowerCase()}`,
+      name: origin.label,
+      type: origin.type,
+      lat: origin.lat,
+      lng: origin.lng,
+      aliases: []
+    };
+    setFavorites(saveFavorite(city.slug, label, place));
+  }, [city, origin]);
+
+  const shareTrip = useCallback(async () => {
+    if (!city || !origin || !destination) return;
+    const url = new URL(window.location.href);
+    url.search = "";
+    url.searchParams.set("city", city.slug);
+    url.searchParams.set("fromLat", origin.lat.toFixed(5));
+    url.searchParams.set("fromLng", origin.lng.toFixed(5));
+    url.searchParams.set("fromLabel", origin.label);
+    url.searchParams.set("fromType", origin.kind === "place" ? origin.type : "Ubicación");
+    url.searchParams.set("toLat", destination.lat.toFixed(5));
+    url.searchParams.set("toLng", destination.lng.toFixed(5));
+    url.searchParams.set("toLabel", destination.name);
+    url.searchParams.set("toType", destination.type);
+    const message = `Viaje en ${city.name}: ${origin.label} → ${destination.name}`;
+    if (window.matchMedia("(max-width: 900px)").matches && navigator.share) {
+      try {
+        await navigator.share({ title: message, url: url.toString() });
+        setShareNotice("Compartido");
+        return;
+      } catch (error) {
+        if (error instanceof DOMException && error.name === "AbortError") return;
+      }
+    }
+    if (await copyText(url.toString())) {
+      setShareNotice("Enlace copiado");
+      return;
+    }
+    setShareNotice("Copia el enlace");
+    window.prompt("Copia el enlace del viaje", url.toString());
+  }, [city, origin, destination]);
+
+  useEffect(() => {
+    if (!shareNotice) return;
+    const timer = window.setTimeout(() => setShareNotice(""), 2600);
+    return () => window.clearTimeout(timer);
+  }, [shareNotice]);
+
+  useEffect(() => {
+    const up = () => setOnline(true);
+    const down = () => setOnline(false);
+    window.addEventListener("online", up);
+    window.addEventListener("offline", down);
+    return () => {
+      window.removeEventListener("online", up);
+      window.removeEventListener("offline", down);
+    };
+  }, []);
 
   const handleLocate = useCallback(async () => {
     if (!city) return;
@@ -758,6 +921,15 @@ export default function App() {
                   </button>
                 </div>
 
+                <QuickAccess
+                  favorites={favorites}
+                  recents={recents}
+                  origin={origin}
+                  onApplyPlace={selectOriginPlace}
+                  onSaveFavorite={saveFavoritePlace}
+                  onApplyRecent={applyRecent}
+                />
+
                 <div className="trip-form">
                   <PlaceField
                     id="origin-field"
@@ -826,6 +998,12 @@ export default function App() {
                   <span>
                     Mapa con {city.routes.length} rutas principales de {city.name}. Al elegir
                     origen y destino cargamos solo las rutas que te sirven.
+                    {city.dataUpdatedAt && (
+                      <span className="notice__sub">
+                        Datos actualizados {relativeTime(city.dataUpdatedAt)} · se renuevan cada
+                        72 h.
+                      </span>
+                    )}
                   </span>
                 </div>
               )}
@@ -891,6 +1069,13 @@ export default function App() {
                 </div>
               )}
 
+              {!online && (
+                <div className="notice notice--info" role="status">
+                  <InfoIcon />
+                  <span>Sin conexión: mostramos la última copia guardada.</span>
+                </div>
+              )}
+
               {nearMode && nearby !== null && nearby.length === 0 && !tripMode && (
                 <div className="notice notice--info">
                   <InfoIcon />
@@ -907,7 +1092,14 @@ export default function App() {
 
               <div className="list-head" id="rutas" tabIndex={-1} ref={listHeadRef}>
                 <h2 title={headTitle}>{headTitle}</h2>
-                <span className="list-head__note">{listNote}</span>
+                <div className="list-head__side">
+                  <span className="list-head__note">{listNote}</span>
+                  {tripMode && !samePlace && (
+                    <button type="button" className="share-button" onClick={() => void shareTrip()}>
+                      {shareNotice || "Compartir"}
+                    </button>
+                  )}
+                </div>
               </div>
 
               {!tripMode && !destinationOnly && (

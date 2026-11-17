@@ -137,7 +137,7 @@ public class GtfsCityBuilder {
             City city = new City(
                     def.slug(), def.name(), def.department(), def.country(), def.timezone(),
                     def.center(), def.zoom(), def.description(), sources, social, fare,
-                    places, mapRoutes, true, allRoutes.size());
+                    places, mapRoutes, true, allRoutes.size(), System.currentTimeMillis());
             CityValidator.validate(city);
             return new LoadedRemoteCity(city, allRoutes, System.currentTimeMillis(), feedUrl);
         }

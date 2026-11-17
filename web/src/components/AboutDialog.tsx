@@ -96,6 +96,14 @@ export function AboutDialog({ dialogRef, city }: Props) {
           {city.name} se construye desde su GTFS: el mapa muestra {city.routes.length} rutas
           principales y las demás se cargan al buscar un viaje. El índice y los resultados se
           cachean 72 h.
+          {city.dataUpdatedAt
+            ? ` Datos actualizados el ${new Intl.DateTimeFormat("es-CO", {
+                day: "numeric",
+                month: "long",
+                year: "numeric",
+                timeZone: city.timezone
+              }).format(new Date(city.dataUpdatedAt))}.`
+            : ""}
         </p>
       )}
       <ul>

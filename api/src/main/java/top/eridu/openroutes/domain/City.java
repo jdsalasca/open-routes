@@ -21,6 +21,7 @@ public record City(
         List<Place> places,
         List<Route> routes,
         boolean partial,
-        int totalRoutes
+        int totalRoutes,
+        Long dataUpdatedAt
 ) {
 }

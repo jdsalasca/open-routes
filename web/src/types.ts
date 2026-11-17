@@ -88,6 +88,7 @@ export interface City extends Omit<CitySummary, "routeCount"> {
   routes: Route[];
   partial?: boolean;
   totalRoutes?: number;
+  dataUpdatedAt?: number | null;
 }
 
 export interface NearbyRoute {

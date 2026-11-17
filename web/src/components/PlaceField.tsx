@@ -257,9 +257,8 @@ export function PlaceField({
               searchController.current?.abort();
               setQuery("");
               lastSelected.current = "";
-              setOpen(true);
+              setOpen(false);
               onClear();
-              inputRef.current?.focus();
             }}
           >
             <CloseIcon size={14} />

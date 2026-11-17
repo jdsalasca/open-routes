@@ -52,6 +52,15 @@ Mapa web de transporte público para Tunja que responda en segundos: qué rutas 
 - [x] Detección de ciudad por geolocalización y botón manual.
 - [x] Compresión gzip de respuestas y simplificación de trazados.
 
+### R1.8 · Favoritos, compartir y PWA
+
+- [x] Favoritos Casa/Trabajo por ciudad y viajes recientes (máximo 5, 30 días) en `localStorage`.
+- [x] Enlace de viaje con ciudad, origen y destino; Web Share en móvil y copia al portapapeles en escritorio.
+- [x] PWA instalable con manifest, iconos y service worker que cachea app, última ciudad y assets.
+- [x] Aviso de “Sin conexión” y fallback a la última copia guardada.
+- [x] Fecha de actualización del GTFS visible en la ciudad remota.
+- [x] Verificación de offline real, favoritos, recientes y enlace compartido en navegador.
+
 ### R2 · Datos y comunidad (después)
 
 - Paradas oficiales y tiempos de paso cuando el operador los publique.
@@ -70,4 +79,5 @@ Mapa web de transporte público para Tunja que responda en segundos: qué rutas 
 6. El buscador encuentra los 154 barrios y veredas oficiales sin red; una dirección se consulta en OpenStreetMap al confirmar.
 7. La sección de movilidad muestra titulares con fuente y enlaces a las cuentas oficiales, sin cookies de X.
 8. Bogotá se construye desde GTFS, muestra 30 rutas principales y carga bajo demanda las rutas de un viaje; la caché dura 72 h.
-9. `https://open-routes.eridu.top/api/health` responde `ok` y los demás sitios del túnel siguen en 200.
+9. Casa/Trabajo, viajes recientes y un enlace compartido restauran el viaje; la PWA abre la última ciudad sin conexión.
+10. `https://open-routes.eridu.top/api/health` responde `ok` y los demás sitios del túnel siguen en 200.

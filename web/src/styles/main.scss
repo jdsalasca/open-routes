@@ -762,6 +762,14 @@ summary:focus-visible {
     font-size: 11px;
   }
 
+  &__side {
+    display: flex;
+    min-width: 0;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 8px;
+  }
+
   &__action {
     padding: 0;
     border: 0;
@@ -773,6 +781,35 @@ summary:focus-visible {
 
   @include mobile {
     padding: 2px 18px 8px;
+
+    h2 {
+      max-width: 52%;
+    }
+  }
+}
+
+.notice__sub {
+  display: block;
+  margin-top: 2px;
+  color: $muted;
+  font-size: 10px;
+}
+
+.share-button {
+  flex: 0 0 auto;
+  padding: 4px 8px;
+  border: 1px solid $line;
+  border-radius: 999px;
+  background: $surface;
+  color: $accent;
+  font-size: 10px;
+  font-weight: 650;
+  white-space: nowrap;
+
+  &:hover,
+  &:focus-visible {
+    border-color: $line-strong;
+    background: $canvas;
   }
 }
 
@@ -1538,6 +1575,74 @@ summary:focus-visible {
 
   @include mobile {
     display: none;
+  }
+}
+
+.quick-access {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-top: 12px;
+
+  &__row {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    overflow-x: auto;
+    padding-bottom: 2px;
+    scrollbar-width: none;
+
+    &::-webkit-scrollbar {
+      display: none;
+    }
+  }
+
+  &__label {
+    display: inline-flex;
+    flex: 0 0 auto;
+    align-items: center;
+    gap: 4px;
+    margin-right: 2px;
+    color: $muted;
+    font-size: 9.5px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+}
+
+.quick-chip {
+  display: inline-flex;
+  max-width: 210px;
+  flex: 0 0 auto;
+  align-items: center;
+  gap: 4px;
+  padding: 5px 9px;
+  border: 1px solid $line;
+  border-radius: 999px;
+  background: $surface;
+  color: $ink-soft;
+  font-size: 10.5px;
+  font-weight: 600;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+
+  &:hover,
+  &:focus-visible {
+    border-color: $line-strong;
+    background: $canvas;
+    color: $ink;
+  }
+
+  &--add {
+    border-style: dashed;
+    background: transparent;
+    color: $accent;
+  }
+
+  &--trip {
+    max-width: 180px;
   }
 }
 
