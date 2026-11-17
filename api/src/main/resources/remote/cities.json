@@ -1,0 +1,39 @@
+{
+ "cities": [
+  {
+   "slug": "bogota",
+   "name": "Bogotá",
+   "department": "Cundinamarca",
+   "country": "Colombia",
+   "timezone": "America/Bogota",
+   "center": { "lat": 4.65, "lng": -74.1 },
+   "zoom": 12,
+   "description": "Bogotá: mapa con las rutas principales del SITP. Al buscar un viaje se cargan las rutas que te sirven.",
+   "sources": [
+    {
+     "label": "TransMilenio · GTFS estático (CC BY-SA 4.0)",
+     "url": "https://datosabiertos.bogota.gov.co/dataset/especificacion-gtfs-general-transport-feed-specification-sitp"
+    }
+   ],
+   "social": [
+    {
+     "label": "TransMilenio",
+     "handle": "@TransMilenio",
+     "url": "https://x.com/TransMilenio"
+    }
+   ],
+   "fare": {
+    "day": 0,
+    "night": 0,
+    "currency": "COP",
+    "note": "La tarifa no viene en el feed GTFS; consulta la tarifa oficial de TransMilenio."
+   },
+   "feed": {
+    "discoveryUrl": "https://www.arcgis.com/sharing/rest/search?q=gtfs%20transmilenio%20type%3A%22Document%20Link%22&f=json&num=5&sortField=modified&sortOrder=desc",
+    "fallbackUrl": "https://storage.googleapis.com/gtfs-estaticos/GTFS_20261027.zip",
+    "mapRoutes": 30,
+    "simplifyTolerance": 0.0001
+   }
+  }
+ ]
+}

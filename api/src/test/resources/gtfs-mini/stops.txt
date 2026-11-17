@@ -1,0 +1,6 @@
+stop_id,stop_name,stop_lat,stop_lon
+A,Parque Central,5.5300,-73.3600
+B,Plaza del Norte,5.5400,-73.3605
+C,Terminal,5.5500,-73.3600
+D,Mercado,5.5200,-73.3600
+E,Universidad,5.5250,-73.3550

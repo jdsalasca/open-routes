@@ -133,6 +133,7 @@ summary:focus-visible {
     font-size: 16px;
     font-weight: 680;
     letter-spacing: -0.025em;
+    white-space: nowrap;
 
     span {
       color: $accent;
@@ -157,11 +158,17 @@ summary:focus-visible {
   }
 }
 
+.city-switch {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  margin-left: auto;
+}
+
 .city-pill {
   display: inline-flex;
   align-items: center;
   gap: 7px;
-  margin-left: auto;
   padding: 7px 11px;
   border: 1px solid $line;
   border-radius: 999px;
@@ -184,12 +191,34 @@ summary:focus-visible {
   }
 
   @include mobile {
-    margin-left: auto;
     padding: 6px 9px;
+
+    select {
+      max-width: 112px;
+    }
 
     .city-pill__dept {
       display: none;
     }
+  }
+}
+
+.city-detect {
+  width: 30px;
+  height: 30px;
+
+  &:disabled {
+    cursor: wait;
+    opacity: 0.7;
+  }
+
+  &__spinner {
+    width: 13px;
+    height: 13px;
+    border: 2px solid $line;
+    border-top-color: $accent;
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
   }
 }
 
@@ -228,6 +257,13 @@ summary:focus-visible {
 
   @include mobile {
     display: inline-grid;
+  }
+}
+
+@media (max-width: 520px) {
+  .brand__name,
+  .github-link {
+    display: none;
   }
 }
 

@@ -42,6 +42,16 @@ Mapa web de transporte público para Tunja que responda en segundos: qué rutas 
 - [x] Detección de errores externos: la app conserva la búsqueda local y muestra un aviso si OSM o las noticias no responden.
 - [x] Verificación desktop/móvil con datos reales y pruebas de los servicios externos con servidores locales.
 
+### R1.7 · Ciudades remotas y caché inteligente
+
+- [x] Catálogo `remote/cities.json`: la ciudad se construye desde GTFS sin empaquetar su JSON.
+- [x] Bogotá: 1.053 rutas en el índice, 30 principales en el mapa, 7.376 paradas y 320 KB comprimidos.
+- [x] `trip-routes` devuelve solo las rutas cerca del origen y el destino; el planificador las usa al instante.
+- [x] Caché de 72 h en backend (memoria + `.json.gz` en volumen) y en IndexedDB del navegador.
+- [x] Descubrimiento del feed más reciente en ArcGIS y respaldo con URL fija.
+- [x] Detección de ciudad por geolocalización y botón manual.
+- [x] Compresión gzip de respuestas y simplificación de trazados.
+
 ### R2 · Datos y comunidad (después)
 
 - Paradas oficiales y tiempos de paso cuando el operador los publique.
@@ -59,4 +69,5 @@ Mapa web de transporte público para Tunja que responda en segundos: qué rutas 
 5. Tocar el mapa abre un panel con las rutas a menos de 150 m y permite abrir su ficha.
 6. El buscador encuentra los 154 barrios y veredas oficiales sin red; una dirección se consulta en OpenStreetMap al confirmar.
 7. La sección de movilidad muestra titulares con fuente y enlaces a las cuentas oficiales, sin cookies de X.
-8. `https://open-routes.eridu.top/api/health` responde `ok` y los demás sitios del túnel siguen en 200.
+8. Bogotá se construye desde GTFS, muestra 30 rutas principales y carga bajo demanda las rutas de un viaje; la caché dura 72 h.
+9. `https://open-routes.eridu.top/api/health` responde `ok` y los demás sitios del túnel siguen en 200.

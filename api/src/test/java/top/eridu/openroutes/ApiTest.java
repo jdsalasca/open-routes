@@ -22,7 +22,9 @@ class ApiTest {
         mvc.perform(get("/api/cities"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[0].slug").value("tunja"))
-                .andExpect(jsonPath("$[0].routeCount").value(26));
+                .andExpect(jsonPath("$[0].routeCount").value(26))
+                .andExpect(jsonPath("$[1].slug").value("bogota"))
+                .andExpect(jsonPath("$[1].routeCount").value(0));
     }
 
     @Test
@@ -66,6 +68,20 @@ class ApiTest {
                         .param("radius", "5000"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.length()").value(26));
+    }
+
+    @Test
+    void rutasDeViajeDevuelvenSoloLasCercanas() throws Exception {
+        mvc.perform(get("/api/cities/tunja/trip-routes")
+                        .param("fromLat", "5.575069")
+                        .param("fromLng", "-73.331541")
+                        .param("toLat", "5.530131")
+                        .param("toLng", "-73.359513")
+                        .param("radius", "300"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.length()").value(org.hamcrest.Matchers.greaterThan(0)))
+                .andExpect(org.springframework.test.web.servlet.result.MockMvcResultMatchers
+                        .header().string("Cache-Control", "private, max-age=259200"));
     }
 
     @Test

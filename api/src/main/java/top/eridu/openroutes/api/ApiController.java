@@ -14,7 +14,9 @@ import top.eridu.openroutes.domain.Point;
 import top.eridu.openroutes.domain.Route;
 import top.eridu.openroutes.domain.Source;
 import top.eridu.openroutes.geo.Geo;
+import top.eridu.openroutes.remote.RemoteCityDefinition;
 
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
@@ -37,11 +39,15 @@ public class ApiController {
 
     @GetMapping("/cities")
     public List<CitySummary> cities() {
-        return cities.all().stream().map(CitySummary::of).toList();
+        List<CitySummary> all = new ArrayList<>();
+        cities.all().forEach(city -> all.add(CitySummary.of(city)));
+        cities.remoteCities().forEach(city -> all.add(CitySummary.from(city)));
+        return all;
     }
 
     @GetMapping("/cities/{slug}")
-    public City city(@PathVariable String slug) {
+    public City city(@PathVariable String slug, jakarta.servlet.http.HttpServletResponse response) {
+        response.setHeader("Cache-Control", "private, max-age=3600");
         return cities.find(slug).orElseThrow(() -> notFound(slug));
     }
 
@@ -107,6 +113,11 @@ public class ApiController {
             return new CitySummary(city.slug(), city.name(), city.department(), city.country(),
                     city.center(), city.zoom(), city.description(), city.sources(), city.fare(),
                     city.routes().size());
+        }
+
+        static CitySummary from(RemoteCityDefinition city) {
+            return new CitySummary(city.slug(), city.name(), city.department(), city.country(),
+                    city.center(), city.zoom(), city.description(), city.sources(), city.fare(), 0);
         }
     }
 

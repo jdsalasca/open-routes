@@ -1,4 +1,4 @@
-import type { City, CitySummary, NewsItem, Place } from "./types";
+import type { City, CitySummary, NewsItem, Place, Route } from "./types";
 
 async function getJson<T>(url: string, signal?: AbortSignal): Promise<T> {
   const response = await fetch(url, { headers: { Accept: "application/json" }, signal });
@@ -18,5 +18,16 @@ export const api = {
       signal
     ),
   news: (slug: string, signal?: AbortSignal) =>
-    getJson<NewsItem[]>(`/api/cities/${encodeURIComponent(slug)}/news`, signal)
+    getJson<NewsItem[]>(`/api/cities/${encodeURIComponent(slug)}/news`, signal),
+  tripRoutes: (
+    slug: string,
+    from: { lat: number; lng: number },
+    to: { lat: number; lng: number },
+    signal?: AbortSignal
+  ) =>
+    getJson<Route[]>(
+      `/api/cities/${encodeURIComponent(slug)}/trip-routes?fromLat=${from.lat.toFixed(4)}` +
+        `&fromLng=${from.lng.toFixed(4)}&toLat=${to.lat.toFixed(4)}&toLng=${to.lng.toFixed(4)}&radius=150`,
+      signal
+    )
 };

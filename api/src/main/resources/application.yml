@@ -2,6 +2,13 @@ spring:
   application:
     name: open-routes
 
+openroutes:
+  remote:
+    cache-dir: ${OPENROUTES_CACHE_DIR:cache}
+    ttl-hours: 72
+    max-download-mb: 300
+    warmup: ${OPENROUTES_REMOTE_WARMUP:false}
+
 server:
   port: 8080
   compression:

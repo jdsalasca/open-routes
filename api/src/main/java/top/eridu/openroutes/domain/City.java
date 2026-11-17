@@ -19,6 +19,8 @@ public record City(
         List<SocialAccount> social,
         Fare fare,
         List<Place> places,
-        List<Route> routes
+        List<Route> routes,
+        boolean partial,
+        int totalRoutes
 ) {
 }

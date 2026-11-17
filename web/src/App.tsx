@@ -24,6 +24,7 @@ import { TripDetail } from "./components/TripDetail";
 import { useGeolocation } from "./hooks/useGeolocation";
 import { distanceMeters, dayKeyInTimeZone, findDirectTrips, findNearbyRoutes, findSplitRoutes } from "./planner";
 import type { TripOption } from "./planner";
+import { readTripRoutes, tripCacheKey, writeTripRoutes } from "./tripCache";
 import type { City, CitySummary, NearbyRoute, Origin, Place, Route } from "./types";
 
 const GPS_RADIUS = 1000;
@@ -43,10 +44,22 @@ const frequency = (value: number | null) => (value ? `Cada ${value} min` : "Frec
 const distanceLabel = (meters: number) =>
   meters < 1000 ? `${meters} m` : `${(meters / 1000).toFixed(1).replace(".", ",")} km`;
 
+const initialCitySlug = () => {
+  const fromUrl = new URLSearchParams(window.location.search).get("city");
+  if (fromUrl) return fromUrl;
+  try {
+    return window.localStorage.getItem("open-routes-city");
+  } catch {
+    return null;
+  }
+};
+
 export default function App() {
   const aboutRef = useRef<HTMLDialogElement>(null);
   const newsRef = useRef<HTMLDialogElement>(null);
   const sidebarRef = useRef<HTMLElement>(null);
+  const initialSlug = useRef(initialCitySlug());
+  const autoDetectTried = useRef(false);
   const listHeadRef = useRef<HTMLDivElement>(null);
   const routeRefs = useRef(new Map<string, HTMLButtonElement>());
   const tripRefs = useRef(new Map<string, HTMLButtonElement>());
@@ -54,15 +67,7 @@ export default function App() {
   const returnFocusToTrip = useRef(false);
   const locateToken = useRef(0);
   const [cities, setCities] = useState<CitySummary[] | null>(null);
-  const [slug, setSlug] = useState<string | null>(() => {
-    const fromUrl = new URLSearchParams(window.location.search).get("city");
-    if (fromUrl) return fromUrl;
-    try {
-      return window.localStorage.getItem("open-routes-city");
-    } catch {
-      return null;
-    }
-  });
+  const [slug, setSlug] = useState<string | null>(initialCitySlug);
   const [city, setCity] = useState<City | null>(null);
   const [boot, setBoot] = useState<"loading" | "ready" | "error">("loading");
   const [selectedId, setSelectedId] = useState<string | null>(null);
@@ -76,6 +81,11 @@ export default function App() {
   const [clock, setClock] = useState(() => Date.now());
   const [newsOpen, setNewsOpen] = useState(false);
   const [inspectPoint, setInspectPoint] = useState<{ lat: number; lng: number } | null>(null);
+  const [extraRoutes, setExtraRoutes] = useState<Route[]>([]);
+  const [tripRoutesLoading, setTripRoutesLoading] = useState(false);
+  const [tripRoutesError, setTripRoutesError] = useState<string | null>(null);
+  const [detectingCity, setDetectingCity] = useState(false);
+  const [cityDetectError, setCityDetectError] = useState<string | null>(null);
   const { status, error: geoError, locate } = useGeolocation();
 
   useEffect(() => {
@@ -114,6 +124,9 @@ export default function App() {
         setNearMode(false);
         setQuery("");
         setInspectPoint(null);
+        setExtraRoutes([]);
+        setTripRoutesError(null);
+        setTripRoutesLoading(false);
         document.title = `open-routes · Rutas de ${data.name}`;
         document
           .querySelector('meta[name="description"]')
@@ -133,9 +146,15 @@ export default function App() {
     return () => window.clearInterval(timer);
   }, []);
 
+  const routePool = useMemo(() => {
+    if (!city) return [];
+    const seen = new Set(city.routes.map((route) => route.id));
+    return [...city.routes, ...extraRoutes.filter((route) => !seen.has(route.id))];
+  }, [city, extraRoutes]);
+
   const selected = useMemo(
-    () => city?.routes.find((route) => route.id === selectedId) ?? null,
-    [city, selectedId]
+    () => routePool.find((route) => route.id === selectedId) ?? null,
+    [routePool, selectedId]
   );
 
   useEffect(() => {
@@ -163,14 +182,59 @@ export default function App() {
     [city]
   );
 
+  const detectCity = useCallback(() => {
+    if (!cities || cities.length === 0) return;
+    if (!navigator.geolocation) {
+      setCityDetectError("Tu navegador no permite detectar la ciudad.");
+      return;
+    }
+    setDetectingCity(true);
+    setCityDetectError(null);
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        setDetectingCity(false);
+        const point = { lat: position.coords.latitude, lng: position.coords.longitude };
+        const nearest = cities
+          .map((item) => ({ item, meters: distanceMeters(point, item.center) }))
+          .sort((a, b) => a.meters - b.meters)[0];
+        if (nearest && nearest.meters <= 80_000) {
+          changeCity(nearest.item.slug);
+        } else {
+          setCityDetectError("Aún no tenemos datos para tu ciudad.");
+        }
+      },
+      () => {
+        setDetectingCity(false);
+        setCityDetectError("No pudimos obtener tu ubicación. Elige la ciudad en la lista.");
+      },
+      { enableHighAccuracy: false, timeout: 8_000, maximumAge: 600_000 }
+    );
+  }, [cities, changeCity]);
+
+  useEffect(() => {
+    if (autoDetectTried.current || initialSlug.current || !cities || cities.length < 2) {
+      return;
+    }
+    autoDetectTried.current = true;
+    if (!navigator.permissions?.query) return;
+    navigator.permissions
+      .query({ name: "geolocation" })
+      .then((permission) => {
+        if (permission.state === "granted") detectCity();
+      })
+      .catch(() => {
+        // El botón de detectar ciudad sigue disponible.
+      });
+  }, [cities, detectCity]);
+
   const nearbyById = useMemo(
     () => new Map((nearby ?? []).map((hit) => [hit.id, hit])),
     [nearby]
   );
 
   const inspectRoutes = useMemo(
-    () => (inspectPoint && city ? findNearbyRoutes(inspectPoint, 150, city.routes) : []),
-    [inspectPoint, city]
+    () => (inspectPoint && city ? findNearbyRoutes(inspectPoint, 150, routePool) : []),
+    [inspectPoint, routePool]
   );
 
   const inspectAt = useCallback((lat: number, lng: number) => {
@@ -178,6 +242,57 @@ export default function App() {
   }, []);
 
   const closeInspector = useCallback(() => setInspectPoint(null), []);
+
+  const samePlace = Boolean(
+    origin && destination && distanceMeters(origin, destination) < 30
+  );
+
+  useEffect(() => {
+    if (!city?.partial || !origin || !destination || samePlace) {
+      setExtraRoutes([]);
+      setTripRoutesLoading(false);
+      setTripRoutesError(null);
+      return;
+    }
+    let cancelled = false;
+    const controller = new AbortController();
+    setExtraRoutes([]);
+    setTripRoutesLoading(true);
+    setTripRoutesError(null);
+    const key = tripCacheKey(city.slug, origin, destination);
+    void (async () => {
+      const cached = await readTripRoutes(key);
+      if (cancelled) return;
+      if (cached) {
+        setExtraRoutes(cached);
+        setTripRoutesLoading(false);
+        return;
+      }
+      try {
+        const routes = await api.tripRoutes(
+          city.slug,
+          { lat: origin.lat, lng: origin.lng },
+          { lat: destination.lat, lng: destination.lng },
+          controller.signal
+        );
+        if (cancelled) return;
+        setExtraRoutes(routes);
+        await writeTripRoutes(key, routes);
+      } catch {
+        if (!cancelled && !controller.signal.aborted) {
+          setTripRoutesError(
+            "No pudimos cargar todas las rutas para este viaje. Mostramos las principales."
+          );
+        }
+      } finally {
+        if (!cancelled) setTripRoutesLoading(false);
+      }
+    })();
+    return () => {
+      cancelled = true;
+      controller.abort();
+    };
+  }, [city, origin, destination, samePlace]);
 
   const visibleRoutes = useMemo(() => {
     if (!city) return [];
@@ -196,21 +311,17 @@ export default function App() {
     );
   }, [city, nearMode, nearby, query]);
 
-  const samePlace = Boolean(
-    origin && destination && distanceMeters(origin, destination) < 30
-  );
-
   const timeZone = city?.timezone ?? "America/Bogota";
   const dayKey = useMemo(() => dayKeyInTimeZone(new Date(clock), timeZone), [clock, timeZone]);
 
   const allTripOptions = useMemo(() => {
     if (!city || !origin || !destination || samePlace) return [];
-    return findDirectTrips(origin, destination, city.routes, {
+    return findDirectTrips(origin, destination, routePool, {
       timeZone,
       now: new Date(clock)
     });
     // dayKey obliga a recalcular al cruzar la medianoche en la ciudad.
-  }, [city, origin, destination, samePlace, timeZone, dayKey]);
+  }, [city, origin, destination, samePlace, routePool, timeZone, dayKey]);
 
   const tripOptions = useMemo(() => allTripOptions.slice(0, 4), [allTripOptions]);
   const directRouteIds = useMemo(
@@ -225,10 +336,10 @@ export default function App() {
 
   const splitRoutes = useMemo(() => {
     if (!city || !origin || !destination || samePlace) return [];
-    return findSplitRoutes(origin, destination, city.routes)
+    return findSplitRoutes(origin, destination, routePool)
       .filter((hit) => !directRouteIds.has(hit.route.id))
       .slice(0, 3);
-  }, [city, origin, destination, samePlace, directRouteIds]);
+  }, [city, origin, destination, samePlace, directRouteIds, routePool]);
 
   const tripMode = Boolean(origin && destination);
   const destinationOnly = Boolean(!origin && destination);
@@ -456,11 +567,13 @@ export default function App() {
   const listNote = tripMode
     ? samePlace
       ? "mismo lugar"
-      : allTripOptions.length
-        ? `${tripOptions.length}${
-            allTripOptions.length > tripOptions.length ? ` de ${allTripOptions.length}` : ""
-          } ${allTripOptions.length === 1 ? "ruta directa" : "rutas directas"}`
-        : "sin ruta directa"
+      : tripRoutesLoading
+        ? "buscando rutas"
+        : allTripOptions.length
+          ? `${tripOptions.length}${
+              allTripOptions.length > tripOptions.length ? ` de ${allTripOptions.length}` : ""
+            } ${allTripOptions.length === 1 ? "ruta directa" : "rutas directas"}`
+          : "sin ruta directa"
     : destinationOnly
       ? "destino elegido"
       : query.trim()
@@ -469,7 +582,7 @@ export default function App() {
           ? origin.kind === "place"
             ? "a 500 m"
             : "radio de 1 km"
-          : `${city.routes.length} rutas`;
+          : `${city.routes.length}${city.partial ? " principales" : ""} rutas`;
 
   const headTitle = tripMode
     ? "Opciones de viaje"
@@ -511,27 +624,46 @@ export default function App() {
           <span className="brand__tag">beta</span>
         </button>
 
-        {cities && cities.length > 1 ? (
-          <label className="city-pill">
-            <PinIcon size={14} />
-            <span className="visually-hidden">Ciudad</span>
-            <select value={city.slug} onChange={(event) => changeCity(event.target.value)}>
-              {cities.map((item) => (
-                <option key={item.slug} value={item.slug}>
-                  {item.name}, {item.department} · {item.routeCount} rutas
-                </option>
-              ))}
-            </select>
-          </label>
-        ) : (
-          <div className="city-pill">
-            <PinIcon size={14} />
-            <span>
-              {city.name}
-              <span className="city-pill__dept">, {city.department}</span>
-            </span>
-          </div>
-        )}
+        <div className="city-switch">
+          {cities && cities.length > 1 ? (
+            <label className="city-pill">
+              <PinIcon size={14} />
+              <span className="visually-hidden">Ciudad</span>
+              <select value={city.slug} onChange={(event) => changeCity(event.target.value)}>
+                {cities.map((item) => (
+                  <option key={item.slug} value={item.slug}>
+                    {item.name}, {item.department}
+                    {item.routeCount > 0 ? ` · ${item.routeCount} rutas` : ""}
+                  </option>
+                ))}
+              </select>
+            </label>
+          ) : (
+            <div className="city-pill">
+              <PinIcon size={14} />
+              <span>
+                {city.name}
+                <span className="city-pill__dept">, {city.department}</span>
+              </span>
+            </div>
+          )}
+          {cities && cities.length > 1 && (
+            <button
+              type="button"
+              className="icon-button city-detect"
+              aria-label="Detectar mi ciudad"
+              title="Detectar mi ciudad"
+              disabled={detectingCity}
+              onClick={detectCity}
+            >
+              {detectingCity ? (
+                <span className="city-detect__spinner" aria-hidden="true" />
+              ) : (
+                <LocateIcon size={16} />
+              )}
+            </button>
+          )}
+        </div>
 
         <div className="topbar__actions">
           <button
@@ -571,7 +703,7 @@ export default function App() {
             <InfoIcon size={18} />
           </button>
           <a
-            className="icon-button"
+            className="icon-button github-link"
             href="https://github.com/jdsalasca/open-routes"
             target="_blank"
             rel="noreferrer"
@@ -678,12 +810,32 @@ export default function App() {
                 <div className="hero__meta">
                   <span className="meta-chip">
                     <BusIcon size={13} /> {city.routes.length} rutas
+                    {city.partial ? " principales" : ""}
                   </span>
-                  <span className="meta-chip">
-                    <TicketIcon size={13} /> Pasaje {money(city.fare.day)}
-                  </span>
+                  {city.fare.day > 0 && (
+                    <span className="meta-chip">
+                      <TicketIcon size={13} /> Pasaje {money(city.fare.day)}
+                    </span>
+                  )}
                 </div>
               </section>
+
+              {city.partial && (
+                <div className="notice notice--info">
+                  <InfoIcon />
+                  <span>
+                    Mapa con {city.routes.length} rutas principales de {city.name}. Al elegir
+                    origen y destino cargamos solo las rutas que te sirven.
+                  </span>
+                </div>
+              )}
+
+              {cityDetectError && (
+                <div className="notice notice--info" role="status">
+                  <InfoIcon />
+                  <span>{cityDetectError}</span>
+                </div>
+              )}
 
               {samePlace && (
                 <div className="notice notice--info">
@@ -692,7 +844,21 @@ export default function App() {
                 </div>
               )}
 
-              {tripMode && !samePlace && tripOptions.length === 0 && (
+              {tripMode && tripRoutesLoading && (
+                <div className="notice notice--info" role="status">
+                  <InfoIcon />
+                  <span>Buscando las rutas que te sirven en {city.name}…</span>
+                </div>
+              )}
+
+              {tripMode && tripRoutesError && (
+                <div className="notice" role="status">
+                  <InfoIcon />
+                  <span>{tripRoutesError}</span>
+                </div>
+              )}
+
+              {tripMode && !samePlace && !tripRoutesLoading && tripOptions.length === 0 && (
                 <div className="notice notice--info">
                   <InfoIcon />
                   <span>
@@ -808,7 +974,7 @@ export default function App() {
                       );
                     })}
                   </div>
-                  {tripOptions.length > 0 && splitRoutes.length > 0 && (
+                  {tripOptions.length > 0 && splitRoutes.length > 0 && !tripRoutesLoading && (
                     <p className="list-footnote">
                       No evaluamos {splitRoutes.map((hit) => hit.route.code).join(", ")}: su trazado
                       está dividido en el mapa y no permite confirmar una ruta directa.

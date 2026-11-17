@@ -67,11 +67,12 @@ export function AboutDialog({ dialogRef, city }: Props) {
 
       <h3>Privacidad</h3>
       <p>
-        Tu ubicación y los lugares que eliges se procesan en tu navegador; la cercanía no se
-        consulta en la API ni se guarda. Si buscas una dirección o un punto de interés, solo ese
-        texto se consulta en OpenStreetMap a través de nuestro servidor. El mapa base pide teselas
-        a OpenStreetMap, que recibe la zona visible y tu IP. Cloudflare sirve el sitio y mide
-        tráfico sin cookies. No hay cuentas ni publicidad.
+        La cercanía del mapa se procesa en tu navegador. En ciudades con GTFS remoto, al calcular un
+        viaje se envían coordenadas redondeadas a nuestro servidor para traer solo las rutas que te
+        sirven; el resultado se guarda 72 h en tu navegador. Si buscas una dirección o un punto de
+        interés, solo ese texto se consulta en OpenStreetMap. El mapa base pide teselas a
+        OpenStreetMap, que recibe la zona visible y tu IP. Cloudflare sirve el sitio y mide tráfico
+        sin cookies. No hay cuentas ni publicidad.
       </p>
       <p>
         Las noticias se consultan sin cookies y las publicaciones de X se abren en X; no incrustamos
@@ -88,6 +89,13 @@ export function AboutDialog({ dialogRef, city }: Props) {
         <p>
           Los barrios y veredas de Tunja provienen de Datos Abiertos Colombia (Alcaldía de Tunja,
           CC BY-SA 4.0). El código de la aplicación sigue bajo licencia MIT.
+        </p>
+      )}
+      {city.partial && (
+        <p>
+          {city.name} se construye desde su GTFS: el mapa muestra {city.routes.length} rutas
+          principales y las demás se cargan al buscar un viaje. El índice y los resultados se
+          cachean 72 h.
         </p>
       )}
       <ul>

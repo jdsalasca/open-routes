@@ -5,6 +5,9 @@ import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.springframework.stereotype.Component;
 import top.eridu.openroutes.domain.City;
+import top.eridu.openroutes.remote.RemoteCityCatalog;
+import top.eridu.openroutes.remote.RemoteCityDefinition;
+import top.eridu.openroutes.remote.RemoteCityService;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -18,8 +21,16 @@ import java.util.Optional;
 public class CityRepository {
 
     private final Map<String, City> cities;
+    private final RemoteCityCatalog remoteCatalog;
+    private final RemoteCityService remoteService;
 
-    public CityRepository(ObjectMapper mapper) throws IOException {
+    public CityRepository(
+            ObjectMapper mapper,
+            RemoteCityCatalog remoteCatalog,
+            RemoteCityService remoteService
+    ) throws IOException {
+        this.remoteCatalog = remoteCatalog;
+        this.remoteService = remoteService;
         var resolver = new PathMatchingResourcePatternResolver();
         Resource[] files = resolver.getResources("classpath:cities/*.json");
         Map<String, City> loaded = new LinkedHashMap<>();
@@ -43,6 +54,14 @@ public class CityRepository {
     }
 
     public Optional<City> find(String slug) {
-        return Optional.ofNullable(cities.get(slug));
+        City local = cities.get(slug);
+        if (local != null) {
+            return Optional.of(local);
+        }
+        return remoteCatalog.find(slug).map(remoteService::city);
+    }
+
+    public List<RemoteCityDefinition> remoteCities() {
+        return remoteCatalog.all();
     }
 }

@@ -107,7 +107,7 @@ export function RouteDetail({ route, activeDirection, onDirection, onBack, fare 
             el operador.
           </p>
         </>
-      ) : (
+      ) : fare.day > 0 ? (
         <>
           <div className="fare">
             <span className="fare__icon">
@@ -120,6 +120,19 @@ export function RouteDetail({ route, activeDirection, onDirection, onBack, fare 
             <div className="fare__note">
               Nocturno, domingos y festivos
               <strong>{money(fare.night)}</strong>
+            </div>
+          </div>
+          <p className="fare-hint">{fare.note}</p>
+        </>
+      ) : (
+        <>
+          <div className="fare">
+            <span className="fare__icon">
+              <TicketIcon />
+            </span>
+            <div>
+              <div className="fare__label">Pasaje</div>
+              <div className="fare__price">Por confirmar</div>
             </div>
           </div>
           <p className="fare-hint">{fare.note}</p>

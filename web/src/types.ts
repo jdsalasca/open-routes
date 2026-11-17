@@ -86,6 +86,8 @@ export interface City extends Omit<CitySummary, "routeCount"> {
   social?: SocialAccount[];
   places: Place[];
   routes: Route[];
+  partial?: boolean;
+  totalRoutes?: number;
 }
 
 export interface NearbyRoute {

@@ -17,7 +17,8 @@ Rutas de transporte público claras y cerca de ti. Empieza en **Tunja, Boyacá**
 ## Qué hace
 
 - Elige un origen y un destino: muestra rutas directas ordenadas por tiempo estimado, con caminata, espera y tramo en bus.
-- Cambia de ciudad desde la cabecera; la elección queda en `?city=` y en el navegador.
+- En ciudades con GTFS remoto, el mapa carga **30 rutas principales** y, al buscar un viaje, trae bajo demanda solo las rutas que pasan cerca del origen y del destino.
+- Cambia de ciudad desde la cabecera o usa **Detectar mi ciudad**; la elección queda en `?city=` y en el navegador.
 - Intercambia origen y destino, o usa tu ubicación como origen.
 - Busca cualquiera de los 154 barrios y veredas oficiales de Tunja, un sitio o una dirección de OpenStreetMap.
 - Toca un punto del mapa y ve todas las rutas que pasan a menos de 150 m, ordenadas por distancia.
@@ -35,7 +36,7 @@ Rutas de transporte público claras y cerca de ti. Empieza en **Tunja, Boyacá**
 |---|---|
 | Web | React 19 + Vite + TypeScript + SCSS + Leaflet |
 | API | Java 21 + Spring Boot 3.5 |
-| Datos | JSON por ciudad en el classpath, validado al arrancar (sin base de datos) |
+| Datos | JSON local por ciudad + catálogo GTFS remoto con caché de 72 h (sin base de datos) |
 | Mapa base | OpenStreetMap (sin API key ni Google Maps) |
 | Despliegue | Docker multi-stage → JRE 21, publicado detrás de Cloudflare |
 
@@ -72,12 +73,13 @@ python tools/gtfs-check.py     # importador GTFS + fixture (Python 3.11+)
 | `GET /api/cities/{slug}/routes/near?lat=&lng=&radius=800` | Rutas a menos de `radius` metros de un punto, ordenadas por distancia |
 | `GET /api/cities/{slug}/search?q=calle+21` | Direcciones, barrios y sitios en OpenStreetMap, acotados a la ciudad |
 | `GET /api/cities/{slug}/news` | Titulares de movilidad de Google News RSS, con fuente y fecha |
+| `GET /api/cities/{slug}/trip-routes?fromLat=&fromLng=&toLat=&toLng=` | Rutas cercanas al origen y al destino, para cargar solo lo necesario |
 
-`radius` se limita a 50–5000 m. Las coordenadas fuera de rango devuelven 400. `search` exige entre 3 y 120 caracteres y cachea 24 h; `news` cachea 30 min.
+`radius` se limita a 50–5000 m. Las coordenadas fuera de rango devuelven 400. `search` exige entre 3 y 120 caracteres y cachea 24 h; `news` cachea 30 min. `trip-routes` cachea 72 h y devuelve como máximo 60 rutas.
 
 ## Agregar una ciudad
 
-La abstracción es el paquete de datos, no la ciudad: el código no cambia. Hay dos caminos.
+La abstracción es el paquete de datos, no la ciudad: el código no cambia. Hay tres caminos.
 
 ### 1. Importar un feed GTFS (recomendado)
 
@@ -111,6 +113,32 @@ Después, reinicia la API. La ciudad aparece en `GET /api/cities` y el selector 
 
 `node tools/tunja-places.mjs` actualiza los 154 barrios y veredas oficiales de Tunja desde Datos Abiertos y los mezcla con los lugares curados. `tools/tunja-routes.mjs` lee esa misma lista para no perderla al regenerar las rutas.
 
+### 3. Catálogo remoto (Bogotá y futuras ciudades)
+
+Para no empaquetar una ciudad grande, agrega una entrada en `api/src/main/resources/remote/cities.json`:
+
+```json
+{
+  "slug": "bogota",
+  "name": "Bogotá",
+  "center": { "lat": 4.65, "lng": -74.1 },
+  "zoom": 11,
+  "timezone": "America/Bogota",
+  "sources": [{ "label": "GTFS oficial", "url": "https://..." }],
+  "fare": { "day": 0, "night": 0, "currency": "COP", "note": "No incluida en el feed." },
+  "feed": {
+    "discoveryUrl": "https://.../search?q=gtfs",
+    "fallbackUrl": "https://.../feed.zip",
+    "mapRoutes": 30,
+    "simplifyTolerance": 0.0001
+  }
+}
+```
+
+El backend descarga el feed, construye todas las rutas para el índice y publica solo `mapRoutes` en el mapa. Al buscar un viaje, `trip-routes` devuelve las rutas cercanas al origen y al destino. Todo se guarda **72 h** en `/app/cache/<slug>.json.gz` y se sirve con gzip. Si el feed falla, se usa la copia anterior.
+
+La primera construcción de Bogotá tarda decenas de segundos (119 MB, 1.053 rutas, 9,4 M filas de horarios); las siguientes cargas salen de caché. El contenedor la precalienta al arrancar (`OPENROUTES_REMOTE_WARMUP=true`).
+
 ### Límites del importador
 
 - Toma hasta dos sentidos por ruta; ramales adicionales del mismo `route_id` se descartan.
@@ -128,13 +156,15 @@ Después, reinicia la API. La ciudad aparece en `GET /api/cities` y el selector 
 - Los recorridos, horarios y tarifas pueden cambiar. La información del operador manda; esta app es una ayuda para leer el sistema, no un aviso oficial.
 - Los trazados son los del mapa público del operador. Algunos ramales se dibujan como segmentos separados porque así están en el KML original.
 - Los lugares buscables incluyen los 179 barrios, veredas y sitios de Tunja. Los barrios y veredas vienen del dataset oficial de la Alcaldía (CC BY-SA 4.0); las direcciones y puntos de interés se buscan en OpenStreetMap solo cuando el usuario lo pide.
-- Cada ciudad es un JSON independiente y validado al arrancar; el selector de ciudad aparece cuando hay más de una publicada. El paquete puede incluir `social` con cuentas oficiales para la sección de movilidad.
+- Bogotá: [TransMilenio · GTFS estático](https://datosabiertos.bogota.gov.co/dataset/especificacion-gtfs-general-transport-feed-specification-sitp), CC BY-SA 4.0. El feed se descubre y se cachea 72 h; el mapa muestra 30 rutas principales y el planificador carga el resto por viaje.
+- Cada ciudad puede ser un JSON local o una entrada del catálogo remoto, validada al arrancar. El selector aparece cuando hay más de una y `Detectar mi ciudad` usa la ubicación del navegador si el usuario lo permite.
 - El planificador combina los trazados para encontrar **rutas directas** (sin transbordos). Los tiempos son estimaciones sobre la geometría: incluyen caminata, espera y bus, pero no tráfico, semáforos ni paradas oficiales.
 - R10 y R22 están marcadas como circulares por el operador; el planificador cierra la vuelta solo si el trazado termina cerca del inicio. R8, R13 y R18 tienen fragmentos en el mapa: se avisa que no se pueden verificar como directas en vez de inventar la conexión.
 - La espera usa la frecuencia del día actual en la zona horaria de la ciudad; no comprueba festivos ni disponibilidad en tiempo real. Las consultas fuera del horario publicado se marcan; una frecuencia desconocida se muestra como “sin espera”.
 - La geolocalización se calcula contra la línea del recorrido, no contra paradas oficiales (el operador no publica esas paradas).
-- Las coordenadas se procesan en el navegador: la web no envía tu ubicación a la API. La API sigue exponiendo `/near` para integraciones.
-- Las búsquedas de direcciones envían solo el texto consultado a OpenStreetMap a través de la API, con caché y un máximo de una petición por segundo; no se envían coordenadas.
+- La cercanía del mapa se calcula en el navegador. En ciudades remotas, al buscar un viaje se envían coordenadas redondeadas a la API para traer solo las rutas que sirven; el resultado se cachea 72 h en IndexedDB. La API sigue exponiendo `/near` para integraciones.
+- Los feeds remotos y sus índices se guardan comprimidos con gzip en el volumen `open-routes-cache`; las respuestas JSON también viajan comprimidas.
+- Las búsquedas de direcciones envían solo el texto consultado a OpenStreetMap a través de la API, con caché y un máximo de una petición por segundo; no se envían coordenadas de ubicación.
 - Los titulares de movilidad vienen de Google News RSS y conservan el enlace y el crédito de su medio. No incrustamos X: las cuentas oficiales se abren en X para no cargar cookies de terceros.
 - El mapa base consulta teselas de OpenStreetMap (recibe la zona visible y tu IP) y Cloudflare sirve el sitio con analítica sin cookies.
 
@@ -152,6 +182,8 @@ curl -s http://127.0.0.1:5179/api/health
 ```
 
 En el servidor se publica solo en loopback (`127.0.0.1:5179`) y Cloudflare Tunnel lo expone en `open-routes.eridu.top`.
+
+El volumen `open-routes-cache` conserva los feeds construidos entre reinicios. El contenedor tiene 900 MB de límite porque la primera construcción de Bogotá descarga y procesa 119 MB; después solo lee el `.json.gz`.
 
 Runbook: `~/sitios/open-routes` en el servidor, rama `develop`, puerto local `5179`; el túnel y el DNS están documentados en `server/README.md`.
 
